@@ -3,10 +3,7 @@
     [string] $containerName = $ENV:CONTAINERNAME,
 
     [Parameter(Mandatory = $false)]
-    [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH,
-
-    [Parameter(Mandatory = $true)]
-    [string] $DeployTocontainerName
+    [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH
 
 )
 
