@@ -1,0 +1,20 @@
+trigger: none
+
+pool: Default
+
+variables:
+- group: BuildVariables
+- group: InsiderBuilds
+
+resources:
+  repositories:
+    - repository: Template
+      type: github
+      name: gunnargestsson/bcbuildtemplate
+      ref: master
+
+extends:
+  template: /.azureDevOps/CI.yml@Template
+  parameters:
+    version: "nextmajor"
+    appVersion: "17.2"
