@@ -23,8 +23,10 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - checkout: self
+    
     - checkout: Template
-      path: Template
+      path: 's\Template'
 
     - task: PowerShell@2
       displayName: 'Reading Settings'
