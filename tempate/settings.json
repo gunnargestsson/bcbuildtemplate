@@ -1,0 +1,73 @@
+{
+    "name": "BLOB",
+    "appFolders": "app",
+    "testFolders": "test",
+    "dependencies": [],
+    "azureBlob": {
+        "azureStorageAccount": "365bcfiles",
+        "azureContainerName": "artifacts"
+    },
+    "testMethod": {
+        "companyName": "My Company",
+        "codeunitId": 60298,
+        "methodName": "StoreSecretValue"
+    },
+    "versions": [
+        {
+            "version": "current",
+            "artifact": "bcartifacts.azureedge.net/sandbox//w1/latest",
+            "imageName": "ci",
+            "insiderBuild": false
+        },
+        {
+            "version": "nextminor",
+            "artifact": "bcinsider/sandbox//w1/SecondToLastMajor",
+            "imageName": "cu",
+            "insiderBuild": true
+        },
+        {
+            "version": "nextmajor",
+            "artifact": "bcinsider/sandbox//w1/Latest",
+            "imageName": "rtm",
+            "insiderBuild": true
+        }
+    ],
+    "validation": [
+        {
+            "branch": "",
+            "previousApps": [],
+            "countries": [
+                "is"
+            ],
+            "affixes": [
+                "O4N"
+            ],
+            "supportedCountries": [
+                "is"
+            ]
+        }
+    ],
+    "deployments": [
+        {
+            "branch": "<disabled>",
+            "DeploymentType": "host",
+            "DeployToName": "",
+            "DeployToTenants": [],
+            "apiBaseUrl": ""
+        }
+    ],
+    "userProfiles": [
+        {
+            "profile": "Default",
+            "bccontainerhelperPath": "",
+            "licenseFilePath": "",
+            "Username": "",
+            "Password": "",
+            "AzureVM": {
+                "ComputerName": "<azure VM uri>",
+                "Username": "<azure VM username>",
+                "Password": "<encrypted or plain azure VM password>"
+            }
+        }
+    ]
+}

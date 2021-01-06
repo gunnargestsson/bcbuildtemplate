@@ -14,7 +14,7 @@
 )
 
 Write-Host "Deploying branch ${branchName}..."
-$settings = (Get-Content (Join-Path $buildProjectFolder "scripts\settings.json") | ConvertFrom-Json)
+$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "settings.json" -Recurse).FullName) | ConvertFrom-Json)
 $deployment = $settings.deployments | Where-Object { $_.branch -eq $branchName }
 if ($deployment) {
 

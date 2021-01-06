@@ -17,7 +17,8 @@ if ($appVersion) {
     write-host "##vso[build.updatebuildnumber]$appVersion"
 }
 
-$settings = (Get-Content (Join-Path $buildProjectFolder "scripts\settings.json") | ConvertFrom-Json)
+
+$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "settings.json" -Recurse).FullName) | ConvertFrom-Json)
 if ("$version" -eq "") {
     $version = $settings.versions[0].version
     Write-Host "Version not defined, using $version"
@@ -53,7 +54,8 @@ if ($property.Value) {
     Write-Host "##vso[task.setvariable variable=azureStorageAccount]$($settings.azureBlob.azureStorageAccount)"
     Write-Host "Set azureContainerName = $($settings.azureBlob.azureContainerName)"
     Write-Host "##vso[task.setvariable variable=azureContainerName]$($settings.azureBlob.azureContainerName)"            
-} else {
+}
+else {
     Write-Host "Set azureStorageAccount = ''"
     Write-Host "##vso[task.setvariable variable=azureStorageAccount]''"
 }

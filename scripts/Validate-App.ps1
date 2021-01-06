@@ -23,7 +23,7 @@
 )
 
 Write-Host "Validating apps for branch ${branchName}..."
-$settings = (Get-Content (Join-Path $buildProjectFolder "scripts\settings.json") | ConvertFrom-Json)
+$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "settings.json" -Recurse).FullName) | ConvertFrom-Json)
 $validation = $settings.validation | Where-Object { $_.branch -eq $branchName }
 if ($validation) {
 
