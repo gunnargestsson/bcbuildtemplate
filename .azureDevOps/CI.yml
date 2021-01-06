@@ -24,6 +24,7 @@ stages:
 
     steps:
     - checkout: self
+      clean: true
       path: 's'
 
     - checkout: Template
