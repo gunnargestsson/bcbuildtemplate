@@ -14,7 +14,7 @@
 )
 
 Write-Host "Deploying branch ${branchName}..."
-$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8| Out-String |ConvertFrom-Json)
+$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $deployment = $settings.deployments | Where-Object { $_.branch -eq $branchName }
 if ($deployment) {
 
@@ -52,8 +52,14 @@ if ($deployment) {
             try {
         
                 if ($useSession) {
-                    $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
-                    $vmSession = New-PSSession -ComputerName $azureVM -Credential $vmCredential -UseSSL -SessionOption $sessionOption
+                    try {
+                        $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
+                        $vmSession = New-PSSession -ComputerName $azureVM -Credential $vmCredential -SessionOption $sessionOption
+                    }
+                    catch {
+                        $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
+                        $vmSession = New-PSSession -ComputerName $azureVM -Credential $vmCredential -SessionOption $sessionOption
+                    }
                     $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
                     $sessionArgument = @{ "Session" = $vmSession }
                 }
