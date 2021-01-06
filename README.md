@@ -12,3 +12,7 @@
         - InsiderSasToken
 3.	Create DevOps pipeline
 
+# Service Connection
+Create a service connection to GitHub and update the endpoint
+-  https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml
+
