@@ -22,4 +22,5 @@ extends:
   parameters:
     version: "current"
     appVersion: "17.2"
+    azureSubscription: ""
 

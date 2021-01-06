@@ -19,3 +19,4 @@ extends:
   parameters:
     version: "nextmajor"
     appVersion: "17.2"
+    azureSubscription: ""

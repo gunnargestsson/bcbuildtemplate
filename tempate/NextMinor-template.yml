@@ -19,4 +19,5 @@ extends:
   parameters:
     version: "nextminor"
     appVersion: "17.2"
+    azureSubscription: ""
 
