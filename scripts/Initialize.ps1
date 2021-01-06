@@ -5,7 +5,7 @@ $ProgressPreference = "SilentlyContinue"
 
 $ProjectRoot = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
 
-$settings = (Get-Content ((Get-ChildItem -Path $ProjectRoot -Filter "settings.json" -Recurse).FullName) | ConvertFrom-Json)
+$settings = (Get-Content ((Get-ChildItem -Path $ProjectRoot -Filter "settings.json" -Recurse).FullName) | Out-String | ConvertFrom-Json)
 
 $defaultVersion = $settings.versions[0].version
 $version = Read-Host ("Select Version (" +(($settings.versions | ForEach-Object { $_.version }) -join ", ") + ") (default $defaultVersion)")
@@ -90,7 +90,7 @@ Function UpdateLaunchJson {
                                   "authentication" =  "UserPassword"
     }
     
-    $settings = (Get-Content ((Get-ChildItem -Path $ProjectFolder -Filter "settings.json" -Recurse).FullName) | ConvertFrom-Json)
+    $settings = (Get-Content ((Get-ChildItem -Path $ProjectFolder -Filter "settings.json" -Recurse).FullName) -Encoding UTF8| Out-String | ConvertFrom-Json)
     
     $settings.launch.PSObject.Properties | % {
         $setting = $_

@@ -12,7 +12,7 @@ Param(
     [switch] $skipVerification
 )
 
-$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "settings.json" -Recurse).FullName) | ConvertFrom-Json)
+$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "settings.json" -Recurse).FullName) -Encoding UTF8| Out-String | ConvertFrom-Json)
 $settings.dependencies | ForEach-Object {
     Write-Host "Publishing $_"
     Publish-BCContainerApp -containerName $containerName -appFile $_ -skipVerification:$skipVerification -sync -install
