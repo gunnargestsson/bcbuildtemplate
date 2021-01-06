@@ -1,4 +1,6 @@
 # Build Template for Business Central
+- Based on the HelloWorld sample from @freddydk 
+- https://dev.azure.com/businesscentralapps/HelloWorld
 
 # Getting Started
 1.	Add Current.yml, NextMinor.yml, NextMinor.yml to your respository
