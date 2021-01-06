@@ -5,10 +5,10 @@ $ProgressPreference = "SilentlyContinue"
 
 $ProjectRoot = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
 
-$settings = (Get-Content ((Get-ChildItem -Path $ProjectRoot -Filter "settings.json" -Recurse).FullName) | Out-String | ConvertFrom-Json)
+$settings = (Get-Content ((Get-ChildItem -Path $ProjectRoot -Filter "build-settings.json" -Recurse).FullName) | Out-String | ConvertFrom-Json)
 
 $defaultVersion = $settings.versions[0].version
-$version = Read-Host ("Select Version (" +(($settings.versions | ForEach-Object { $_.version }) -join ", ") + ") (default $defaultVersion)")
+$version = Read-Host ("Select Version (" + (($settings.versions | ForEach-Object { $_.version }) -join ", ") + ") (default $defaultVersion)")
 if (!($version)) {
     $version = $defaultVersion
 }
@@ -26,13 +26,13 @@ if ($defaultUserProfile) {
 }
 else {
     $defaultUserProfile = $settings.userProfiles[0]
-    $profile = Read-Host ("Select User Profile (" +(($settings.userProfiles | ForEach-Object { $_.profile }) -join ", ") + ") (default $($defaultUserProfile.profile))")
+    $profile = Read-Host ("Select User Profile (" + (($settings.userProfiles | ForEach-Object { $_.profile }) -join ", ") + ") (default $($defaultUserProfile.profile))")
 }
 
 $userProfile = $settings.userProfiles | Where-Object { $_.profile -eq $profile }
 $imageversion = $settings.versions | Where-Object { $_.version -eq $version }
 if (!($imageversion)) {
-    throw "No version for $version in settings.json"
+    throw "No version for $version in build-settings.json"
 }
 if (-not ($imageversion.PSObject.Properties.Name -eq "reuseContainer")) {
     $imageversion | Add-Member -NotePropertyName reuseContainer -NotePropertyValue $false
@@ -81,16 +81,16 @@ Function UpdateLaunchJson {
     )
     
     $launchSettings = [ordered]@{ "type" = "al";
-                                  "request" = "launch";
-                                  "name" = "$Name"; 
-                                  "server" = "$Server"
-                                  "serverInstance" = $serverInstance
-                                  "port" = $Port
-                                  "tenant" = ""
-                                  "authentication" =  "UserPassword"
+        "request"                        = "launch";
+        "name"                           = "$Name"; 
+        "server"                         = "$Server"
+        "serverInstance"                 = $serverInstance
+        "port"                           = $Port
+        "tenant"                         = ""
+        "authentication"                 = "UserPassword"
     }
     
-    $settings = (Get-Content ((Get-ChildItem -Path $ProjectFolder -Filter "settings.json" -Recurse).FullName) -Encoding UTF8| Out-String | ConvertFrom-Json)
+    $settings = (Get-Content ((Get-ChildItem -Path $ProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
     
     $settings.launch.PSObject.Properties | % {
         $setting = $_
