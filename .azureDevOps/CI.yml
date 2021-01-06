@@ -28,13 +28,14 @@ stages:
       path: 's'
 
     - checkout: Template
-      path: 's\Template'
+      clean: false
+      path: 's\bcbuildtemplate'
 
     - task: PowerShell@2
       displayName: 'Reading Settings'
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Read-Settings.ps1'
+        filePath: 'bcbuildtemplate\scripts\Read-Settings.ps1'
         arguments: '-appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
         failOnStderr: true
     
@@ -42,7 +43,7 @@ stages:
       displayName: 'Install bccontainerhelper'
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Install-bccontainerhelper.ps1'
+        filePath: 'bcbuildtemplate\scripts\Install-bccontainerhelper.ps1'
         failOnStderr: true
     
     - task: PowerShell@2
@@ -53,14 +54,14 @@ stages:
         InsiderSasToken: $(InsiderSasToken)
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Create-Container.ps1'
+        filePath: 'bcbuildtemplate\scripts\Create-Container.ps1'
         failOnStderr: true
 
     - task: PowerShell@2
       displayName: 'Publish Dependencies'
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Publish-Dependencies.ps1'
+        filePath: 'bcbuildtemplate\scripts\Publish-Dependencies.ps1'
         arguments: '-skipVerification:$true'
         failOnStderr: true
 
@@ -70,7 +71,7 @@ stages:
         Password: $(Password)
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Compile-App.ps1'
+        filePath: 'bcbuildtemplate\scripts\Compile-App.ps1'
         arguments: '-appFolders "$(appFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)"'
         failOnStderr: true
     
@@ -81,7 +82,7 @@ stages:
         Password: $(Password)
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Compile-App.ps1'
+        filePath: 'bcbuildtemplate\scripts\Compile-App.ps1'
         arguments: '-appFolders "$(testFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)"'
         failOnStderr: true
     
@@ -93,7 +94,7 @@ stages:
         codeSignPfxPassword: $(CodeSignPfxPassword)
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Sign-App.ps1'
+        filePath: 'bcbuildtemplate\scripts\Sign-App.ps1'
         arguments: '-appFolders "$(appFolders)"'
         failOnStderr: true
     
@@ -101,7 +102,7 @@ stages:
       displayName: 'Publish App'
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Publish-App.ps1'
+        filePath: 'bcbuildtemplate\scripts\Publish-App.ps1'
         arguments: '-appFolders "$(appFolders)" -skipVerification:("$(CodeSignPfxPassword)" -eq "")'
         failOnStderr: true
     
@@ -110,7 +111,7 @@ stages:
       condition: and(succeeded(),ne(variables['testFolders'],''))
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Publish-App.ps1'
+        filePath: 'bcbuildtemplate\scripts\Publish-App.ps1'
         arguments: '-appFolders "$(testFolders)" -skipVerification'
         failOnStderr: true
      
@@ -121,7 +122,7 @@ stages:
         TestSecret: $(TestSecret)
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Set-TestSecret.ps1'
+        filePath: 'bcbuildtemplate\scripts\Set-TestSecret.ps1'
         failOnStderr: true
 
     - task: PowerShell@2
@@ -132,7 +133,7 @@ stages:
         TestParameters: $(TestParameters)
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Run-Tests.ps1'
+        filePath: 'bcbuildtemplate\scripts\Run-Tests.ps1'
         arguments: '-appFolders "$(testFolders)"'
         failOnStderr: true
       
@@ -149,7 +150,7 @@ stages:
       condition: and(succeeded(),eq(variables['createRuntimePackages'],'True'))
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Get-AppRuntimePackage.ps1'
+        filePath: 'bcbuildtemplate\scripts\Get-AppRuntimePackage.ps1'
         arguments: '-appFolders "$(appFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)"'
         failOnStderr: true
 
@@ -161,7 +162,7 @@ stages:
         codeSignPfxPassword: $(CodeSignPfxPassword)
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Sign-App.ps1'
+        filePath: 'bcbuildtemplate\scripts\Sign-App.ps1'
         arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)\RuntimePackages"'
         failOnStderr: true
         
@@ -188,7 +189,7 @@ stages:
         InsiderSasToken: $(InsiderSasToken)
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Validate-App.ps1'
+        filePath: 'bcbuildtemplate\scripts\Validate-App.ps1'
         arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -appFolders "$(appFolders)" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
         failOnStderr: true            
 
@@ -228,7 +229,7 @@ stages:
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Deploy-App.ps1'
+        filePath: 'bcbuildtemplate\scripts\Deploy-App.ps1'
         arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -appFolders "$(appFolders)" -branchName "$(Build.SourceBranch)"'
         failOnStderr: true
             
@@ -237,11 +238,11 @@ stages:
       condition: ne(variables['reuseContainer'],'True')
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Remove-Container.ps1'
+        filePath: 'bcbuildtemplate\scripts\Remove-Container.ps1'
 
     - task: PowerShell@2
       displayName: 'Remove Unused Container Image'
       inputs:
         targetType: filePath
-        filePath: 'Template\scripts\Remove-OldDockerImages.ps1'
+        filePath: 'bcbuildtemplate\scripts\Remove-OldDockerImages.ps1'
         
