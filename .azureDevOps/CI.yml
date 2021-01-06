@@ -7,6 +7,10 @@ parameters:
   displayName: 'Specify build app version'
   type: string
   default: "17.0"
+- name: azureSubscription
+  displayName: 'Specify azure subscription name'
+  type: string
+  default: 'Visual Studio Ultimate with MSDN (98d9d1ef-c54f-4ae3-b8d2-c8d130103a6c)'
 
 stages:
 - stage: Build
@@ -198,7 +202,7 @@ stages:
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\*\*.app'
-        azureSubscription: 'Visual Studio Ultimate with MSDN (98d9d1ef-c54f-4ae3-b8d2-c8d130103a6c)'
+        azureSubscription: '${{ parameters.azureSubscription }}'
         Destination: AzureBlob
         storage: '$(azureStorageAccount)'
         ContainerName: '$(azureContainerName)'
@@ -209,7 +213,7 @@ stages:
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\RuntimePackages\*\*.app'
-        azureSubscription: 'Visual Studio Ultimate with MSDN (98d9d1ef-c54f-4ae3-b8d2-c8d130103a6c)'
+        azureSubscription: '${{ parameters.azureSubscription }}'
         Destination: AzureBlob
         storage: '$(azureStorageAccount)'
         ContainerName: '$(azureContainerName)'
