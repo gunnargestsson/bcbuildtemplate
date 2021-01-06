@@ -4,8 +4,8 @@
     "testFolders": "test",
     "dependencies": [],
     "azureBlob": {
-        "azureStorageAccount": "365bcfiles",
-        "azureContainerName": "artifacts"
+        "azureStorageAccount": "",
+        "azureContainerName": ""
     },
     "testMethod": {
         "companyName": "My Company",
