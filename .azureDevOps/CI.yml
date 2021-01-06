@@ -24,7 +24,8 @@ stages:
 
     steps:
     - checkout: self
-    
+      path: 's'
+
     - checkout: Template
       path: 's\Template'
 
