@@ -220,12 +220,11 @@ stages:
         BlobPrefix: 'Runtime\$(Build.Repository.Name)'
 
     - task: PowerShell@2
-      displayName: 'Upgrade Microsoft Apps in Container'
+      displayName: 'Upgrade Microsoft Apps'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
       inputs:
         targetType: filePath
-        filePath: 'scripts\Upgrade-MicrosoftApps.ps1'
-        arguments: '-QAcontainerName "$(QAContainerName)"'
+        filePath: 'bcbuildtemplate\scripts\Upgrade-MicrosoftApps.ps1'
         failOnStderr: true
 
     - task: PowerShell@2
