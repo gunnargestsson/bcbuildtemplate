@@ -3,6 +3,15 @@
     "appFolders": "app",
     "testFolders": "test",
     "dependencies": [],
+    "dotnetAddIns": [],
+    "containerParameters": {
+        "locale": "",
+        "AuthenticationEmail": "",
+        "multitenant": false,
+        "addFontsFromPath": "${env:SystemRoot}\\Fonts",
+        "useNewDatabase": false,
+        "useCleanDatabase": false
+    },
     "azureBlob": {
         "azureStorageAccount": "",
         "azureContainerName": ""

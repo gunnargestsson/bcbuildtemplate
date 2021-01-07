@@ -10,6 +10,9 @@
     [string] $imageName = $ENV:IMAGENAME,
 
     [Parameter(Mandatory = $false)]
+    [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH,
+
+    [Parameter(Mandatory = $false)]
     [string] $artifact = $null,
 
     [Parameter(Mandatory = $false)]
@@ -69,6 +72,14 @@ $parameters = @{
     "Accept_Outdated" = $true
 }
 
+$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
+if ($settings.containerParameters) {
+    Foreach ($parameter in ($settings.containerParameters.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
+        try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }
+        if (!([String]::IsNullOrEmpty($value))) { $parameters += @{ $parameter.Name = $value } }
+    }
+}
+
 if ($licenseFile) {
     $unsecureLicenseFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile)))
     $parameters += @{
@@ -86,7 +97,11 @@ elseif ($buildenv -eq "AzureDevOps") {
     $additionalParameters = @("--volume ""$($rootFolder):C:\Agent""")
     $parameters += @{ 
         "shortcuts" = "None"
+        "myscripts" = @((
+                Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName 
+            "${$PSScriptRoot}\Copy-AddIns.ps1" )
     }
+    
 }
 else {
     $workspaceFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
@@ -136,6 +151,7 @@ if (!$restoreDb) {
         -useTraefik:$false `
         -multitenant:$false
 
+    & .\Publish-Dependencies.ps1 -buildEnv $buildEnv -containerName $containerName -buildProjectFolder $buildProjectFolder -skipVerification
     Import-TestToolkitToBcContainer -containerName $containerName -includeTestLibrariesOnly
     
     if ($reuseContainer) {
