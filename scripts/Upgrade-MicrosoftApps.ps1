@@ -10,7 +10,7 @@
 
 )
 
-Write-Host "Deploying branch ${branchName}..."
+Write-Host "Deploying Microsoft App Upgrade for branch ${branchName}..."
 $settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $deployment = $settings.deployments | Where-Object { $_.branch -eq $branchName }
 Write-Host "Deployment type: $($deployment.DeploymentType)"
