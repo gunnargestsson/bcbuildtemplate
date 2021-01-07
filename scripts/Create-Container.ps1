@@ -99,7 +99,7 @@ elseif ($buildenv -eq "AzureDevOps") {
         "shortcuts" = "None"
         "myscripts" = @((
                 Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName 
-            "${$PSScriptRoot}\Copy-AddIns.ps1" )
+            "${PSScriptRoot}\Copy-AddIns.ps1" )
     }
     
 }
