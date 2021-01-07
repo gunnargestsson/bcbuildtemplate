@@ -94,7 +94,10 @@ if ($buildenv -eq "Local") {
 elseif ($buildenv -eq "AzureDevOps") {
     $segments = "$PSScriptRoot".Split('\')
     $rootFolder = "$($segments[0])\$($segments[1])"
-    $additionalParameters = @("--volume ""$($rootFolder):C:\Agent""")
+    $additionalParameters = @(
+        "--volume ""$($rootFolder):C:\Agent"""
+        "--volume ""$($buildProjectFolder):C:\Build"""
+    )
     $parameters += @{ 
         "shortcuts" = "None"
         "myscripts" = @("${PSScriptRoot}\Copy-AddIns.ps1")
@@ -149,7 +152,7 @@ if (!$restoreDb) {
         -useTraefik:$false `
         -multitenant:$false
 
-    & .\Publish-Dependencies.ps1 -buildEnv $buildEnv -containerName $containerName -buildProjectFolder $buildProjectFolder -skipVerification
+    & "${PSScriptRoot}\Publish-Dependencies.ps1" -buildEnv $buildEnv -containerName $containerName -buildProjectFolder $buildProjectFolder -skipVerification
     Import-TestToolkitToBcContainer -containerName $containerName -includeTestLibrariesOnly
     
     if ($reuseContainer) {
