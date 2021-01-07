@@ -153,7 +153,8 @@ if (!$restoreDb) {
         -doNotUseRuntimePackages `
         -enableTaskScheduler:$false `
         -useTraefik:$false `
-        -multitenant:$false
+        -multitenant:$false `
+        -verbose
 
     & "${PSScriptRoot}\Publish-Dependencies.ps1" -buildEnv $buildEnv -containerName $containerName -buildProjectFolder $buildProjectFolder -skipVerification
     Import-TestToolkitToBcContainer -containerName $containerName -includeTestLibrariesOnly
