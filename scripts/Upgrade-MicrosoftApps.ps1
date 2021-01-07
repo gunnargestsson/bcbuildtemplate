@@ -48,9 +48,10 @@ if ($deployment -and $deployment.DeploymentType -eq "container" -and $deployment
                 if (Get-BCContainerAppInfo -containerName $DeployTocontainerName -tenantSpecificProperties -tenant $tenant.Id | Where-Object -Property IsInstalled -EQ "True" | Where-Object -Property Name -EQ $_.name | Where-Object -Property Version -LT $app.Version) {
                     Invoke-ScriptInBcContainer -containerName $DeployTocontainerName -ScriptBlock { 
                         Param($appName, $appVersion, $tenant, $language)
+                        Write-Host "Starting upgrade of app ${appName} v${appversion} in tenant ${tenant} using language ${language}"
                         Sync-NavApp -ServerInstance $ServerInstance -Name $appName -Tenant $tenant -Version $appVersion 
                         Start-NAVAppDataUpgrade -ServerInstance $ServerInstance -Name $appName -Tenant $tenant -Language $language -Version $appVersion 
-                    } -ArgumentList $app.name, $app.version, $tenant.Id, (Get-LocaleFromCountry -country (Get-BcContainerCountry -containerOrImageName $containerName))
+                    } -ArgumentList $app.name, $app.version, $tenant.Id, (Get-LocaleFromCountry -country (Get-BcContainerCountry -containerOrImageName $DeployTocontainerName))
                 } 
             }
             UnPublish-BCContainerApp -containerName $DeployTocontainerName -appName $_.name -publisher $_.publisher -version $_.Version -force 
