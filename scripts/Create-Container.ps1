@@ -100,9 +100,12 @@ elseif ($buildenv -eq "AzureDevOps") {
     )
     $parameters += @{ 
         "shortcuts" = "None"
-        "myscripts" = @( @{ "Copy-AddIns.ps1" = (Get-Content -Path "${PSScriptRoot}\Copy-AddIns.ps1" -Encoding UTF8) })
     }
-    
+    if ($settings.dotnetAddIns) {
+        $parameters += @{ 
+            "myscripts" = @( @{ "Copy-AddIns.ps1" = (Get-Content -Path "${PSScriptRoot}\Copy-AddIns.ps1" -Encoding UTF8 | Out-String) })
+        }
+    }    
 }
 else {
     $workspaceFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName

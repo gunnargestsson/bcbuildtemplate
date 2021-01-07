@@ -4,6 +4,8 @@ $serviceTierFolder = (Get-Item "C:\Program Files\Microsoft Dynamics NAV\*\Servic
 $serviceTierAddInsFolder = Join-Path $serviceTierFolder "Add-ins"
 $settings = (Get-Content ((Get-ChildItem -Path 'C:\Build' -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
 
+Write-Host "Copying Add-ins to the service tier add-ins folder"
+
 $settings.dotnetAddIns | ForEach-Object {
     $appFile = $_
     if ($appFile.ToLower().StartsWith("http://") -or $appFile.ToLower().StartsWith("https://")) {
