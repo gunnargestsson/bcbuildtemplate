@@ -231,8 +231,8 @@ if ($deployment) {
                         Write-Host "Deploying to ${containerName}\${containerTenant}"
                         Publish-BCContainerApp -containerName $containerName -tenant $containerTenant -appFile $appFile -skipVerification -sync -install -scope Tenant
                                                            
-                        $allTenantsApps = Get-BCContainerAppInfo -containerName $containerName -Name $CurrentApp.Name -tenant $containerTenant | Where-Object -Property Scope -EQ Tenant
-                        $apps = Get-BCContainerAppInfo -containerName $containerName -Name $CurrentApp.Name -tenant $containerTenant | Where-Object -Property Scope -EQ Tenant | Where-Object -Property IsInstalled -EQ True
+                        $allTenantsApps = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant | Where-Object -Property Scope -EQ Tenant
+                        $apps = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant | Where-Object -Property Scope -EQ Tenant | Where-Object -Property IsInstalled -EQ True
                         foreach ($app in $apps | Sort-Object -Property Version) {
                             $NoOfApps = ($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).count
                             $NoOfInstalledApps = ($allTenantsApps | Where-Object -Property Version -EQ $app.Version).count
