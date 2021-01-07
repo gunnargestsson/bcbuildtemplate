@@ -43,15 +43,15 @@ if ($deployment -and $deployment.DeploymentType -eq "container" -and $deployment
             Write-Host "Updating $($_.name) from version $($_.version) to $($app.version)"
             $appPath = Join-Path $appFolder $app.Name
             Copy-FileFromBCContainer -containerName $containerName -containerPath $app.FullName -localPath $appPath
-            foreach ($tenant in (Get-BcContainerTenants -containerName $DeployTocontainerName)) {
-                Publish-BCContainerApp -containerName $DeployTocontainerName -appFile $appPath -skipVerification -sync -scope Global -tenant $tenant.Id
-                if (Get-BCContainerAppInfo -containerName $DeployTocontainerName -tenantSpecificProperties -tenant $tenant.Id | Where-Object -Property IsInstalled -EQ "True" | Where-Object -Property Name -EQ $_.name) {
+            Publish-BCContainerApp -containerName $DeployTocontainerName -appFile $appPath -skipVerification -scope Global
+            foreach ($tenant in (Get-BcContainerTenants -containerName $DeployTocontainerName)) {                
+                if (Get-BCContainerAppInfo -containerName $DeployTocontainerName -tenantSpecificProperties -tenant $tenant.Id | Where-Object -Property IsInstalled -EQ "True" | Where-Object -Property Name -EQ $_.name | Where-Object -Property Version -LT $app.Version) {
                     Invoke-ScriptInBcContainer -containerName $DeployTocontainerName -ScriptBlock { 
                         Param($appName, $appVersion, $tenant, $language)
+                        Sync-NavApp -ServerInstance $ServerInstance -Name $appName -Tenant $tenant -Version $appVersion 
                         Start-NAVAppDataUpgrade -ServerInstance $ServerInstance -Name $appName -Tenant $tenant -Language $language -Version $appVersion 
                     } -ArgumentList $app.name, $app.version, $tenant.Id, (Get-LocaleFromCountry -country (Get-BcContainerCountry -containerOrImageName $containerName))
-                    Install-BCContainerApp -containerName $DeployTocontainerName -appName $app.name -appVersion $app.version -tenant $tenant.Id
-                }
+                } 
             }
             UnPublish-BCContainerApp -containerName $DeployTocontainerName -appName $_.name -publisher $_.publisher -version $_.Version -force 
         }
