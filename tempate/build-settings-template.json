@@ -6,6 +6,7 @@
     "dotnetAddIns": [],
     "includeTestLibrariesOnly": false,
     "includeTestFrameworkOnly": true,
+    "testToolkitCountry": "is-IS",
     "containerParameters": {
         "locale": "",
         "AuthenticationEmail": "",

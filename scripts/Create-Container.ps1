@@ -157,9 +157,16 @@ if (!$restoreDb) {
 
     & "${PSScriptRoot}\Publish-Dependencies.ps1" -buildEnv $buildEnv -containerName $containerName -buildProjectFolder $buildProjectFolder -skipVerification
     
-    if ($settings.includeTestFrameworkOnly -or $settings.includeTestLibrariesOnly) {
-        Import-TestToolkitToBcContainer -containerName $containerName -includeTestLibrariesOnly:$settings.includeTestLibrariesOnly -includeTestFrameworkOnly:$settings.includeTestFrameworkOnly
+    if ($settings.includeTestLibrariesOnly) {
+        Import-TestToolkitToBcContainer -containerName $containerName -includeTestLibrariesOnly 
     }
+    elseif ($settings.includeTestFrameworkOnly) {
+        Import-TestToolkitToBcContainer -containerName $containerName -includeTestFrameworkOnly
+    }
+    elseif ($settings.testToolkitCountry) {
+        Import-TestToolkitToBcContainer -containerName $containerName -testToolkitCountry $settings.testToolkitCountry
+    }
+    
     
     if ($reuseContainer) {
         Backup-BCContainerDatabases -containerName $containerName -bakFolder $containerName
