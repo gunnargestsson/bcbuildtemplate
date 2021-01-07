@@ -46,7 +46,7 @@ if ($deployment -and $deployment.DeploymentType -eq "container" -and $deployment
             foreach ($tenant in (Get-BcContainerTenants -containerName $DeployTocontainerName)) {
                 Publish-BCContainerApp -containerName $DeployTocontainerName -appFile $appPath -skipVerification -sync -scope Global -tenant $tenant.Id
                 if (Get-BCContainerAppInfo -containerName $DeployTocontainerName -tenantSpecificProperties -tenant $tenant.Id | Where-Object -Property IsInstalled -EQ "True" | Where-Object -Property Name -EQ $_.name) {
-                    Invoke-ScriptInBcContainer -containerName $containerName -ScriptBlock { 
+                    Invoke-ScriptInBcContainer -containerName $DeployTocontainerName -ScriptBlock { 
                         Param($appName, $appVersion, $tenant, $language)
                         Start-NAVAppDataUpgrade -ServerInstance $ServerInstance -Name $appName -Tenant $tenant -Language $language -Version $appVersion 
                     } -ArgumentList $app.name, $app.version, $tenant.Id, (Get-LocaleFromCountry -country (Get-BcContainerCountry -containerOrImageName $containerName))
