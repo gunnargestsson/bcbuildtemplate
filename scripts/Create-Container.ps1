@@ -95,15 +95,15 @@ elseif ($buildenv -eq "AzureDevOps") {
     $segments = "$PSScriptRoot".Split('\')
     $rootFolder = "$($segments[0])\$($segments[1])"
     $additionalParameters = @(
-        "--volume ""$($rootFolder):C:\Agent"""
-        "--volume ""$($buildProjectFolder):C:\Build"""
+        "--volume ""$($rootFolder):C:\Agent"""        
     )
     $parameters += @{ 
         "shortcuts" = "None"
     }
     if ($settings.dotnetAddIns) {
         $parameters += @{ 
-            "myscripts" = @( @{ "SetupAddIns.ps1" = (Get-Content -Path "${PSScriptRoot}\Copy-AddIns.ps1" -Encoding UTF8 | Out-String) })
+            "myscripts" = @( (Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName
+                @{ "SetupAddIns.ps1" = (Get-Content -Path "${PSScriptRoot}\Copy-AddIns.ps1" -Encoding UTF8 | Out-String) })
         }
     }    
 }
