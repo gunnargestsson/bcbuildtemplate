@@ -4,6 +4,8 @@
     "testFolders": "test",
     "dependencies": [],
     "dotnetAddIns": [],
+    "includeTestLibrariesOnly": false,
+    "includeTestFrameworkOnly": true,
     "containerParameters": {
         "locale": "",
         "AuthenticationEmail": "",
