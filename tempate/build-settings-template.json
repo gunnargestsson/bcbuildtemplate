@@ -7,7 +7,6 @@
     "containerParameters": {
         "locale": "",
         "AuthenticationEmail": "",
-        "multitenant": false,
         "addFontsFromPath": "${env:SystemRoot}\\Fonts",
         "useNewDatabase": false,
         "useCleanDatabase": false
