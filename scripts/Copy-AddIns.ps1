@@ -1,8 +1,3 @@
-Param(
-    [Parameter(Mandatory = $false)]
-    [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH
-)
-
 Add-Type -AssemblyName System.Net.Http
 
 $serviceTierFolder = (Get-Item "C:\Program Files\Microsoft Dynamics NAV\*\Service").FullName
