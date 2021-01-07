@@ -100,7 +100,7 @@ elseif ($buildenv -eq "AzureDevOps") {
     )
     $parameters += @{ 
         "shortcuts" = "None"
-        "myscripts" = @("${PSScriptRoot}\Copy-AddIns.ps1")
+        "myscripts" = @( @{ "Copy-AddIns.ps1" = (Get-Content -Path "${PSScriptRoot}\Copy-AddIns.ps1" -Encoding UTF8) })
     }
     
 }
