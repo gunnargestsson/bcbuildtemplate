@@ -97,9 +97,7 @@ elseif ($buildenv -eq "AzureDevOps") {
     $additionalParameters = @("--volume ""$($rootFolder):C:\Agent""")
     $parameters += @{ 
         "shortcuts" = "None"
-        "myscripts" = @((
-                Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName 
-            "${PSScriptRoot}\Copy-AddIns.ps1" )
+        "myscripts" = @("${PSScriptRoot}\Copy-AddIns.ps1")
     }
     
 }
