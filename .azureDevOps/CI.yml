@@ -216,7 +216,7 @@ stages:
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
       inputs:
         targetType: filePath
-        filePath: 'bcbuildtemplate\scripts\Upgrade-MicrosoftApps.ps1'
+        filePath: 'bcbuildtemplate\scripts\Upgrade-MicrosoftApps.ps1 -branchName "$(Build.SourceBranch)"'
         failOnStderr: true
 
     - task: PowerShell@2

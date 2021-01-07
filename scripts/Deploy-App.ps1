@@ -180,7 +180,7 @@ if ($deployment) {
                 try {
                     Write-Host "Deploying to ${containerName}\${containerTenant}"
                     $appExists = $false
-                    $apps = Get-BCContainerAppInfo $containerName -tenantSpecificProperties -tenant $containerTenant | Sort-Object -Property Name
+                    $apps = Get-BCContainerAppInfo $containerName -tenantSpecificProperties -tenant $containerTenant -sort DependenciesFirst
                     Write-Host "Extensions:"
                     $apps | % {
                         Write-Host " - $($_.Name) v$($_.version) installed=$($_.isInstalled)"
