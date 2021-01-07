@@ -179,23 +179,18 @@ if ($deployment) {
             foreach ($containerTenant in $Tenants) {
                 try {
                     Write-Host "Deploying to ${containerName}\${containerTenant}"
-                    $appExists = $false
-                    $apps = Get-BCContainerAppInfo $containerName -tenantSpecificProperties -tenant $containerTenant -sort DependenciesFirst
-                    Write-Host "Extensions:"
-                    $apps | % {
-                        Write-Host " - $($_.Name) v$($_.version) installed=$($_.isInstalled)"
-                        if ($_.publisher -eq $appJson.publisher -and $_.name -eq $appjson.name -and $_.appid -eq $appjson.id) {
-                            $appExists = $_.isInstalled -eq "True"
-                            UnPublish-BCContainerApp -containerName $containerName -tenant $containerTenant -appName $_.name -publisher $_.publisher -version $_.Version -unInstall:$appExists -force -Verbose 
+                    Publish-BCContainerApp -containerName $containerName -tenant $containerTenant -appFile $appFile -skipVerification -sync -install -scope Tenant
+                                                           
+                    $allTenantsApps = Get-BCContainerAppInfo -containerName $containerName -Name $CurrentApp.Name -tenant $containerTenant | Where-Object -Property Scope -EQ Tenant
+                    $apps = Get-BCContainerAppInfo -containerName $containerName -Name $CurrentApp.Name -tenant $containerTenant | Where-Object -Property Scope -EQ Tenant | Where-Object -Property IsInstalled -EQ True
+                    foreach ($app in $apps | Sort-Object -Property Version) {
+                        $NoOfApps = ($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).count
+                        $NoOfInstalledApps = ($allTenantsApps | Where-Object -Property Version -EQ $app.Version).count
+                        if ($NoOfApps -gt 0 -and $NoOfInstalledApps -eq 0) {
+                            Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
+                            UnPublish-BCContainerApp -containerName $containerName -Name $app.Name -Publisher $app.Publisher -Version $app.Version -tenant $containerTenant
                         }
                     }
-                    
-                    Publish-BCContainerApp -containerName $containerName -tenant $containerTenant -appFile $appFile -skipVerification -sync -scope Tenant
-                    if ($appExists) {
-                        Start-BCContainerAppDataUpgrade -containerName $containerName -tenant $containerTenant -appName $appJson.name -appVersion $appJson.version
-                    }
-
-                    Install-BCContainerApp -containerName $containerName -tenant $containerTenant -appName $appJson.name -appVersion $appJson.version
                 }
                 catch {
                     throw "Could not publish $($appJson.name) to ${containerName}\${containerTenant}"
