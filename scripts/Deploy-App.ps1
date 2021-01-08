@@ -237,8 +237,8 @@ if ($deployment) {
                     } else {
                         Install-BCContainerApp -containerName $containerName -tenant $containerTenant -appName $appJson.Name -appVersion $appjson.version
                     }
-                    $allTenantsApps = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant | Where-Object -Property Scope -EQ Tenant
-                    $apps = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant | Where-Object -Property Scope -EQ Tenant | Where-Object -Property IsInstalled -EQ True
+                    $allTenantsApps = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant -tenantSpecificProperties | Where-Object -Property Scope -EQ Tenant
+                    $apps = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant -tenantSpecificProperties | Where-Object -Property Scope -EQ Tenant | Where-Object -Property IsInstalled -EQ True
                     foreach ($app in $apps | Sort-Object -Property Version) {
                         $NoOfApps = ($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).count
                         $NoOfInstalledApps = ($allTenantsApps | Where-Object -Property Version -EQ $app.Version).count
