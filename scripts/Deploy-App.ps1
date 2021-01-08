@@ -231,7 +231,7 @@ if ($deployment) {
                 try {
                     Write-Host "Deploying to ${containerName}\${containerTenant}"
                     Publish-BCContainerApp -containerName $containerName -tenant $containerTenant -appFile $appFile -skipVerification -sync -scope Tenant
-                    $installedApp = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant | Where-Object -Property IsInstalled -EQ True
+                    $installedApp = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant -tenantSpecificProperties | Where-Object -Property IsInstalled -EQ True
                     if ($installedApp) {
                         Start-BcContainerAppDataUpgrade -containerName $containerName -tenant $containerTenant -appName $appJson.Name -appVersion $appjson.version 
                     } else {
