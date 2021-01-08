@@ -211,8 +211,8 @@ if ($deployment) {
                         
                     $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Name $appJson.Name
                     foreach ($app in $apps | Sort-Object -Property Version) {
-                        $NoOfApps = ($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).count
-                        $NoOfInstalledApps = ($allTenantsApps | Where-Object -Property Version -EQ $app.Version).count
+                        $NoOfApps = @($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).Count
+                        $NoOfInstalledApps = @($allTenantsApps | Where-Object -Property Version -EQ $app.Version).Count
                         if ($NoOfApps -gt 0 -and $NoOfInstalledApps -eq 0) {
                             Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
                             Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version
@@ -327,8 +327,8 @@ if ($deployment) {
                         }
                         $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Name $CurrentApp.Name
                         foreach ($app in $apps | Sort-Object -Property Version) {
-                            $NoOfApps = ($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).count
-                            $NoOfInstalledApps = ($allTenantsApps | Where-Object -Property Version -EQ $app.Version).count
+                            $NoOfApps = @($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).Count
+                            $NoOfInstalledApps = @($allTenantsApps | Where-Object -Property Version -EQ $app.Version).Count
                             if ($NoOfApps -gt 0 -and $NoOfInstalledApps -eq 0) {
                                 Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
                                 Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version
@@ -421,7 +421,7 @@ if ($deployment) {
                         $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $CurrentApp.Name | Where-Object -Property IsInstalled -EQ $false
                         $installedApp = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $CurrentApp.Name | Where-Object -Property IsInstalled -EQ $true
                         foreach ($app in $apps | Sort-Object -Property Version) {
-                            $NoOfApps = ($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).count
+                            $NoOfApps = @($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).Count
                             if ($NoOfApps -gt 0 -or $installedApp -ne $null) {
                                 Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
                                 Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version -Tenant $Tenant 
