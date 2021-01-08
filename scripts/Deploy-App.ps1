@@ -237,11 +237,13 @@ if ($deployment) {
                     } else {
                         Install-BCContainerApp -containerName $containerName -tenant $containerTenant -appName $appJson.Name -appVersion $appjson.version
                     }
-                    $apps = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant -tenantSpecificProperties | Where-Object -Property Scope -EQ Tenant
+                    $apps = Get-BCContainerAppInfo -containerName $containerName -tenant $containerTenant -tenantSpecificProperties | Where-Object -Property Scope -EQ Tenant | Where-Object -Property Name -EQ $appJson.Name
                     foreach ($app in $apps | Sort-Object -Property Version) {
                         Write-Host "Checking installation status for app $($app.Name) $($app.Version)"
-                        $NoOfNewerApps = ($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).Count
-                        $IsInstalled = ($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -EQ $app.Version).IsInstalled
+                        $NoOfNewerApps = ($apps | Where-Object -Property Version -GT $app.Version).Count
+                        $IsInstalled = ($apps | Where-Object -Property Version -EQ $app.Version).IsInstalled
+                        Write-Host "No. of newer apps: ${NoOfNewerApps}"
+                        Write-Host "Installed: ${IsInstalled}"
                         if ($NoOfNewerApps -gt 0 -and $IsInstalled -eq $false) {
                             Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
                             UnPublish-BCContainerApp -containerName $containerName -Name $app.Name -Publisher $app.Publisher -Version $app.Version -tenant $containerTenant
