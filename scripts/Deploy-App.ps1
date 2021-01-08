@@ -237,12 +237,12 @@ if ($deployment) {
                     } else {
                         Install-BCContainerApp -containerName $containerName -tenant $containerTenant -appName $appJson.Name -appVersion $appjson.version
                     }
-                    $allTenantsApps = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant -tenantSpecificProperties | Where-Object -Property Scope -EQ Tenant
-                    $apps = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant -tenantSpecificProperties | Where-Object -Property Scope -EQ Tenant | Where-Object -Property IsInstalled -EQ True
+                    $apps = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant -tenantSpecificProperties | Where-Object -Property Scope -EQ Tenant
                     foreach ($app in $apps | Sort-Object -Property Version) {
-                        $NoOfApps = ($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).count
-                        $NoOfInstalledApps = ($allTenantsApps | Where-Object -Property Version -EQ $app.Version).count
-                        if ($NoOfApps -gt 0 -and $NoOfInstalledApps -eq 0) {
+                        Write-Host "Checking installation status for app $($app.Name) $($app.Version)"
+                        $NoOfNewerApps = ($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).Count
+                        $IsInstalled = ($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -EQ $app.Version).IsInstalled
+                        if ($NoOfNewerApps -gt 0 -and $IsInstalled -eq $false) {
                             Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
                             UnPublish-BCContainerApp -containerName $containerName -Name $app.Name -Publisher $app.Publisher -Version $app.Version -tenant $containerTenant
                         }
