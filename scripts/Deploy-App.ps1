@@ -240,7 +240,7 @@ if ($deployment) {
                     $apps = Get-BCContainerAppInfo -containerName $containerName -tenant $containerTenant -tenantSpecificProperties | Where-Object -Property Scope -EQ Tenant | Where-Object -Property Name -EQ $appJson.Name
                     foreach ($app in $apps | Sort-Object -Property Version) {
                         Write-Host "Checking installation status for app $($app.Name) $($app.Version)"
-                        $NoOfNewerApps = ($apps | Where-Object -Property Version -GT $app.Version).Count
+                        $NoOfNewerApps = @($apps | Where-Object -Property Version -GT $app.Version).Count
                         $IsInstalled = ($apps | Where-Object -Property Version -EQ $app.Version).IsInstalled
                         Write-Host "No. of newer apps: ${NoOfNewerApps}"
                         Write-Host "Installed: ${IsInstalled}"
