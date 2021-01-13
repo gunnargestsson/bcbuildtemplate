@@ -234,7 +234,8 @@ if ($deployment) {
                     $installedApp = Get-BCContainerAppInfo -containerName $containerName -Name $appJson.Name -tenant $containerTenant -tenantSpecificProperties | Where-Object -Property IsInstalled -EQ True
                     if ($installedApp) {
                         Start-BcContainerAppDataUpgrade -containerName $containerName -tenant $containerTenant -appName $appJson.Name -appVersion $appjson.version 
-                    } else {
+                    }
+                    else {
                         Install-BCContainerApp -containerName $containerName -tenant $containerTenant -appName $appJson.Name -appVersion $appjson.version
                     }
                     $apps = Get-BCContainerAppInfo -containerName $containerName -tenant $containerTenant -tenantSpecificProperties | Where-Object -Property Scope -EQ Tenant | Where-Object -Property Name -EQ $appJson.Name
@@ -288,12 +289,21 @@ if ($deployment) {
                     $sessionArgument = @{ }
                 }
     
-                Invoke-Command @sessionArgument -ScriptBlock { Param($appFile)
+                Invoke-Command @sessionArgument -ScriptBlock { Param($appFile, $DeployToInstance)
                     $ErrorActionPreference = "Stop"
     
-                    $modulePath = Get-Item 'C:\Program Files\Microsoft Dynamics 365 Business Central\*\Service\NavAdminTool.ps1'
-                    Import-Module $modulePath | Out-Null
-                    $ServerInstance = (Get-NAVServerInstance | Where-Object -Property Default -EQ True).ServerInstance
+                    if ([String]::IsNullOrEmpty($DeployToInstance)) {
+                        $modulePath = Get-Item 'C:\Program Files\Microsoft Dynamics 365 Business Central\*\Service\NavAdminTool.ps1'
+                        Import-Module $modulePath | Out-Null
+                        $ServerInstance = (Get-NAVServerInstance | Where-Object -Property Default -EQ True).ServerInstance
+                    }
+                    else {
+                        $ServicePath = (Get-WmiObject win32_service | Where-Object { $_.Name -eq "MicrosoftDynamicsNavServer`$${DeployToInstance}" } | Select-Object Name, DisplayName, @{Name = "Path"; Expression = { $_.PathName.split('"')[1] } }).Path
+                        $modulePath = Get-Item (Join-Path (Split-Path -Path $ServicePath -Parent) 'NavAdminTool.ps1')
+                        Import-Module $modulePath | Out-Null
+                        $ServerInstance = $DeployToInstance
+                    }
+                    
                     $CurrentApp = Get-NAVAppInfo -Path $appFile
 
                     Write-Host "Publishing v$($CurrentApp.Version)"    
@@ -335,7 +345,7 @@ if ($deployment) {
                             }
                         }
                     }
-                } -ArgumentList $tempAppFile
+                } -ArgumentList $tempAppFile, $deployment.DeployToInstance
             }
             catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
                 throw "Could not connect to $VM. Maybe port 5985 (WinRM) is not open for your IP address $myip"
@@ -381,12 +391,20 @@ if ($deployment) {
                     $sessionArgument = @{ }
                 }
     
-                Invoke-Command @sessionArgument -ScriptBlock { Param($Tenants, $appFile)
+                Invoke-Command @sessionArgument -ScriptBlock { Param($Tenants, $appFile, $DeployToInstance)
                     $ErrorActionPreference = "Stop"
     
-                    $modulePath = Get-Item 'C:\Program Files\Microsoft Dynamics 365 Business Central\*\Service\NavAdminTool.ps1'
-                    Import-Module $modulePath | Out-Null
-                    $ServerInstance = (Get-NAVServerInstance | Where-Object -Property Default -EQ True).ServerInstance
+                    if ([String]::IsNullOrEmpty($DeployToInstance)) {
+                        $modulePath = Get-Item 'C:\Program Files\Microsoft Dynamics 365 Business Central\*\Service\NavAdminTool.ps1'
+                        Import-Module $modulePath | Out-Null
+                        $ServerInstance = (Get-NAVServerInstance | Where-Object -Property Default -EQ True).ServerInstance
+                    }
+                    else {
+                        $ServicePath = (Get-WmiObject win32_service | Where-Object { $_.Name -eq "MicrosoftDynamicsNavServer`$${DeployToInstance}" } | Select-Object Name, DisplayName, @{Name = "Path"; Expression = { $_.PathName.split('"')[1] } }).Path
+                        $modulePath = Get-Item (Join-Path (Split-Path -Path $ServicePath -Parent) 'NavAdminTool.ps1')
+                        Import-Module $modulePath | Out-Null
+                        $ServerInstance = $DeployToInstance
+                    }
                     $CurrentApp = Get-NAVAppInfo -Path $appFile
 
                     foreach ($Tenant in $Tenants) {
@@ -431,7 +449,7 @@ if ($deployment) {
                             }
                         }         
                     }
-                } -ArgumentList $Tenants, $tempAppFile
+                } -ArgumentList $Tenants, $tempAppFile, $deployment.DeployToInstance
             }
             catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
                 throw "Could not connect to $VM. Maybe port 5985 (WinRM) is not open for your IP address $myip"

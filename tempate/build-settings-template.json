@@ -63,6 +63,7 @@
             "branch": "<disabled>",
             "DeploymentType": "host",
             "DeployToName": "",
+            "DeployToInstance": "",
             "DeployToTenants": [],
             "apiBaseUrl": ""
         }
