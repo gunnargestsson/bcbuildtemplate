@@ -75,7 +75,7 @@ if ($deployment) {
                         }
                     }
 
-                    Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -sync -scope Tenant
+                    Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -sync -scope Tenant -SkipVerification
                     if ($appExists) {
                         Start-BCContainerAppDataUpgrade -containerName $containerName -appName $appJson.name -appVersion $appJson.version
                     }
@@ -299,7 +299,7 @@ if ($deployment) {
                     $CurrentApp = Get-NAVAppInfo -Path $appFile
 
                     Write-Host "Publishing v$($CurrentApp.Version)"    
-                    Publish-NAVApp -ServerInstance $ServerInstance -Path $appFile -Scope Global
+                    Publish-NAVApp -ServerInstance $ServerInstance -Path $appFile -Scope Global -SkipVerification
                 
                     foreach ($Tenant in (Get-NAVTenant -ServerInstance $ServerInstance).Id) {                                      
                         $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $CurrentApp.Name
@@ -405,7 +405,7 @@ if ($deployment) {
                             Unpublish-NAVApp -ServerInstance $ServerInstance -Name $_.Name -Publisher $_.Publisher -Version $_.Version -Tenant $Tenant                         
                         }
                         Write-Host "Publishing v$($CurrentApp.Version)"    
-                        Publish-NAVApp -ServerInstance $ServerInstance -Path $appFile -Tenant $Tenant -Scope Tenant
+                        Publish-NAVApp -ServerInstance $ServerInstance -Path $appFile -Tenant $Tenant -Scope Tenant -SkipVerification
             
                         $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $CurrentApp.Name
                         foreach ($app in $apps | Sort-Object -Property Version) {

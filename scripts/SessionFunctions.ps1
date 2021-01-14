@@ -24,7 +24,7 @@ function CopyFileToSession {
             $localFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($localFile)))
         }
         if ($localfile -notlike "https://*" -and $localfile -notlike "http://*") {
-            $tempFilename = "c:\artifacts\$([Guid]::NewGuid().ToString())"
+            $tempFilename = Join-Path (GetTempPathFromSession -session $session) "$([Guid]::NewGuid().ToString())"
             Copy-Item -ToSession $session -Path $localFile -Destination $tempFilename
             $localfile = $tempFilename
         }
@@ -44,6 +44,18 @@ function CopyFileToSession {
         }
     }
 }
+
+function GetTempPathFromSession {
+    Param(
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.Runspaces.PSSession] $session
+    )
+
+    Invoke-Command -Session $session -ScriptBlock {
+        $env:TEMP
+    }
+}
+
 
 function RemoveFileFromSession {
     Param(
