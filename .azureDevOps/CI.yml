@@ -170,6 +170,7 @@ stages:
 
     - task: PowerShell@1
       displayName: Remove Test App from Artifact Staging Directory
+      condition: and(succeeded(),ne(variables['testFolders'],''))
       inputs:
         scriptType: inlineScript
         inlineScript: >
