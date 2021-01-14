@@ -52,14 +52,7 @@ if ($deployment) {
             try {
         
                 if ($useSession) {
-                    try {
-                        $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
-                        $vmSession = New-PSSession -ComputerName $azureVM -Credential $vmCredential -SessionOption $sessionOption
-                    }
-                    catch {
-                        $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
-                        $vmSession = New-PSSession -ComputerName $azureVM -Credential $vmCredential -SessionOption $sessionOption
-                    }
+                    $vmSession = New-DeploymentRemoteSession -HostName $azureVM -Credential $vmCredential
                     $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
                     $sessionArgument = @{ "Session" = $vmSession }
                 }
@@ -279,8 +272,7 @@ if ($deployment) {
             try {
     
                 if ($useSession) {
-                    $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
-                    $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption
+                    $vmSession = New-DeploymentRemoteSession -HostName $VM
                     $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
                     $sessionArgument = @{ "Session" = $vmSession }
                 }
@@ -381,8 +373,7 @@ if ($deployment) {
             try {
     
                 if ($useSession) {
-                    $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
-                    $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption
+                    $vmSession = New-DeploymentRemoteSession -HostName $VM
                     $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
                     $sessionArgument = @{ "Session" = $vmSession }
                 }

@@ -1,10 +1,10 @@
 ﻿function InvokeScriptInSession {
     Param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.Runspaces.PSSession] $session,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string] $filename,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [object[]] $argumentList
     )
 
@@ -13,7 +13,7 @@
 
 function CopyFileToSession {
     Param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.Runspaces.PSSession] $session,
         $localfile,
         [switch] $returnSecureString
@@ -47,7 +47,7 @@ function CopyFileToSession {
 
 function RemoveFileFromSession {
     Param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.Runspaces.PSSession] $session,
         $filename
     )
@@ -66,13 +66,13 @@ function RemoveFileFromSession {
 
 function CopyFoldersToSession {
     Param(
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.Runspaces.PSSession] $session,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string] $baseFolder,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string[]] $subFolders,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]] $exclude = @("*.app")
     )
 
@@ -100,13 +100,111 @@ function CopyFoldersToSession {
 
 function RemoveFolderFromSession {
     Param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.Runspaces.PSSession] $session,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string] $foldername
     )
     
     Invoke-Command -Session $session -ScriptBlock { Param($foldername)
         Remove-Item $foldername -Force -Recurse
     } -ArgumentList $foldername
+}
+
+Function New-DeploymentRemoteSession {
+    param(
+        [Parameter(Mandatory = $True, ValueFromPipelineByPropertyname = $true)]
+        [String]$HostName,
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyname = $true)]
+        [System.Management.Automation.PSCredential]$Credential
+    )
+
+    if ($Credential) {
+        try {
+            $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck 
+            $vmSession = New-PSSession -ComputerName $HostName -Credential $Credential -SessionOption $sessionOption -UseSSL
+            return $vmSession
+        }
+        catch {}
+        try {
+            $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
+            $vmSession = New-PSSession -ComputerName $HostName -Credential $Credential -SessionOption $sessionOption -UseSSL
+            return $vmSession
+        }
+        catch {}
+        try {
+            $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
+            $vmSession = New-PSSession -ComputerName $HostName -Credential $Credential -SessionOption $sessionOption
+            return $vmSession
+        }
+        catch {}
+        try {
+            $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
+            $vmSession = New-PSSession -ComputerName $HostName -Credential $Credential -SessionOption $sessionOption
+            return $vmSession
+        }
+        catch {}
+        try {
+            if ((Test-NetConnection -ComputerName $HostName -Port 5986).TcpTestSucceeded) {
+                $WinRmUri = New-Object Uri("https://$($HostName):5986")
+                $WinRmOption = New-PSSessionOption –SkipCACheck –SkipCNCheck –SkipRevocationCheck
+                $vmSession = New-PSSession -ConnectionUri $WinRMUri -Credential $Credential -SessionOption $WinRmOption 
+                return $vmSession
+            }
+        }
+        catch {}        
+        try {
+            if ((Test-NetConnection -ComputerName $HostName -Port 5985).TcpTestSucceeded) {
+                $WinRmUri = New-Object Uri("http://$($HostName):5985")
+                $WinRmOption = New-PSSessionOption –SkipCACheck –SkipCNCheck –SkipRevocationCheck
+                $vmSession = New-PSSession -ConnectionUri $WinRMUri -Credential $Credential -SessionOption $WinRmOption 
+                return $vmSession
+            }
+        }
+        catch {}
+    }    
+    try {
+        $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
+        $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption -UseSSL
+        return $vmSession
+    }
+    catch {}
+    try {
+        $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
+        $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption -UseSSL
+        return $vmSession        
+    }   
+    catch {}
+    try {
+        $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
+        $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption
+        return $vmSession
+    }
+    catch {}
+    try {
+        $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
+        $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption
+        return $vmSession        
+    }
+    catch {}
+    try {
+        if ((Test-NetConnection -ComputerName $HostName -Port 5986).TcpTestSucceeded) {
+            $WinRmUri = New-Object Uri("https://$($HostName):5986")
+            $WinRmOption = New-PSSessionOption –SkipCACheck –SkipCNCheck –SkipRevocationCheck
+            $vmSession = New-PSSession -ConnectionUri $WinRMUri -SessionOption $WinRmOption 
+            return $vmSession
+        }
+    }
+    catch {}
+    try {
+        if ((Test-NetConnection -ComputerName $HostName -Port 5985).TcpTestSucceeded) {
+            $WinRmUri = New-Object Uri("http://$($HostName):5985")
+            $WinRmOption = New-PSSessionOption –SkipCACheck –SkipCNCheck –SkipRevocationCheck
+            $vmSession = New-PSSession -ConnectionUri $WinRMUri -SessionOption $WinRmOption 
+            return $vmSession
+        }
+    }
+    catch {}
+    Write-Host "Unable to create a PS Remote Session to host: ${HostName} !"
+    throw
 }
