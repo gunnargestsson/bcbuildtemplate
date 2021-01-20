@@ -10,7 +10,7 @@
     "containerParameters": {
         "locale": "",
         "AuthenticationEmail": "",
-        "addFontsFromPath": "${env:SystemRoot}\\Fonts",
+        "addFontsFromPath": "${env:SystemRoot}\\Fonts\\*.ttf",
         "useNewDatabase": false,
         "useCleanDatabase": false
     },
