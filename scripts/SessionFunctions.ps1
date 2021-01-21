@@ -177,6 +177,18 @@ Function New-DeploymentRemoteSession {
     }    
     try {
         $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
+        $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption
+        return $vmSession
+    }
+    catch {}
+    try {
+        $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
+        $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption
+        return $vmSession        
+    }    
+    catch {}
+    try {
+        $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
         $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption -UseSSL
         return $vmSession
     }
@@ -186,19 +198,7 @@ Function New-DeploymentRemoteSession {
         $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption -UseSSL
         return $vmSession        
     }   
-    catch {}
-    try {
-        $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
-        $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption
-        return $vmSession
-    }
-    catch {}
-    try {
-        $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
-        $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption
-        return $vmSession        
-    }
-    catch {}
+    catch {}    
     try {
         if ((Test-NetConnection -ComputerName $HostName -Port 5986).TcpTestSucceeded) {
             $WinRmUri = New-Object Uri("https://$($HostName):5986")
