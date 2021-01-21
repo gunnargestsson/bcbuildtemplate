@@ -18,3 +18,7 @@
 Create a service connection to GitHub and update the endpoint
 -  https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml
 
+# Build Agent
+Build Agent must have Docker and Azure compatability
+- Install-Module AZ
+
