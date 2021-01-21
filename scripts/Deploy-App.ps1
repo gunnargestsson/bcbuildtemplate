@@ -297,7 +297,7 @@ if ($deployment) {
                     $sessionArgument = @{ }
                 }
     
-                Invoke-Command @sessionArgument -ScriptBlock { Param($appFile, $DeployToInstance)
+                Invoke-Command @sessionArgument -ScriptBlock { Param($appFile, $DeployToInstance, $installNewApps)
                     $ErrorActionPreference = "Stop"
     
                     if ([String]::IsNullOrEmpty($DeployToInstance)) {
@@ -343,14 +343,14 @@ if ($deployment) {
                         foreach ($Tenant in (Get-NAVTenant -ServerInstance $ServerInstance).Id) {
                             $allTenantsApps += Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties -Name $CurrentApp.Name | Where-Object -Property IsInstalled -EQ $true
                         }
-                        $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Name $CurrentApp.Name
+                        $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Name $CurrentApp.Name | Where-Object -Property Scope -EQ Global
                         foreach ($app in $apps | Sort-Object -Property Version) {
                             $NoOfApps = @($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).Count
                             $NoOfInstalledApps = @($allTenantsApps | Where-Object -Property Version -EQ $app.Version).Count
                             if ($NoOfApps -gt 0 -and $NoOfInstalledApps -eq 0) {
                                 Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
                                 try {
-                                    Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version -ErrorAction Continue
+                                    Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version
                                 }
                                 catch {
                                     Write-Host "Unable to unpublish $($app.Name) v$($app.Version)"
@@ -358,7 +358,7 @@ if ($deployment) {
                             }
                         }
                     }
-                } -ArgumentList $tempAppFile, $deployment.DeployToInstance
+                } -ArgumentList $tempAppFile, $deployment.DeployToInstance, $installNewApps
             }
             catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
                 throw "Could not connect to $VM. Maybe port 5985 (WinRM) is not open for your IP address $myip"
@@ -409,7 +409,7 @@ if ($deployment) {
                     $sessionArgument = @{ }
                 }
     
-                Invoke-Command @sessionArgument -ScriptBlock { Param($Tenants, $appFile, $DeployToInstance)
+                Invoke-Command @sessionArgument -ScriptBlock { Param($Tenants, $appFile, $DeployToInstance, $installNewApps)
                     $ErrorActionPreference = "Stop"
     
                     if ([String]::IsNullOrEmpty($DeployToInstance)) {
@@ -429,7 +429,12 @@ if ($deployment) {
                         Write-Host "Publishing $($CurrentApp.Name) (${appFile}) to ${Tenant}"
                         Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $CurrentApp.Name | Where-Object -Property IsInstalled -EQ $false | ForEach-Object {
                             Write-Host "Removing unused app v$($_.Version)"
-                            Unpublish-NAVApp -ServerInstance $ServerInstance -Name $_.Name -Publisher $_.Publisher -Version $_.Version -Tenant $Tenant                         
+                            try {
+                                Unpublish-NAVApp -ServerInstance $ServerInstance -Name $_.Name -Publisher $_.Publisher -Version $_.Version -Tenant $Tenant
+                            }
+                            catch {
+                                Write-Host "Unable to unpublish $($app.Name) v$($app.Version)"
+                            }
                         }
                         Write-Host "Publishing v$($CurrentApp.Version)"    
                         Publish-NAVApp -ServerInstance $ServerInstance -Path $appFile -Tenant $Tenant -Scope Tenant -SkipVerification
@@ -472,7 +477,7 @@ if ($deployment) {
                             }
                         }         
                     }
-                } -ArgumentList $Tenants, $tempAppFile, $deployment.DeployToInstance
+                } -ArgumentList $Tenants, $tempAppFile, $deployment.DeployToInstance, $installNewApps
             }
             catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
                 throw "Could not connect to $VM. Maybe port 5985 (WinRM) is not open for your IP address $myip"
