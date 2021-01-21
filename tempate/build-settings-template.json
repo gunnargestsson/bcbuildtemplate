@@ -65,6 +65,7 @@
             "DeployToName": "",
             "DeployToInstance": "",
             "DeployToTenants": [],
+            "InstallNewApps": false,
             "apiBaseUrl": ""
         }
     ],

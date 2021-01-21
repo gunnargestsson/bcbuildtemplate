@@ -254,6 +254,12 @@ if ($deployment) {
 
         elseif ($deploymentType -eq "host" -and ($deployment.DeployToTenants).Count -eq 0) {
             $VM = $deployment.DeployToName
+            if ($deployment.InstallNewApps) {
+                $installNewApps = $true
+            }
+            else {
+                $installNewApps = $false
+            }
             Write-Host "Host deployment to ${VM}"
             . (Join-Path $PSScriptRoot "SessionFunctions.ps1")
     
@@ -316,7 +322,7 @@ if ($deployment) {
                                     Write-Host "Newer App is available"
                                 }
                             }
-                            elseif (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -EQ $app.Version | Where-Object -Property IsInstalled -EQ $false) {
+                            elseif ($installNewApps -and (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -EQ $app.Version | Where-Object -Property IsInstalled -EQ $false)) {
                                 Write-Host "installing app $($app.Name) v$($app.Version) in tenant $($Tenant)"
                                 Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
                                 Install-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
@@ -355,6 +361,12 @@ if ($deployment) {
         elseif ($deploymentType -eq "host") {
             $VM = $deployment.DeployToName
             $Tenants = $deployment.DeployToTenants
+            if ($deployment.InstallNewApps) {
+                $installNewApps = $true
+            }
+            else {
+                $installNewApps = $false
+            }
             Write-Host "Host deployment to ${VM}"
             . (Join-Path $PSScriptRoot "SessionFunctions.ps1")
     
@@ -421,7 +433,7 @@ if ($deployment) {
                                     Write-Host "Newer App is available"
                                 }
                             }
-                            elseif (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -EQ $app.Version | Where-Object -Property IsInstalled -EQ $false) {
+                            elseif ($installNewApps -and (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -EQ $app.Version | Where-Object -Property IsInstalled -EQ $false)) {
                                 Write-Host "installing app $($app.Name) v$($app.Version) in tenant $($Tenant)"
                                 Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
                                 Install-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
