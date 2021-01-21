@@ -208,7 +208,12 @@ if ($deployment) {
                         $NoOfInstalledApps = @($allTenantsApps | Where-Object -Property Version -EQ $app.Version).Count
                         if ($NoOfApps -gt 0 -and $NoOfInstalledApps -eq 0) {
                             Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
-                            Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version
+                            try {
+                                Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version
+                            }
+                            catch {
+                                Write-Host "Unable to unpublish $($app.Name) v$($app.Version)"
+                            }
                         }
                     }
                 } -argumentList $appjson            
@@ -240,7 +245,12 @@ if ($deployment) {
                         Write-Host "Installed: ${IsInstalled}"
                         if ($NoOfNewerApps -gt 0 -and $IsInstalled -eq $false) {
                             Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
-                            UnPublish-BCContainerApp -containerName $containerName -Name $app.Name -Publisher $app.Publisher -Version $app.Version -tenant $containerTenant
+                            try {
+                                UnPublish-BCContainerApp -containerName $containerName -Name $app.Name -Publisher $app.Publisher -Version $app.Version -tenant $containerTenant
+                            }
+                            catch {
+                                Write-Host "Unable to unpublish $($app.Name) v$($app.Version)"
+                            }
                         }
                     }
                 }
@@ -339,7 +349,12 @@ if ($deployment) {
                             $NoOfInstalledApps = @($allTenantsApps | Where-Object -Property Version -EQ $app.Version).Count
                             if ($NoOfApps -gt 0 -and $NoOfInstalledApps -eq 0) {
                                 Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
-                                Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version -ErrorAction Continue
+                                try {
+                                    Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version -ErrorAction Continue
+                                }
+                                catch {
+                                    Write-Host "Unable to unpublish $($app.Name) v$($app.Version)"
+                                }
                             }
                         }
                     }
@@ -448,7 +463,12 @@ if ($deployment) {
                             Write-Host "Installed: ${IsInstalled}"    
                             if ($NoOfApps -gt 0 -or $installedApp -ne $null) {
                                 Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
-                                Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version -Tenant $Tenant -ErrorAction Continue
+                                try {
+                                    Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version -Tenant $Tenant
+                                }
+                                catch {
+                                    Write-Host "Unable to unpublish $($app.Name) v$($app.Version)"
+                                }
                             }
                         }         
                     }
