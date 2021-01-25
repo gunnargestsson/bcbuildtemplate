@@ -170,13 +170,19 @@ if ($deployment) {
             $ErrorActionPreference = "Stop"
             Write-Host "Container deployment to ${containerName}"
             Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -scope Global
+            $containerPath = Join-Path "C:\Run\My" (Split-Path -Path $appFile -Leaf)
+            Copy-FileToBcContainer -containerName $containerName -localPath $appFile -containerPath $containerPath 
+            $appInfo = Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
+                param($appFile)
+                Get-NAVAppInfo -Path $appFile
+            } -argumentList $containerPath
             
             Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
-                Param($appJson)
+                Param($appInfo)
                 $ServerInstance = (Get-NAVServerInstance | Where-Object -Property Default -EQ True).ServerInstance
 
                 foreach ($Tenant in (Get-NAVTenant -ServerInstance $ServerInstance).Id) {                                      
-                    $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $appJson.Name
+                    $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $appInfo.Name
                     foreach ($app in $apps | Sort-Object -Property Version) {
                         Write-Host "Investigating app $($app.Name) v$($app.version) installed=$($app.isInstalled)"
                         $NewApp = $apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.version                            
@@ -199,10 +205,10 @@ if ($deployment) {
 
                     $allTenantsApps = @()
                     foreach ($Tenant in (Get-NAVTenant -ServerInstance $ServerInstance).Id) {                                    
-                        $allTenantsApps += Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties -Name $appJson.Name | Where-Object -Property IsInstalled -EQ $true
+                        $allTenantsApps += Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties -Name $appInfo.Name | Where-Object -Property IsInstalled -EQ $true
                     }
                         
-                    $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Name $appJson.Name
+                    $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Name $appInfo.Name
                     foreach ($app in $apps | Sort-Object -Property Version) {
                         $NoOfApps = @($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).Count
                         $NoOfInstalledApps = @($allTenantsApps | Where-Object -Property Version -EQ $app.Version).Count
@@ -216,7 +222,7 @@ if ($deployment) {
                             }
                         }
                     }
-                } -argumentList $appjson            
+                } -argumentList $appInfo            
             }
         }
         elseif ($deploymentType -eq "container") {
