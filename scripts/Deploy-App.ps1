@@ -223,8 +223,8 @@ if ($deployment) {
                             }
                         }
                     }
-                } -argumentList $appName            
-            }
+                } 
+            } -argumentList $appName
         }
         elseif ($deploymentType -eq "container") {
             $containerName = $deployment.DeployToName
