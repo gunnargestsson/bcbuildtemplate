@@ -174,8 +174,10 @@ if ($deployment) {
             Copy-FileToBcContainer -containerName $containerName -localPath $appFile -containerPath $containerPath 
             $appInfo = Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
                 param($appFile)
-                Get-NAVAppInfo -Path $appFile
+                $appInfo = Get-NAVAppInfo -Path $appFile
+                return $appInfo
             } -argumentList $containerPath
+            $appInfo
             
             Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
                 Param($appInfo)
