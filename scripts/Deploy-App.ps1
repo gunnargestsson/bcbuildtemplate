@@ -172,10 +172,9 @@ if ($deployment) {
             Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -scope Global
             $containerPath = Join-Path "C:\Run\My" (Split-Path -Path $appFile -Leaf)
             Copy-FileToBcContainer -containerName $containerName -localPath $appFile -containerPath $containerPath 
-            $appInfo = Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
+            $appName = Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
                 param($appFile)
-                $appInfo = Get-NAVAppInfo -Path $appFile
-                return $appInfo
+                return (Get-NAVAppInfo -Path $appFile).Name
             } -argumentList $containerPath
             
             Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
@@ -224,7 +223,7 @@ if ($deployment) {
                             }
                         }
                     }
-                } -argumentList $appInfo.Name            
+                } -argumentList $appName            
             }
         }
         elseif ($deploymentType -eq "container") {
