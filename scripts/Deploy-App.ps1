@@ -177,14 +177,14 @@ if ($deployment) {
                 $appInfo = Get-NAVAppInfo -Path $appFile
                 return $appInfo
             } -argumentList $containerPath
-            $appInfo
             
             Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
-                Param($appInfo)
+                Param($appName)
                 $ServerInstance = (Get-NAVServerInstance | Where-Object -Property Default -EQ True).ServerInstance
+                Write-Host "Updating app '${appName}' on server instance '${ServerInstance}'..."
 
                 foreach ($Tenant in (Get-NAVTenant -ServerInstance $ServerInstance).Id) {                                      
-                    $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $appInfo.Name
+                    $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties -Name $appName
                     foreach ($app in $apps | Sort-Object -Property Version) {
                         Write-Host "Investigating app $($app.Name) v$($app.version) installed=$($app.isInstalled)"
                         $NewApp = $apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.version                            
@@ -207,10 +207,10 @@ if ($deployment) {
 
                     $allTenantsApps = @()
                     foreach ($Tenant in (Get-NAVTenant -ServerInstance $ServerInstance).Id) {                                    
-                        $allTenantsApps += Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties -Name $appInfo.Name | Where-Object -Property IsInstalled -EQ $true
+                        $allTenantsApps += Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties -Name $appName | Where-Object -Property IsInstalled -EQ $true
                     }
                         
-                    $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Name $appInfo.Name
+                    $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Name $appName
                     foreach ($app in $apps | Sort-Object -Property Version) {
                         $NoOfApps = @($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).Count
                         $NoOfInstalledApps = @($allTenantsApps | Where-Object -Property Version -EQ $app.Version).Count
@@ -224,7 +224,7 @@ if ($deployment) {
                             }
                         }
                     }
-                } -argumentList $appInfo            
+                } -argumentList $appInfo.Name            
             }
         }
         elseif ($deploymentType -eq "container") {
