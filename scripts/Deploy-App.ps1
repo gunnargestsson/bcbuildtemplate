@@ -169,9 +169,9 @@ if ($deployment) {
         
             $ErrorActionPreference = "Stop"
             Write-Host "Container deployment to ${containerName}"
-            Publish-BCContainerApp -containerName $containerName -tenant $containerTenant -appFile $appFile -skipVerification -scope Global
+            Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -scope Global
             
-            Invoke-ScriptInBcContainer -containerName $containerTenant -scriptblock {
+            Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
                 Param($appJson)
                 $ServerInstance = (Get-NAVServerInstance | Where-Object -Property Default -EQ True).ServerInstance
 
