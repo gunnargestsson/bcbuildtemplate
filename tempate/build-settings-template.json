@@ -8,6 +8,7 @@
     "includeTestFrameworkOnly": true,
     "testToolkitCountry": "is-IS",
     "testCompanyName": "CRONUS Danmark A/S",
+    "testSuiteDisabled": false,
     "containerParameters": {
         "locale": "",
         "AuthenticationEmail": "",

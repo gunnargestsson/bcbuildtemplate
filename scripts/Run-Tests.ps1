@@ -26,6 +26,7 @@
 
 $settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $testCompanyName = $settings.testCompanyName
+$testSuiteDisabled = $settings.testSuiteDisabled
 
 if ([String]::IsNullOrEmpty($testCompanyName)) {
     $testCompanyName = Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
@@ -69,37 +70,35 @@ if ($NavVersion -ge "15.0.0.0") {
             $appProjectFolder = Join-Path $buildProjectFolder $appFolder
             $appJson = Get-Content -Path (Join-Path $appProjectFolder "app.json") | ConvertFrom-Json
             $getTestsParam += @{ "ExtensionId" = "$($appJson.Id)" }
+            if ($testSuiteDisabled) {
+                $azureDevOpsParam += @{ "ExtensionId" = "$($appJson.Id)" }
+            }
             $disabledTestsFile = Join-Path $appProjectFolder "disabledTests.json"
             if (Test-Path $disabledTestsFile) {
                 $disabledTests += Get-Content $disabledTestsFile | ConvertFrom-Json
             }
         }
-        if ($disabledTests) {
-            $getTestsParam += @{ "DisabledTests" = $disabledTests }
-        }
 
-        $tests = Get-TestsFromBCContainer @getTestsParam `
-            -containerName $containerName `
-            -credential $credential `
-            -ignoreGroups `
-            -testSuite $testSuite -debugMode
-        
-        $tests | ForEach-Object {
-            if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
-                        -containerName $containerName `
-                        -companyName $testCompanyName `
-                        -credential $credential `
-                        -XUnitResultFileName $TempTestResultFile `
-                        -AppendToXUnitResultFile:(!$first) `
-                        -testSuite $testSuite `
-                        -testCodeunit $_.Id `
-                        -returnTrueIfAllPassed `
-                        -restartContainerAndRetry)) { $rerunTests += $_ }
-            $first = $false
+        if ($testSuiteDisabled) {
+            Run-TestsInBcContainer @AzureDevOpsParam `
+                -containerName $containerName `
+                -companyName $testCompanyName `
+                -credential $credential `
+                -XUnitResultFileName $TempTestResultFile 
         }
-        if ($rerunTests.Count -gt 0 -and $reRunFailedTests) {
-            Restart-BCContainer -containerName $containername
-            $rerunTests | % {
+        else {
+        
+            if ($disabledTests) {
+                $getTestsParam += @{ "DisabledTests" = $disabledTests }
+            }
+
+            $tests = Get-TestsFromBCContainer @getTestsParam `
+                -containerName $containerName `
+                -credential $credential `
+                -ignoreGroups `
+                -testSuite $testSuite -debugMode
+        
+            $tests | ForEach-Object {
                 if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
                             -containerName $containerName `
                             -companyName $testCompanyName `
@@ -109,8 +108,24 @@ if ($NavVersion -ge "15.0.0.0") {
                             -testSuite $testSuite `
                             -testCodeunit $_.Id `
                             -returnTrueIfAllPassed `
-                            -restartContainerAndRetry)) { $failedTests += $_ }
+                            -restartContainerAndRetry)) { $rerunTests += $_ }
                 $first = $false
+            }
+            if ($rerunTests.Count -gt 0 -and $reRunFailedTests) {
+                Restart-BCContainer -containerName $containername
+                $rerunTests | % {
+                    if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
+                                -containerName $containerName `
+                                -companyName $testCompanyName `
+                                -credential $credential `
+                                -XUnitResultFileName $TempTestResultFile `
+                                -AppendToXUnitResultFile:(!$first) `
+                                -testSuite $testSuite `
+                                -testCodeunit $_.Id `
+                                -returnTrueIfAllPassed `
+                                -restartContainerAndRetry)) { $failedTests += $_ }
+                    $first = $false
+                }
             }
         }
     }
