@@ -1,28 +1,38 @@
 ﻿Param(
-    [ValidateSet('AzureDevOps','Local','AzureVM')]
-    [Parameter(Mandatory=$false)]
+    [ValidateSet('AzureDevOps', 'Local', 'AzureVM')]
+    [Parameter(Mandatory = $false)]
     [string] $buildEnv = "AzureDevOps",
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string] $containerName = $ENV:CONTAINERNAME,
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string] $testSuite = "DEFAULT",
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH,
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string] $appFolders = "",
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [pscredential] $credential = $null,
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string] $testResultsFile = (Join-Path $ENV:BUILD_REPOSITORY_LOCALPATH "TestResults.xml"),
 
     [switch] $reRunFailedTests
 )
+
+$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
+$testCompanyName = $settings.testCompanyName
+
+if ([String]::IsNullOrEmpty($testCompanyName)) {
+    $testCompanyName = Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
+        $ServerInstance = (Get-NAVServerInstance | Where-Object -Property Default -EQ True).ServerInstance
+        @(Get-NAVCompany -ServerInstance $ServerInstance -Tenant default).CompanyName
+    } | Select-Object -First 1
+}
 
 if (-not ($credential)) {
     $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
@@ -74,37 +84,41 @@ if ($NavVersion -ge "15.0.0.0") {
         
         $tests | ForEach-Object {
             if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
-                -containerName $containerName `
-                -credential $credential `
-                -XUnitResultFileName $TempTestResultFile `
-                -AppendToXUnitResultFile:(!$first) `
-                -testSuite $testSuite `
-                -testCodeunit $_.Id `
-                -returnTrueIfAllPassed `
-                -restartContainerAndRetry)) { $rerunTests += $_ }
+                        -containerName $containerName `
+                        -companyName $testCompanyName `
+                        -credential $credential `
+                        -XUnitResultFileName $TempTestResultFile `
+                        -AppendToXUnitResultFile:(!$first) `
+                        -testSuite $testSuite `
+                        -testCodeunit $_.Id `
+                        -returnTrueIfAllPassed `
+                        -restartContainerAndRetry)) { $rerunTests += $_ }
             $first = $false
         }
         if ($rerunTests.Count -gt 0 -and $reRunFailedTests) {
             Restart-BCContainer -containerName $containername
             $rerunTests | % {
                 if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
-                    -containerName $containerName `
-                    -credential $credential `
-                    -XUnitResultFileName $TempTestResultFile `
-                    -AppendToXUnitResultFile:(!$first) `
-                    -testSuite $testSuite `
-                    -testCodeunit $_.Id `
-                    -returnTrueIfAllPassed `
-                    -restartContainerAndRetry)) { $failedTests += $_ }
+                            -containerName $containerName `
+                            -companyName $testCompanyName `
+                            -credential $credential `
+                            -XUnitResultFileName $TempTestResultFile `
+                            -AppendToXUnitResultFile:(!$first) `
+                            -testSuite $testSuite `
+                            -testCodeunit $_.Id `
+                            -returnTrueIfAllPassed `
+                            -restartContainerAndRetry)) { $failedTests += $_ }
                 $first = $false
             }
         }
     }
-} else {
+}
+else {
     Run-TestsInBcContainer @AzureDevOpsParam `
-                -containerName $containerName `
-                -credential $credential `
-                -XUnitResultFileName $TempTestResultFile 
+        -containerName $containerName `
+        -companyName $testCompanyName `
+        -credential $credential `
+        -XUnitResultFileName $TempTestResultFile 
 }
 
 Copy-Item -Path $TempTestResultFile -Destination $testResultsFile -Force
