@@ -84,7 +84,8 @@ if ($NavVersion -ge "15.0.0.0") {
                 -containerName $containerName `
                 -companyName $testCompanyName `
                 -credential $credential `
-                -XUnitResultFileName $TempTestResultFile 
+                -XUnitResultFileName $TempTestResultFile `
+                -detailed
         }
         else {
         
