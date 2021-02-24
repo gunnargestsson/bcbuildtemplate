@@ -34,6 +34,8 @@ if ([String]::IsNullOrEmpty($testCompanyName)) {
     } | Select-Object -First 1
 }
 
+Write-Host "Executing tests on company '${testCompanyName}' and saving results in '${testResultFile}'"
+
 if (-not ($credential)) {
     $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
     $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
