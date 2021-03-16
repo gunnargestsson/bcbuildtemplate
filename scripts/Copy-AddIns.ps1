@@ -15,7 +15,7 @@ $settings.dotnetAddIns | ForEach-Object {
         Download-File -sourceUrl $addinUrl -destinationFile $addinFile
         if ($addinFile.EndsWith(".zip", "OrdinalIgnoreCase")) {
             Write-Host "Extracting .zip file " -NoNewline
-            Expand-7zipArchive -Path $addinFile -DestinationPath $serviceTierAddInsFolder
+            Expand-Archive -Path $addinFile -DestinationPath $serviceTierAddInsFolder
             Remove-Item -Path $addinFile -Force
         }        
     }
