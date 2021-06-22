@@ -157,7 +157,10 @@ if (!$restoreDb) {
 
     & "${PSScriptRoot}\Publish-Dependencies.ps1" -buildEnv $buildEnv -containerName $containerName -buildProjectFolder $buildProjectFolder -skipVerification
     
-    if ($settings.includeTestLibrariesOnly) {
+    if ($settings.includeTestRunnerOnly) {
+        Import-TestToolkitToBcContainer -containerName $containerName -includeTestRunnerOnly 
+    }
+    elseif ($settings.includeTestLibrariesOnly) {
         Import-TestToolkitToBcContainer -containerName $containerName -includeTestLibrariesOnly 
     }
     elseif ($settings.includeTestFrameworkOnly) {

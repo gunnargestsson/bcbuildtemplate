@@ -4,6 +4,7 @@
     "testFolders": "test",
     "dependencies": [],
     "dotnetAddIns": [],
+    "includeTestRunnerOnly": false,
     "includeTestLibrariesOnly": false,
     "includeTestFrameworkOnly": true,
     "testToolkitCountry": "is-IS",
