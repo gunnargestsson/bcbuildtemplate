@@ -99,7 +99,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: 'bcbuildtemplate\scripts\Publish-App.ps1'
-        arguments: '-appFolders "$(appFolders)" -skipVerification:("$(CodeSignPfxPassword)" -eq "")'
+        arguments: '-appFolders "$(appFolders)" -skipVerification:([String]::IsNullOrEmpty($CodeSignPfxPassword))'
         failOnStderr: true
     
     - task: PowerShell@2

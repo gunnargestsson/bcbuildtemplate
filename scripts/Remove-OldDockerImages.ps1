@@ -1,4 +1,4 @@
-﻿Flush-ContainerHelperCache  -keepDays 40
+﻿Flush-ContainerHelperCache -keepDays 40 
 $images = docker image list --format "table {{.Repository}},{{.Tag}},{{.ID}},{{.Size}},{{.CreatedAt}}"
 $dockerImages = @()
 $imagesToRemove = @()
