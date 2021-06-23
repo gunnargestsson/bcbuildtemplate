@@ -14,7 +14,7 @@
     [Parameter(Mandatory = $false)]
     $clientId = $ENV:ClientID,
     
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     $clientSecret = $ENV:ClientSecret
     
 )
