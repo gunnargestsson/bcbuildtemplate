@@ -225,8 +225,8 @@ stages:
       displayName: 'Deploy to Environment'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
       env:
-        ClientId: $(clientId)
-        ClientSecret: $(clientSecret)
+        ClientId: $(ClientId)
+        RefreshToken: $(RefreshToken)
       inputs:
         targetType: filePath
         filePath: 'bcbuildtemplate\scripts\Deploy-App.ps1'
