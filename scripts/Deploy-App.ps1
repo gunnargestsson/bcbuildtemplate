@@ -12,10 +12,10 @@
     [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH,
 
     [Parameter(Mandatory = $false)]
-    $clientId = $ENV:ClientID,
+    $clientId = $ENV:CLIENTID,
     
     [Parameter(Mandatory = $false)]
-    $clientSecret = $ENV:ClientSecret
+    $clientSecret = $ENV:CLIENTSECRET
     
 )
 

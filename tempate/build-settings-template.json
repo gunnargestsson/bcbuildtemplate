@@ -65,11 +65,20 @@
         {
             "branch": "<disabled>",
             "DeploymentType": "host",
-            "DeployToName": "",
-            "DeployToInstance": "",
-            "DeployToTenants": [],
-            "InstallNewApps": false,
-            "apiBaseUrl": ""
+            "DeployToName": "<hostname>",
+            "DeployToInstance": "<blank for default incance>",
+            "DeployToTenants": [
+                "<blank for all tenants>"
+            ],
+            "InstallNewApps": false
+        },
+        {
+            "branch": "<disabled>",
+            "DeploymentType": "onlineTenant",
+            "DeployToName": "Sandbox",
+            "DeployToTenants": [
+                "24bc1e4f-1a1b-40f8-8987-cd9988f90b4d"
+            ]
         }
     ],
     "userProfiles": [
