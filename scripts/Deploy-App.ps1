@@ -9,15 +9,20 @@
     [string] $branchName,
 
     [Parameter(Mandatory = $false)]
-    [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH
+    [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH,
+
+    [Parameter(Mandatory = $false)]
+    $clientId = $ENV:ClientID,
+    
+    [Parameter(Mandatory = $true)]
+    $clientSecret = $ENV:ClientSecret
     
 )
 
 Write-Host "Deploying branch ${branchName}..."
 $settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
-$deployment = $settings.deployments | Where-Object { $_.branch -eq $branchName }
-if ($deployment) {
-
+$deployments = $settings.deployments | Where-Object { $_.branch -eq $branchName }
+foreach ($deployment in $deployments) {
     $deploymentType = $deployment.DeploymentType
 
     $artifactsFolder = (Get-Item $artifactsFolder).FullName
@@ -97,71 +102,10 @@ if ($deployment) {
             }
         }
         elseif ($deploymentType -eq "onlineTenant") {
-            $apiBaseUrl = $deployment.apiBaseUrl
-            $baseUrl = $apiBaseUrl.TrimEnd('/')
-            Write-Host "Base Url: $baseurl"
-            
-            # Get company id (of any company in the tenant)​
-            $companiesResponse = Invoke-WebRequest -Uri "$baseUrl/v1.0/companies" -Credential $credential
-            $companiesContent = $companiesResponse.Content
-            $companyId = (ConvertFrom-Json $companiesContent).value[0].id
-        
-            Write-Host "CompanyId $companyId"
-            
-            # Get existing extensions
-            $getExtensions = Invoke-WebRequest `
-                -Method Get `
-                -Uri "$baseUrl/microsoft/automation/v1.0/companies($companyId)/extensions" `
-                -Credential $credential
-            
-            $extensions = (ConvertFrom-Json $getExtensions.Content).value | Sort-Object -Property DisplayName
-            
-            Write-Host "Extensions:"
-            $extensions | % { Write-Host " - $($_.DisplayName) v$($_.versionMajor).$($_.versionMinor) installed=$($_.isInstalled)" }
-            
-            # Publish and install extension
-            Write-Host "Publishing and installing $appFolder"
-            Invoke-WebRequest `
-                -Method Patch `
-                -Uri "$baseUrl/microsoft/automation/v1.0/companies($companyId)/extensionUpload(0)/content" `
-                -Credential $credential `
-                -ContentType "application/octet-stream" `
-                -Headers @{"If-Match" = "*" } `
-                -InFile $appFile | Out-Null
-            
-            Write-Host ""
-            Write-Host "Deployment status:"
-            
-            # Monitor publishing progress
-            $inprogress = $true
-            $completed = $false
-            $errCount = 0
-            while ($inprogress) {
-                Start-Sleep -Seconds 5
-                try {
-                    $extensionDeploymentStatusResponse = Invoke-WebRequest `
-                        -Method Get `
-                        -Uri "$baseUrl/microsoft/automation/v1.0/companies($companyId)/extensionDeploymentStatus" `
-                        -Credential $credential
-                    $extensionDeploymentStatuses = (ConvertFrom-Json $extensionDeploymentStatusResponse.Content).value
-                    $inprogress = $false
-                    $completed = $true
-                    $extensionDeploymentStatuses | Where-Object { $_.publisher -eq $appJson.publisher -and $_.name -eq $appJson.name -and $_.appVersion -eq $appJson.version } | % {
-                        Write-Host " - $($_.name) $($_.appVersion) $($_.operationType) $($_.status)"
-                        if ($_.status -eq "InProgress") { $inProgress = $true }
-                        if ($_.status -ne "Completed") { $completed = $false }
-                    }
-                    $errCount = 0
-                }
-                catch {
-                    if ($errCount++ -gt 3) {
-                        $inprogress = $false
-                    }
-                }
-            }
-            if (!$completed) {
-                throw "Unable to publish app"
-            }
+            $environment = $deployment.DeployToName;
+            $tenantId = $deployment.DeployToTenants | Select-Object -First 1
+            $authContext = New-BcAuthContext -clientID $clientId -clientSecret $clientSecret -tenantID $tenantId -scopes "https://api.businesscentral.dynamics.com/.default"
+            Publish-PerTenantExtensionApps -bcAuthContext $authContext -environment $environment -appFiles $appFile -Verbose
         }
         elseif ($deploymentType -eq "container" -and ($deployment.DeployToTenants).Count -eq 0) {
             $containerName = $deployment.DeployToName
