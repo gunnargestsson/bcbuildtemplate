@@ -226,7 +226,7 @@ stages:
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
       env:
         ClientId: $(ClientId)
-        RefreshToken: $(RefreshToken)
+        ClientSecret: $(ClientSecret)
       inputs:
         targetType: filePath
         filePath: 'bcbuildtemplate\scripts\Deploy-App.ps1'
