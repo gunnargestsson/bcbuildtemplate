@@ -105,8 +105,6 @@ foreach ($deployment in $deployments) {
         elseif ($deploymentType -eq "onlineTenant") {
             $environment = $deployment.DeployToName;
             $tenantId = $deployment.DeployToTenants | Select-Object -First 1
-            if ($clientSecret -is [String]) { $clientSecret = ConvertTo-SecureString -String $clientSecret -AsPlainText -Force }
-            if ($clientSecret -isnot [SecureString]) { throw "ClientSecret needs to be a SecureString or a String" }
             Write-Host "Online Tenant deployment to https://businesscentral.dynamics.com/${tenantId}/${environment}/"
             $authContext = New-BcAuthContext -clientID $clientId -refreshToken $refreshToken -tenantID $tenantId -scopes "https://api.businesscentral.dynamics.com/.default" -includeDeviceLogin
             Publish-PerTenantExtensionApps -bcAuthContext $authContext -environment $environment -appFiles $appFile -Verbose
