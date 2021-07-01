@@ -9,6 +9,7 @@
         - CodeSignPfxFile
         - CodeSignPfxPassword
         - LicenseFile
+        - TestLicenseFile
         - Password
     - InsiderBuilds
         - InsiderSasToken

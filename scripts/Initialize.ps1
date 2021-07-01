@@ -51,6 +51,13 @@ else {
     $licenseFile = $null
 }
 
+if ($userProfile.testLicenseFilePath) {
+    $testLicenseFile = try { $userProfile.testLicenseFilePath | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $userProfile.testLicenseFilePath -AsPlainText -Force }
+}
+else {
+    $testLlicenseFile = $null
+}
+
 $securePassword = try { $userProfile.Password | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $userProfile.Password -AsPlainText -Force }
 $credential = New-Object PSCredential($userProfile.Username, $securePassword)
 
