@@ -118,6 +118,8 @@ stages:
     - task: PowerShell@2
       displayName: 'Publish Test App'
       condition: and(succeeded(),ne(variables['testFolders'],''),eq(variables['TestLicenseFile'],''))
+      env:
+        LicenseFile: $(LicenseFile)
       inputs:
         targetType: filePath
         filePath: 'bcbuildtemplate\scripts\Publish-App.ps1'
