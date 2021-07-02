@@ -106,7 +106,7 @@ stages:
     
     - task: PowerShell@2
       displayName: 'Publish Test App'
-      condition: and(succeeded(),ne(variables['testFolders'],''))
+      condition: and(succeeded(),ne(variables['testFolders'],''),ne(variables['TestLicenseFile'],''))
       env:
         LicenseFile: $(TestLicenseFile)
       inputs:
@@ -114,7 +114,16 @@ stages:
         filePath: 'bcbuildtemplate\scripts\Publish-App.ps1'
         arguments: '-appFolders "$(testFolders)" -skipVerification'
         failOnStderr: true
-     
+
+    - task: PowerShell@2
+      displayName: 'Publish Test App'
+      condition: and(succeeded(),ne(variables['testFolders'],''),eq(variables['TestLicenseFile'],''))
+      inputs:
+        targetType: filePath
+        filePath: 'bcbuildtemplate\scripts\Publish-App.ps1'
+        arguments: '-appFolders "$(testFolders)" -skipVerification'
+        failOnStderr: true
+
     - task: PowerShell@2
       displayName: 'Set Test Secret'
       condition: and(succeeded(),ne(variables['TestSecret'],''))
