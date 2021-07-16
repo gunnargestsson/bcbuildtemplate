@@ -10,7 +10,7 @@ parameters:
 - name: azureSubscription
   displayName: 'Specify azure subscription name'
   type: string
-  default: 'Visual Studio Ultimate with MSDN (98d9d1ef-c54f-4ae3-b8d2-c8d130103a6c)'
+  default: 'My Azure Service Connection'
 
 stages:
 - stage: Build
@@ -105,7 +105,7 @@ stages:
         failOnStderr: true
     
     - task: PowerShell@2
-      displayName: 'Publish Test App'
+      displayName: 'Publish Test App using Test License File'
       condition: and(succeeded(),ne(variables['testFolders'],''),ne(variables['TestLicenseFile'],''))
       env:
         LicenseFile: $(TestLicenseFile)
@@ -116,7 +116,7 @@ stages:
         failOnStderr: true
 
     - task: PowerShell@2
-      displayName: 'Publish Test App'
+      displayName: 'Publish Test App using Build License File'
       condition: and(succeeded(),ne(variables['testFolders'],''),eq(variables['TestLicenseFile'],''))
       env:
         LicenseFile: $(LicenseFile)
