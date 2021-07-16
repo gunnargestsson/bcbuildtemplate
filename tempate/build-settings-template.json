@@ -1,5 +1,6 @@
 {
     "name": "BLOB",
+    "imageName": "ci",
     "appFolders": "app",
     "testFolders": "test",
     "dependencies": [],
