@@ -23,4 +23,5 @@ extends:
     version: "current"
     appVersion: "17.2"
     azureSubscription: ""
+    createRuntimePackages: true
 

@@ -11,6 +11,10 @@ parameters:
   displayName: 'Specify azure subscription name'
   type: string
   default: 'My Azure Service Connection'
+- name: createRuntimePackages
+  displayName: 'Specify boolean value for runtime package creation'
+  type: boolean
+  default: true
 
 stages:
 - stage: Build
@@ -23,7 +27,6 @@ stages:
       platform: x64
       appBuild: $[counter(variables['appVersion'],0)]
       appRevision: 0
-      createRuntimePackages: True
       skipComponentGovernanceDetection: True
 
     steps:

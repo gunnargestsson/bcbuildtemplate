@@ -20,4 +20,5 @@ extends:
     version: "nextminor"
     appVersion: "17.2"
     azureSubscription: ""
+    createRuntimePackages: false
 
