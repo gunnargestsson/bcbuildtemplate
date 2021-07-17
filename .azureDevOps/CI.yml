@@ -14,7 +14,7 @@ parameters:
 - name: createRuntimePackages
   displayName: 'Specify boolean value for runtime package creation'
   type: boolean
-  default: true
+  default: True
 
 stages:
 - stage: Build
