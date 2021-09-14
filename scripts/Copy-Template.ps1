@@ -4,6 +4,12 @@ Param(
 )
 
 $tempFolder = Join-Path $AgentToolsDirectory 'bcbuildtemplate'
+if (Test-Path -Path $tempFolder -PathType Container) {
+    Remove-Item -Path $tempFolder -Force
+}
+if (!(Test-Path -Path $tempFolder -PathType Leaf)) {
+    New-Item -Path $tempFolder -ItemType Directory 
+}
 Write-Host "Set templateFolder = $tempFolder"
 Write-Host "##vso[task.setvariable variable=templateFolder]$tempFolder"
 
