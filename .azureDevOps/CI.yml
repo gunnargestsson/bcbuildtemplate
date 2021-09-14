@@ -227,9 +227,19 @@ stages:
     cancelTimeoutInMinutes: 10
     variables:           
       platform: x64
+      appBuild: $[counter(variables['appVersion'],0)]
+      appRevision: 0
       skipComponentGovernanceDetection: True
 
     steps:
+    - task: PowerShell@2
+      displayName: 'Reading Settings'
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
+        arguments: '-appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
+        failOnStderr: true
+
     - task: PowerShell@2
       displayName: 'Validate App'
       condition: succeeded()
@@ -251,6 +261,8 @@ stages:
     cancelTimeoutInMinutes: 10
     variables:           
       platform: x64
+      appBuild: $[counter(variables['appVersion'],0)]
+      appRevision: 0
       skipComponentGovernanceDetection: True
 
     steps:
@@ -285,9 +297,19 @@ stages:
     cancelTimeoutInMinutes: 10
     variables:           
       platform: x64
+      appBuild: $[counter(variables['appVersion'],0)]
+      appRevision: 0
       skipComponentGovernanceDetection: True
 
     steps:
+    - task: PowerShell@2
+      displayName: 'Reading Settings'
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
+        arguments: '-appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
+        failOnStderr: true
+
     - task: PowerShell@2
       displayName: 'Upgrade Microsoft Apps'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
