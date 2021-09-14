@@ -43,6 +43,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: 'bcbuildtemplate\scripts\Copy-Template.ps1'
+        arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
         failOnStderr: true
 
     - task: PowerShell@2
@@ -202,6 +203,20 @@ stages:
           foreach ($folder in ('$(testFolders)'.Split(','))) {
             Remove-Item (Join-Path '$(Build.ArtifactStagingDirectory)' $folder) -Recurse -Force
           }
+
+    - task: PowerShell@2
+      displayName: 'Remove Build Container'
+      condition: ne(variables['reuseContainer'],'True')
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-Container.ps1'
+
+    - task: PowerShell@2
+      displayName: 'Remove Unused Container Image'
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
+
         
 - stage: Validation
   dependsOn: Build
@@ -293,32 +308,3 @@ stages:
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Deploy-App.ps1'
         arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -appFolders "$(appFolders)" -branchName "$(Build.SourceBranch)"'
         failOnStderr: true
-
-- stage: CleanUp
-  jobs:
-  - job: CleanUp
-    timeoutInMinutes: 360
-    cancelTimeoutInMinutes: 10
-    variables:           
-      platform: x64
-      skipComponentGovernanceDetection: True
-
-    steps:
-    - task: PowerShell@2
-      displayName: 'Remove Build Container'
-      condition: ne(variables['reuseContainer'],'True')
-      inputs:
-        targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-Container.ps1'
-
-    - task: PowerShell@2
-      displayName: 'Remove Unused Container Image'
-      inputs:
-        targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
-
-    - task: PowerShell@2
-      displayName: 'Remove Template Files'
-      inputs:
-        targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-Template.ps1'
