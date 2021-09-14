@@ -40,72 +40,7 @@ foreach ($deployment in $deployments) {
         $appJsonFile = (Get-Item (Join-Path $artifactsFolder "$appFolder\app.json")).FullName
         $appJson = Get-Content $appJsonFile | ConvertFrom-Json
 
-        if ($deploymentType -eq "AzureVM") {
-            $azureVM = $deployment.DeployToName
-            Write-Host "Connecting to ${azureVM}"
-
-            . (Join-Path $PSScriptRoot "SessionFunctions.ps1")
-        
-            $useSession = $true
-            try { 
-                $myip = ""; $myip = (Invoke-WebRequest -Uri http://ifconfig.me/ip).Content
-                $targetip = (Resolve-DnsName $azureVM).IP4Address
-                if ($myip -eq $targetip) {
-                    $useSession = $false
-                }
-            }
-            catch { }
-        
-            $vmSession = $null
-            $tempAppFile = ""
-            try {
-        
-                if ($useSession) {
-                    $vmSession = New-DeploymentRemoteSession -HostName $azureVM -Credential $vmCredential
-                    $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
-                    $sessionArgument = @{ "Session" = $vmSession }
-                }
-                else {
-                    $tempAppFile = $appFile
-                    $sessionArgument = @{ }
-                }
-        
-                Invoke-Command @sessionArgument -ScriptBlock { Param($containerName, $appFile, $credential)
-                    $ErrorActionPreference = "Stop"
-        
-                    $appExists = $false
-                    $apps = Get-BCContainerAppInfo $containerName -tenantSpecificProperties | Sort-Object -Property Name
-                    Write-Host "Extensions:"
-                    $apps | % {
-                        Write-Host " - $($_.Name) v$($_.version) installed=$($_.isInstalled)"
-                        if ($_.publisher -eq $appJson.publisher -and $_.name -eq $appjson.name -and $_.appid -eq $appjson.id) {
-                            UnPublish-BCContainerApp -containerName $containerName -appName $_.name -publisher $_.publisher -version $_.Version -unInstall -force
-                            $appExists = $true
-                        }
-                    }
-
-                    Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -sync -scope Tenant -SkipVerification
-                    if ($appExists) {
-                        Start-BCContainerAppDataUpgrade -containerName $containerName -appName $appJson.name -appVersion $appJson.version
-                    }
-
-                    Install-BCContainerApp -containerName $containerName -appName $appJson.name -appVersion $appJson.version
-        
-                } -ArgumentList $containerName, $tempAppFile, $credential
-            }
-            catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
-                throw "Could not connect to $azureVM. Maybe port 5986 (WinRM) is not open for your IP address $myip"
-            }
-            finally {
-                if ($vmSession) {
-                    if ($tempAppFile) {
-                        try { RemoveFileFromSession -session $vmSession -filename $tempAppFile } catch {}
-                    }
-                    Remove-PSSession -Session $vmSession
-                }
-            }
-        }
-        elseif ($deploymentType -eq "onlineTenant") {
+        if ($deploymentType -eq "onlineTenant") {
             $environment = $deployment.DeployToName;
             $tenantId = $deployment.DeployToTenants | Select-Object -First 1
             Write-Host "Online Tenant deployment to https://businesscentral.dynamics.com/${tenantId}/${environment}/"
@@ -396,7 +331,7 @@ foreach ($deployment in $deployments) {
                         Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $CurrentApp.Name | Where-Object -Property IsInstalled -EQ $false | ForEach-Object {
                             Write-Host "Removing unused app v$($_.Version)"
                             try {
-                                Unpublish-NAVApp -ServerInstance $ServerInstance -Name $_.Name -Publisher $_.Publisher -Version $_.Version -Tenant $Tenant
+                                Unpublish-NAVApp -ServerInstance $ServerInstance -Name $_.Name -Publisher $_.Publisher -Version $_.Version -Tenant $Tenant -Scope Tenant
                             }
                             catch {
                                 Write-Host "Unable to unpublish $($app.Name) v$($app.Version)"
@@ -435,7 +370,7 @@ foreach ($deployment in $deployments) {
                             if ($NoOfNewerApps -gt 0 -and $IsInstalled -eq $false) {
                                 Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
                                 try {
-                                    Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version -Tenant $Tenant
+                                    Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version -Tenant $Tenant -Scope Tenant
                                 }
                                 catch {
                                     Write-Host "Unable to unpublish $($app.Name) v$($app.Version)"
