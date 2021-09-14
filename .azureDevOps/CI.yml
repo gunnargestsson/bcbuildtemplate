@@ -217,6 +217,20 @@ stages:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
 
+- stage: Validation
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: AzureBlob
+    timeoutInMinutes: 360
+    cancelTimeoutInMinutes: 10
+    variables:           
+      platform: x64
+      appBuild: $[counter(variables['appVersion'],0)]
+      appRevision: 0
+      skipComponentGovernanceDetection: True
+
+    steps:
     - task: PowerShell@2
       displayName: 'Validate App'
       condition: succeeded()
@@ -226,11 +240,12 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Validate-App.ps1'
-        arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -appFolders "$(appFolders)" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
+        arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
         failOnStderr: true                  
 
+
 - stage: AzureBlob
-  dependsOn: Build
+  dependsOn: Validation
   condition: succeeded()
   jobs:
   - job: AzureBlob
@@ -266,7 +281,7 @@ stages:
         BlobPrefix: 'Runtime\$(Build.Repository.Name)'
 
 - stage: Deployment
-  dependsOn: Build
+  dependsOn: Validation
   condition: succeeded()
   jobs:
   - job: Deployment
