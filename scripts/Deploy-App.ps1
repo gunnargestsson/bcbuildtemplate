@@ -331,7 +331,7 @@ foreach ($deployment in $deployments) {
                         Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $CurrentApp.Name | Where-Object -Property IsInstalled -EQ $false | ForEach-Object {
                             Write-Host "Removing unused app v$($_.Version)"
                             try {
-                                Unpublish-NAVApp -ServerInstance $ServerInstance -Name $_.Name -Publisher $_.Publisher -Version $_.Version -Tenant $Tenant -Scope Tenant
+                                Unpublish-NAVApp -ServerInstance $ServerInstance -Name $_.Name -Publisher $_.Publisher -Version $_.Version -Tenant $Tenant
                             }
                             catch {
                                 Write-Host "Unable to unpublish $($_.Name) v$($_.Version) : $($PSItem.Exception.Message)"
@@ -370,7 +370,7 @@ foreach ($deployment in $deployments) {
                             if ($NoOfNewerApps -gt 0 -and $IsInstalled -eq $false) {
                                 Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
                                 try {
-                                    Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version -Tenant $Tenant -Scope Tenant
+                                    Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version -Tenant $Tenant
                                 }
                                 catch {
                                     Write-Host "Unable to unpublish $($app.Name) v$($app.Version) : $($PSItem.Exception.Message)"
