@@ -4,10 +4,10 @@ Param(
 )
 
 $tempFolder = Join-Path $AgentToolsDirectory 'bcbuildtemplate'
-if (Test-Path -Path $tempFolder -PathType Container) {
+if (Test-Path -Path $tempFolder -PathType Leaf) {
     Remove-Item -Path $tempFolder -Force
 }
-if (!(Test-Path -Path $tempFolder -PathType Leaf)) {
+if (!(Test-Path -Path $tempFolder -PathType Container)) {
     New-Item -Path $tempFolder -ItemType Directory 
 }
 Write-Host "Set templateFolder = $tempFolder"
