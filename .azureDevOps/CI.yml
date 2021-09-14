@@ -231,6 +231,11 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - task: DownloadPipelineArtifact@2
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
+      inputs:
+        path: '$(Build.ArtifactStagingDirectory)' 
+            
     - task: PowerShell@2
       displayName: 'Validate App'
       condition: succeeded()
@@ -258,6 +263,11 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - task: DownloadPipelineArtifact@2
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
+      inputs:
+        path: '$(Build.ArtifactStagingDirectory)' 
+
     - task: AzureFileCopy@4
       displayName: 'Copy Apps to Azure Blob'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
@@ -294,13 +304,9 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
-    - task: PowerShell@2
-      displayName: 'Reading Settings'
+    - task: DownloadPipelineArtifact@2
       inputs:
-        targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
-        arguments: '-appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
-        failOnStderr: true
+        path: '$(Build.ArtifactStagingDirectory)' 
 
     - task: PowerShell@2
       displayName: 'Upgrade Microsoft Apps'
