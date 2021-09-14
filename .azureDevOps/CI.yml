@@ -197,6 +197,31 @@ stages:
           }
 
     - task: PowerShell@2
+      displayName: 'Remove Build Container'
+      condition: ne(variables['reuseContainer'],'True')
+      inputs:
+        targetType: filePath
+        filePath: 'bcbuildtemplate\scripts\Remove-Container.ps1'
+
+    - task: PowerShell@2
+      displayName: 'Remove Unused Container Image'
+      inputs:
+        targetType: filePath
+        filePath: 'bcbuildtemplate\scripts\Remove-OldDockerImages.ps1'
+        
+- stage: Validation
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: Validation
+    timeoutInMinutes: 360
+    cancelTimeoutInMinutes: 10
+    variables:           
+      platform: x64
+      skipComponentGovernanceDetection: True
+
+    steps:
+    - task: PowerShell@2
       displayName: 'Validate App'
       condition: succeeded()
       env:
@@ -208,6 +233,18 @@ stages:
         arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -appFolders "$(appFolders)" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
         failOnStderr: true            
 
+- stage: Azure Blob
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: Azure Blob
+    timeoutInMinutes: 360
+    cancelTimeoutInMinutes: 10
+    variables:           
+      platform: x64
+      skipComponentGovernanceDetection: True
+
+    steps:
     - task: AzureFileCopy@4
       displayName: 'Copy Apps to Azure Blob'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
@@ -230,6 +267,18 @@ stages:
         ContainerName: '$(azureContainerName)'
         BlobPrefix: 'Runtime\$(Build.Repository.Name)'
 
+- stage: Deployment
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: Deployment
+    timeoutInMinutes: 360
+    cancelTimeoutInMinutes: 10
+    variables:           
+      platform: x64
+      skipComponentGovernanceDetection: True
+
+    steps:
     - task: PowerShell@2
       displayName: 'Upgrade Microsoft Apps'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
@@ -251,16 +300,3 @@ stages:
         arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -appFolders "$(appFolders)" -branchName "$(Build.SourceBranch)"'
         failOnStderr: true
             
-    - task: PowerShell@2
-      displayName: 'Remove Build Container'
-      condition: ne(variables['reuseContainer'],'True')
-      inputs:
-        targetType: filePath
-        filePath: 'bcbuildtemplate\scripts\Remove-Container.ps1'
-
-    - task: PowerShell@2
-      displayName: 'Remove Unused Container Image'
-      inputs:
-        targetType: filePath
-        filePath: 'bcbuildtemplate\scripts\Remove-OldDockerImages.ps1'
-        
