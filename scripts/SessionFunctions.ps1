@@ -89,7 +89,7 @@ function CopyFoldersToSession {
     )
 
     $tempFolder = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
-    $subFolders | % {
+    $subFolders | ForEach-Object {
         Copy-Item -Path (Join-Path $baseFolder $_) -Destination (Join-Path $tempFolder "$_\") -Recurse -Exclude $exclude
     }
 
