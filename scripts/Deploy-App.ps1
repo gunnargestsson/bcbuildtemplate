@@ -16,7 +16,7 @@
     
 )
 
-Write-Host "Deploying branch ${branchName}..."
+Write-Host "Deploying apps from ${artifactFolder} to branch ${branchName} ..."
 $settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
 if ($clientId -is [string]) {
     if ($clientSecret -is [String]) { $clientSecret = ConvertTo-SecureString -String $clientSecret -AsPlainText -Force }
