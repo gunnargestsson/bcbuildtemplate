@@ -49,7 +49,7 @@ stages:
       displayName: 'Reading Settings'
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Read-Settings.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
         arguments: '-appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
         failOnStderr: true
     
@@ -57,7 +57,7 @@ stages:
       displayName: 'Install bccontainerhelper'
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Install-bccontainerhelper.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Install-bccontainerhelper.ps1'
         failOnStderr: true
         
     - task: PowerShell@2
@@ -68,7 +68,7 @@ stages:
         InsiderSasToken: $(InsiderSasToken)
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Create-Container.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Create-Container.ps1'
         failOnStderr: true
 
     - task: PowerShell@2
@@ -77,7 +77,7 @@ stages:
         Password: $(Password)
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Compile-App.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
         arguments: '-appFolders "$(appFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)"'
         failOnStderr: true
     
@@ -88,7 +88,7 @@ stages:
         Password: $(Password)
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Compile-App.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
         arguments: '-appFolders "$(testFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)"'
         failOnStderr: true
     
@@ -100,7 +100,7 @@ stages:
         codeSignPfxPassword: $(CodeSignPfxPassword)
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Sign-App.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Sign-App.ps1'
         arguments: '-appFolders "$(appFolders)"'
         failOnStderr: true
     
@@ -110,7 +110,7 @@ stages:
         LicenseFile: $(LicenseFile)
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Publish-App.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
         arguments: '-appFolders "$(appFolders)" -skipVerification:([String]::IsNullOrEmpty($CodeSignPfxPassword))'
         failOnStderr: true
     
@@ -121,7 +121,7 @@ stages:
         LicenseFile: $(TestLicenseFile)
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Publish-App.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
         arguments: '-appFolders "$(testFolders)" -skipVerification'
         failOnStderr: true
 
@@ -132,7 +132,7 @@ stages:
         LicenseFile: $(LicenseFile)
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Publish-App.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
         arguments: '-appFolders "$(testFolders)" -skipVerification'
         failOnStderr: true
 
@@ -143,7 +143,7 @@ stages:
         TestSecret: $(TestSecret)
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Set-TestSecret.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Set-TestSecret.ps1'
         failOnStderr: true
 
     - task: PowerShell@2
@@ -154,7 +154,7 @@ stages:
         TestParameters: $(TestParameters)
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Run-Tests.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Run-Tests.ps1'
         arguments: '-appFolders "$(testFolders)"'
         failOnStderr: true
       
@@ -171,7 +171,7 @@ stages:
       condition: and(succeeded(),eq(variables['createRuntimePackages'],'True'))
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Get-AppRuntimePackage.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Get-AppRuntimePackage.ps1'
         arguments: '-appFolders "$(appFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)"'
         failOnStderr: true
 
@@ -183,7 +183,7 @@ stages:
         codeSignPfxPassword: $(CodeSignPfxPassword)
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Sign-App.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Sign-App.ps1'
         arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)\RuntimePackages"'
         failOnStderr: true
         
@@ -223,12 +223,12 @@ stages:
         InsiderSasToken: $(InsiderSasToken)
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Validate-App.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Validate-App.ps1'
         arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -appFolders "$(appFolders)" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
         failOnStderr: true            
 
 - stage: AzureBlob
-  dependsOn: Build
+  dependsOn: Validation
   condition: succeeded()
   jobs:
   - job: AzureBlob
@@ -262,7 +262,7 @@ stages:
         BlobPrefix: 'Runtime\$(Build.Repository.Name)'
 
 - stage: Deployment
-  dependsOn: Build
+  dependsOn: Validation
   condition: succeeded()
   jobs:
   - job: Deployment
@@ -278,7 +278,7 @@ stages:
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Upgrade-MicrosoftApps.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Upgrade-MicrosoftApps.ps1'
         arguments: '-branchName "$(Build.SourceBranch)"'
         failOnStderr: true
 
@@ -290,12 +290,11 @@ stages:
         ClientSecret: $(ClientSecret)
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Deploy-App.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Deploy-App.ps1'
         arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -appFolders "$(appFolders)" -branchName "$(Build.SourceBranch)"'
         failOnStderr: true
 
 - stage: CleanUp
-  dependsOn: Build
   jobs:
   - job: CleanUp
     timeoutInMinutes: 360
@@ -310,16 +309,16 @@ stages:
       condition: ne(variables['reuseContainer'],'True')
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Remove-Container.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-Container.ps1'
 
     - task: PowerShell@2
       displayName: 'Remove Unused Container Image'
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Remove-OldDockerImages.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
 
     - task: PowerShell@2
       displayName: 'Remove Template Files'
       inputs:
         targetType: filePath
-        filePath: '$(templateFolder)\Remove-Template.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-Template.ps1'
