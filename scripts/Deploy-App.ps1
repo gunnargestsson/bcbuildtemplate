@@ -334,7 +334,7 @@ foreach ($deployment in $deployments) {
                                 Unpublish-NAVApp -ServerInstance $ServerInstance -Name $_.Name -Publisher $_.Publisher -Version $_.Version -Tenant $Tenant -Scope Tenant
                             }
                             catch {
-                                Write-Host "Unable to unpublish $($app.Name) v$($app.Version)"
+                                Write-Host "Unable to unpublish $($_.Name) v$($_.Version) : $($PSItem.Exception.Message)"
                             }
                         }
                         Write-Host "Publishing v$($CurrentApp.Version)"    
@@ -373,7 +373,7 @@ foreach ($deployment in $deployments) {
                                     Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version -Tenant $Tenant -Scope Tenant
                                 }
                                 catch {
-                                    Write-Host "Unable to unpublish $($app.Name) v$($app.Version)"
+                                    Write-Host "Unable to unpublish $($app.Name) v$($app.Version) : $($PSItem.Exception.Message)"
                                 }
                             }
                         }         
