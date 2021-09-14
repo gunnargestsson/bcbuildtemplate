@@ -160,13 +160,13 @@ if (!$restoreDb) {
     if ($settings.includeTestRunnerOnly) {
         Import-TestToolkitToBcContainer -containerName $containerName -includeTestRunnerOnly 
     }
-    elseif ($settings.includeTestLibrariesOnly) {
+    if ($settings.includeTestLibrariesOnly) {
         Import-TestToolkitToBcContainer -containerName $containerName -includeTestLibrariesOnly 
     }
-    elseif ($settings.includeTestFrameworkOnly) {
+    if ($settings.includeTestFrameworkOnly) {
         Import-TestToolkitToBcContainer -containerName $containerName -includeTestFrameworkOnly
     }
-    elseif ($settings.testToolkitCountry) {
+    if ($settings.testToolkitCountry) {
         Import-TestToolkitToBcContainer -containerName $containerName -testToolkitCountry $settings.testToolkitCountry
     }
     
