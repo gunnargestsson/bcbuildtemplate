@@ -232,13 +232,13 @@ stages:
 
     steps:
     - task: DownloadPipelineArtifact@2
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
       inputs:
         path: '$(Build.ArtifactStagingDirectory)' 
             
     - task: PowerShell@2
       displayName: 'Validate App'
-      condition: succeeded()
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
       env:
         LicenseFile: $(LicenseFile)
         InsiderSasToken: $(InsiderSasToken)
