@@ -92,7 +92,7 @@ if ($buildenv -eq "Local") {
     $additionalParameters = @("--volume ""${workspaceFolder}:C:\Source""") 
 }
 elseif ($buildenv -eq "AzureDevOps") {
-    $segments = "$PSScriptRoot".Split('\')
+    $segments = "$buildProjectFolder".Split('\')
     $rootFolder = "$($segments[0])\$($segments[1])"
     $additionalParameters = @(
         "--volume ""$($rootFolder):C:\Agent"""        
