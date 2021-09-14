@@ -1,9 +1,6 @@
 ﻿Param(
     [Parameter(Mandatory = $true)]
     [string] $artifactsFolder,
-
-    [Parameter(Mandatory = $true)]
-    [string] $appFolders,
     
     [Parameter(Mandatory = $true)]
     [string] $branchName,
@@ -26,6 +23,7 @@ if ($clientId -is [string]) {
     if ($clientSecret -isnot [SecureString]) { throw "ClientSecret needs to be a SecureString or a String" }
     $vmCredential = New-Object System.Management.Automation.PSCredential($clientId, $clientSecret);
 }
+$appFolders = $settings.appFolders
 $deployments = @()
 $deployments += $settings.deployments | Where-Object { $_.branch -eq $branchName }
 foreach ($deployment in $deployments) {

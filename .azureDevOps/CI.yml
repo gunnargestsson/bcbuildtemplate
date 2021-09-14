@@ -328,5 +328,5 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Deploy-App.ps1'
-        arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -appFolders "$(appFolders)" -branchName "$(Build.SourceBranch)"'
+        arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)"'
         failOnStderr: true
