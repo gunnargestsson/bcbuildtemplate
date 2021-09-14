@@ -221,6 +221,10 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - checkout: Template
+      clean: false
+      path: 's\bcbuildtemplate'
+
     - task: PowerShell@2
       displayName: 'Validate App'
       condition: succeeded()
@@ -245,6 +249,10 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - checkout: Template
+      clean: false
+      path: 's\bcbuildtemplate'
+
     - task: AzureFileCopy@4
       displayName: 'Copy Apps to Azure Blob'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
@@ -279,6 +287,10 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - checkout: Template
+      clean: false
+      path: 's\bcbuildtemplate'
+
     - task: PowerShell@2
       displayName: 'Upgrade Microsoft Apps'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
