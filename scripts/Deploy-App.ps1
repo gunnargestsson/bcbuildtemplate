@@ -21,6 +21,11 @@
 
 Write-Host "Deploying branch ${branchName}..."
 $settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
+if ($clientId -is [string]) {
+    if ($clientSecret -is [String]) { $clientSecret = ConvertTo-SecureString -String $clientSecret -AsPlainText -Force }
+    if ($clientSecret -isnot [SecureString]) { throw "ClientSecret needs to be a SecureString or a String" }
+    $vmCredential = New-Object System.Management.Automation.PSCredential($clientId, $clientSecret);
+}
 $deployments = @()
 $deployments += $settings.deployments | Where-Object { $_.branch -eq $branchName }
 foreach ($deployment in $deployments) {
@@ -105,8 +110,6 @@ foreach ($deployment in $deployments) {
         elseif ($deploymentType -eq "onlineTenant") {
             $environment = $deployment.DeployToName;
             $tenantId = $deployment.DeployToTenants | Select-Object -First 1
-            if ($clientSecret -is [String]) { $clientSecret = ConvertTo-SecureString -String $clientSecret -AsPlainText -Force }
-            if ($clientSecret -isnot [SecureString]) { throw "ClientSecret needs to be a SecureString or a String" }
             Write-Host "Online Tenant deployment to https://businesscentral.dynamics.com/${tenantId}/${environment}/"
             $authContext = New-BcAuthContext -clientID $clientId -clientSecret $clientSecret -tenantID $tenantId -scopes "https://api.businesscentral.dynamics.com/.default"
             Publish-PerTenantExtensionApps -bcAuthContext $authContext -environment $environment -appFiles $appFile -Verbose
@@ -243,7 +246,12 @@ foreach ($deployment in $deployments) {
             try {
     
                 if ($useSession) {
-                    $vmSession = New-DeploymentRemoteSession -HostName $VM
+                    if ($vmCredential) {
+                        $vmSession = New-DeploymentRemoteSession -HostName $VM  -Credential $vmCredential
+                    }
+                    else {
+                        $vmSession = New-DeploymentRemoteSession -HostName $VM
+                    }
                     $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
                     $sessionArgument = @{ "Session" = $vmSession }
                 }
@@ -355,7 +363,12 @@ foreach ($deployment in $deployments) {
             try {
     
                 if ($useSession) {
-                    $vmSession = New-DeploymentRemoteSession -HostName $VM
+                    if ($vmCredential) {
+                        $vmSession = New-DeploymentRemoteSession -HostName $VM  -Credential $vmCredential
+                    }
+                    else {
+                        $vmSession = New-DeploymentRemoteSession -HostName $VM
+                    }
                     $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
                     $sessionArgument = @{ "Session" = $vmSession }
                 }
