@@ -434,7 +434,7 @@ foreach ($deployment in $deployments) {
                             $IsInstalled = ($apps | Where-Object -Property Version -EQ $app.Version).IsInstalled
                             Write-Host "No. of newer apps: ${NoOfNewerApps}"
                             Write-Host "Installed: ${IsInstalled}"    
-                            if ($NoOfApps -gt 0 -or $installedApp -ne $null) {
+                            if ($NoOfNewerApps -gt 0 -and $IsInstalled -eq $false) {
                                 Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
                                 try {
                                     Unpublish-NAVApp -ServerInstance $ServerInstance -Name $app.Name -Publisher $app.Publisher -Version $app.Version -Tenant $Tenant
