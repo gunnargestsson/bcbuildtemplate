@@ -188,12 +188,6 @@ stages:
         arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)\RuntimePackages"'
         failOnStderr: true
         
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifacts'
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: '${{ parameters.appVersion }}'
-
     - task: PowerShell@1
       displayName: Remove Test App from Artifact Staging Directory
       condition: and(succeeded(),ne(variables['testFolders'],''))
@@ -203,6 +197,12 @@ stages:
           foreach ($folder in ('$(testFolders)'.Split(','))) {
             Remove-Item (Join-Path '$(Build.ArtifactStagingDirectory)' $folder) -Recurse -Force
           }
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifacts'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: '${{ parameters.appVersion }}'
 
     - task: PowerShell@2
       displayName: 'Remove Build Container'
@@ -221,7 +221,7 @@ stages:
   dependsOn: Build
   condition: succeeded()
   jobs:
-  - job: AzureBlob
+  - job: Validation
     timeoutInMinutes: 360
     cancelTimeoutInMinutes: 10
     variables:           
@@ -245,7 +245,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Validate-App.ps1'
-        arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
+        arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
         failOnStderr: true                  
 
 
@@ -272,7 +272,7 @@ stages:
       displayName: 'Copy Apps to Azure Blob'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
       inputs:
-        SourcePath: '$(Build.ArtifactStagingDirectory)\*\*.app'
+        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
         Destination: AzureBlob
         storage: '$(azureStorageAccount)'
@@ -283,7 +283,7 @@ stages:
       displayName: 'Copy Runtime Apps to Azure Blob'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
       inputs:
-        SourcePath: '$(Build.ArtifactStagingDirectory)\RuntimePackages\*\*.app'
+        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}\RuntimePackages\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
         Destination: AzureBlob
         storage: '$(azureStorageAccount)'
@@ -326,5 +326,5 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Deploy-App.ps1'
-        arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)"'
+        arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}" -branchName "$(Build.SourceBranch)"'
         failOnStderr: true

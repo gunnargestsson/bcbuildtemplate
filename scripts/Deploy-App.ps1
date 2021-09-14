@@ -1,7 +1,7 @@
 ﻿Param(
     [Parameter(Mandatory = $true)]
     [string] $artifactsFolder,
-    
+
     [Parameter(Mandatory = $true)]
     [string] $branchName,
 

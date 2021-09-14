@@ -6,11 +6,13 @@
 1.	Add Current.yml, NextMinor.yml, NextMinor.yml to your respository
 2.	Add Variable Library for Build parameters
     - BuildVariables
-        - CodeSignPfxFile
-        - CodeSignPfxPassword
+        - CodeSignPfxFile (optional for signing the apps)
+        - CodeSignPfxPassword (optional for signing the apps)
         - LicenseFile
-        - TestLicenseFile
+        - TestLicenseFile (optional if unit tests require development license and build is using customer license)
         - Password
+        - ClientId (optional for online tenant deployment and host deployment)
+        - ClientSecret (optional for online tenant deployment and host deployment)
     - InsiderBuilds
         - InsiderSasToken
 3.	Create DevOps pipeline
@@ -28,7 +30,7 @@ To upload artifacts to Azure Blob container
 -  Add Storage Account and Container name to build-settings.json
 
 # Build Agent
-Build Agent must have Docker and Azure compatability
+Build Agent must have Docker and Azure compatibility
 - Install-Module AZ
 
 # Update AzCopy.exe
