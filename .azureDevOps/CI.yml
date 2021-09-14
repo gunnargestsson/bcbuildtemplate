@@ -233,11 +233,11 @@ stages:
         arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)" -appFolders "$(appFolders)" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
         failOnStderr: true            
 
-- stage: Azure Blob
+- stage: AzureBlob
   dependsOn: Build
   condition: succeeded()
   jobs:
-  - job: Azure Blob
+  - job: AzureBlob
     timeoutInMinutes: 360
     cancelTimeoutInMinutes: 10
     variables:           
