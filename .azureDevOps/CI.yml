@@ -209,6 +209,28 @@ stages:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: '${{ parameters.appVersion }}'
 
+    - task: AzureFileCopy@4
+      displayName: 'Copy Apps to Azure Blob'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
+      inputs:
+        SourcePath: '$(Build.ArtifactStagingDirectory)\*\*.app'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        Destination: AzureBlob
+        storage: '$(azureStorageAccount)'
+        ContainerName: '$(azureContainerName)'
+        BlobPrefix: '$(Build.Repository.Name)'
+
+    - task: AzureFileCopy@4
+      displayName: 'Copy Runtime Apps to Azure Blob'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
+      inputs:
+        SourcePath: '$(Build.ArtifactStagingDirectory)\RuntimePackages\*\*.app'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        Destination: AzureBlob
+        storage: '$(azureStorageAccount)'
+        ContainerName: '$(azureContainerName)'
+        BlobPrefix: 'Runtime\$(Build.Repository.Name)'
+
     - task: PowerShell@2
       displayName: 'Remove Build Container'
       condition: ne(variables['reuseContainer'],'True')
@@ -222,147 +244,6 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
-
-- stage: Validation
-  dependsOn: Build
-  condition: succeeded()
-  jobs:
-  - job: Validation
-    timeoutInMinutes: 360
-    cancelTimeoutInMinutes: 10
-    variables:           
-      platform: x64
-      appBuild: $[counter(variables['appVersion'],0)]
-      appRevision: 0
-      skipComponentGovernanceDetection: True
-
-    steps:
-    - checkout: Template
-      clean: false
-      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
-      path: 'bcbuildtemplate'
-
-    - task: DownloadPipelineArtifact@2
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
-      inputs:
-        path: '$(Build.ArtifactStagingDirectory)' 
-
-    - task: PowerShell@2
-      displayName: 'Copy Build Template'
-      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
-      inputs:
-        targetType: filePath
-        filePath: 'scripts\Copy-Template.ps1'
-        arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
-        failOnStderr: true
-
-    - task: PowerShell@2
-      displayName: 'Validate App'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
-      env:
-        LicenseFile: $(LicenseFile)
-        InsiderSasToken: $(InsiderSasToken)
-      inputs:
-        targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Validate-App.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
-        failOnStderr: true                  
-
-
-- stage: AzureBlob
-  dependsOn: Validation
-  condition: succeeded()
-  jobs:
-  - job: AzureBlob
-    timeoutInMinutes: 360
-    cancelTimeoutInMinutes: 10
-    variables:           
-      platform: x64
-      appBuild: $[counter(variables['appVersion'],0)]
-      appRevision: 0
-      skipComponentGovernanceDetection: True
-
-    steps:
-    - checkout: Template
-      clean: false
-      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
-      path: 'bcbuildtemplate'
-
-    - task: PowerShell@2
-      displayName: 'Copy Build Template'
-      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
-      inputs:
-        targetType: filePath
-        filePath: 'scripts\Copy-Template.ps1'
-        arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
-        failOnStderr: true
-
-    - task: PowerShell@2
-      displayName: 'Reading Settings'
-      inputs:
-        targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
-        failOnStderr: true
-            
-    - task: DownloadPipelineArtifact@2
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
-      inputs:
-        path: '$(Build.ArtifactStagingDirectory)' 
-
-    - task: AzureFileCopy@4
-      displayName: 'Copy Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
-      inputs:
-        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}\*\*.app'
-        azureSubscription: '${{ parameters.azureSubscription }}'
-        Destination: AzureBlob
-        storage: '$(azureStorageAccount)'
-        ContainerName: '$(azureContainerName)'
-        BlobPrefix: '$(Build.Repository.Name)'
-
-    - task: AzureFileCopy@4
-      displayName: 'Copy Runtime Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
-      inputs:
-        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}\RuntimePackages\*\*.app'
-        azureSubscription: '${{ parameters.azureSubscription }}'
-        Destination: AzureBlob
-        storage: '$(azureStorageAccount)'
-        ContainerName: '$(azureContainerName)'
-        BlobPrefix: 'Runtime\$(Build.Repository.Name)'
-
-- stage: Deployment
-  dependsOn: Validation
-  condition: succeeded()
-  jobs:
-  - job: Deployment
-    timeoutInMinutes: 360
-    cancelTimeoutInMinutes: 10
-    variables:           
-      platform: x64
-      appBuild: $[counter(variables['appVersion'],0)]
-      appRevision: 0
-      skipComponentGovernanceDetection: True
-
-    steps:
-    - checkout: Template
-      clean: false
-      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
-      path: 'bcbuildtemplate'
-
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        path: '$(Build.ArtifactStagingDirectory)' 
-
-    - task: PowerShell@2
-      displayName: 'Copy Build Template'
-      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
-      inputs:
-        targetType: filePath
-        filePath: 'scripts\Copy-Template.ps1'
-        arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
-        failOnStderr: true
 
     - task: PowerShell@2
       displayName: 'Upgrade Microsoft Apps'
@@ -382,5 +263,5 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Deploy-App.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}" -branchName "$(Build.SourceBranch)"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)"'
         failOnStderr: true
