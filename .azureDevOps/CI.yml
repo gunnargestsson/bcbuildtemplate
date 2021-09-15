@@ -240,7 +240,16 @@ stages:
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
       inputs:
         path: '$(Build.ArtifactStagingDirectory)' 
-            
+
+    - task: PowerShell@2
+      displayName: 'Copy Build Template'
+      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
+      inputs:
+        targetType: filePath
+        filePath: 'bcbuildtemplate\scripts\Copy-Template.ps1'
+        arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
+        failOnStderr: true
+
     - task: PowerShell@2
       displayName: 'Validate App'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
@@ -268,6 +277,15 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - task: PowerShell@2
+      displayName: 'Copy Build Template'
+      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
+      inputs:
+        targetType: filePath
+        filePath: 'bcbuildtemplate\scripts\Copy-Template.ps1'
+        arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
+        failOnStderr: true
+
     - task: PowerShell@2
       displayName: 'Reading Settings'
       inputs:
@@ -320,6 +338,15 @@ stages:
     - task: DownloadPipelineArtifact@2
       inputs:
         path: '$(Build.ArtifactStagingDirectory)' 
+
+    - task: PowerShell@2
+      displayName: 'Copy Build Template'
+      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
+      inputs:
+        targetType: filePath
+        filePath: 'bcbuildtemplate\scripts\Copy-Template.ps1'
+        arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
+        failOnStderr: true
 
     - task: PowerShell@2
       displayName: 'Upgrade Microsoft Apps'
