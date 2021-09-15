@@ -263,6 +263,14 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - task: PowerShell@2
+      displayName: 'Reading Settings'
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
+        arguments: '-appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
+        failOnStderr: true
+            
     - task: DownloadPipelineArtifact@2
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
       inputs:
