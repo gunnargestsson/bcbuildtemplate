@@ -158,7 +158,7 @@ if (!$restoreDb) {
         -useTraefik:$false `
         -multitenant:$false 
 
-    & "${PSScriptRoot}\Publish-Dependencies.ps1" -buildEnv $buildEnv -containerName $containerName -buildProjectFolder $buildProjectFolder -skipVerification
+    & "${PSScriptRoot}\Publish-Dependencies.ps1" -settings $settings -buildEnv $buildEnv -containerName $containerName -buildProjectFolder $buildProjectFolder -skipVerification
     
     if ($settings.includeTestRunnerOnly) {
         Import-TestToolkitToBcContainer -containerName $containerName -includeTestRunnerOnly 

@@ -1,4 +1,7 @@
 Param(
+    [Parameter(Mandatory = $true)]
+    [System.Management.Automation.PSCustomObject] $settings,
+
     [ValidateSet('AzureDevOps', 'Local', 'AzureVM')]
     [Parameter(Mandatory = $false)]
     [string] $buildEnv = "AzureDevOps",
@@ -12,7 +15,6 @@ Param(
     [switch] $skipVerification
 )
 
-$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $settings.dependencies | ForEach-Object {
     Write-Host "Publishing $_"
     Publish-BCContainerApp -containerName $containerName -appFile $_ -skipVerification:$skipVerification -sync -install
