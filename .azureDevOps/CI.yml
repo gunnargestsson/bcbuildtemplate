@@ -246,6 +246,18 @@ stages:
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
 
     - task: PowerShell@2
+      displayName: 'Validate App'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
+      env:
+        LicenseFile: $(LicenseFile)
+        InsiderSasToken: $(InsiderSasToken)
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Validate-App.ps1'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
+        failOnStderr: true    
+
+    - task: PowerShell@2
       displayName: 'Upgrade Microsoft Apps'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
       inputs:
