@@ -218,6 +218,7 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Remove Unused Container Image'
+      condition: and(ne(variables['Agent.Name'],'Hosted Agent'),ne(variables['Agent.Name'],'Azure Pipelines*'))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
