@@ -1,5 +1,8 @@
 ﻿Param(
     [Parameter(Mandatory = $true)]
+    [string] $configurationFilePath,
+
+    [Parameter(Mandatory = $true)]
     [string] $artifactsFolder,
 
     [Parameter(Mandatory = $true)]
@@ -17,7 +20,7 @@
 )
 
 Write-Host "Deploying apps from ${artifactFolder} to branch ${branchName} ..."
-$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
+$settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 if ($clientId -is [string]) {
     if ($clientSecret -is [String]) { $clientSecret = ConvertTo-SecureString -String $clientSecret -AsPlainText -Force }
     if ($clientSecret -isnot [SecureString]) { throw "ClientSecret needs to be a SecureString or a String" }

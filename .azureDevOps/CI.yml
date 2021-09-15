@@ -55,7 +55,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
-        arguments: '-appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }} -configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
         failOnStderr: true
     
     - task: PowerShell@2
@@ -74,6 +74,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Create-Container.ps1'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}"'
         failOnStderr: true
 
     - task: PowerShell@2
@@ -160,7 +161,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Run-Tests.ps1'
-        arguments: '-appFolders "$(testFolders)"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appFolders "$(testFolders)"'
         failOnStderr: true
       
     - task: PublishTestResults@2
@@ -249,7 +250,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Validate-App.ps1'
-        arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
         failOnStderr: true                  
 
 
@@ -272,7 +273,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
-        arguments: '-appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
         failOnStderr: true
             
     - task: DownloadPipelineArtifact@2
@@ -326,7 +327,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Upgrade-MicrosoftApps.ps1'
-        arguments: '-branchName "$(Build.SourceBranch)"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -branchName "$(Build.SourceBranch)"'
         failOnStderr: true
 
     - task: PowerShell@2
@@ -338,5 +339,5 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Deploy-App.ps1'
-        arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}" -branchName "$(Build.SourceBranch)"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}" -branchName "$(Build.SourceBranch)"'
         failOnStderr: true

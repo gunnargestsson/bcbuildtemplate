@@ -1,4 +1,7 @@
 ﻿Param(
+    [Parameter(Mandatory = $true)]
+    [string] $configurationFilePath,
+
     [ValidateSet('AzureDevOps', 'Local', 'AzureVM')]
     [Parameter(Mandatory = $false)]
     [string] $buildenv = "AzureDevOps",
@@ -72,7 +75,7 @@ $parameters = @{
     "Accept_Outdated" = $true
 }
 
-$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
+$settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 if ($settings.containerParameters) {
     Foreach ($parameter in ($settings.containerParameters.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
         try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }

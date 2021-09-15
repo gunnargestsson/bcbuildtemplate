@@ -1,4 +1,7 @@
 ﻿Param(
+    [Parameter(Mandatory = $true)]
+    [string] $configurationFilePath,
+
     [Parameter(Mandatory = $false)]
     [string] $containerName = $ENV:CONTAINERNAME,
 
@@ -11,7 +14,7 @@
 )
 
 Write-Host "Deploying Microsoft App Upgrade for branch ${branchName}..."
-$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
+$settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $deployment = $settings.deployments | Where-Object { $_.branch -eq $branchName }
 Write-Host "Deployment type: $($deployment.DeploymentType)"
 Write-Host "Upgrade Microsoft Apps: $($deployment.upgradeMicrosoftApps)"
