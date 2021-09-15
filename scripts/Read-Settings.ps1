@@ -1,4 +1,7 @@
 Param(
+    [Parameter(Mandatory = $true)]
+    [string] $configurationFilePath,
+
     [ValidateSet('AzureDevOps', 'Local', 'AzureVM')]
     [Parameter(Mandatory = $false)]
     [string] $buildEnv = "AzureDevOps",
@@ -17,8 +20,7 @@ if ($appVersion) {
     write-host "##vso[build.updatebuildnumber]$appVersion"
 }
 
-
-$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
+$settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 if ("$version" -eq "") {
     $version = $settings.versions[0].version
     Write-Host "Version not defined, using $version"

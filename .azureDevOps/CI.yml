@@ -15,6 +15,10 @@ parameters:
   displayName: 'Specify boolean value for runtime package creation'
   type: boolean
   default: True
+- name: configurationFilePath
+  displayName: 'Specifies the path to the build-settings.json file'
+  type: string
+  default: '.azureDevOps\build-settings.json'
 
 stages:
 - stage: Build
@@ -51,7 +55,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
-        arguments: '-appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
+        arguments: '-appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }} -configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}"'
         failOnStderr: true
     
     - task: PowerShell@2
