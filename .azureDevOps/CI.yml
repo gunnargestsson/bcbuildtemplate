@@ -236,6 +236,11 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - checkout: Template
+      clean: false
+      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
+      path: 's\bcbuildtemplate'
+
     - task: DownloadPipelineArtifact@2
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
       inputs:
@@ -277,6 +282,11 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - checkout: Template
+      clean: false
+      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
+      path: 's\bcbuildtemplate'
+
     - task: PowerShell@2
       displayName: 'Copy Build Template'
       condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
@@ -335,6 +345,11 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - checkout: Template
+      clean: false
+      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
+      path: 's\bcbuildtemplate'
+
     - task: DownloadPipelineArtifact@2
       inputs:
         path: '$(Build.ArtifactStagingDirectory)' 
