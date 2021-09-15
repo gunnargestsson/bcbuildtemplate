@@ -1,5 +1,8 @@
 ﻿Param(
     [Parameter(Mandatory = $true)]
+    [string] $configurationFilePath,
+
+    [Parameter(Mandatory = $true)]
     [string] $artifactsFolder,
     
     [Parameter(Mandatory = $true)]
@@ -20,7 +23,7 @@
 )
 
 Write-Host "Validating apps for branch ${branchName}..."
-$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
+$settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $appFolders = $settings.appFolders
 $validation = $settings.validation | Where-Object { $_.branch -eq $branchName }
 if ($validation) {

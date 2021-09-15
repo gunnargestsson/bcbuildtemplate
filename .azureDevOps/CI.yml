@@ -15,6 +15,10 @@ parameters:
   displayName: 'Specify boolean value for runtime package creation'
   type: boolean
   default: True
+- name: configurationFilePath
+  displayName: 'Specifies the path to the build-settings.json file'
+  type: string
+  default: '.azureDevOps\build-settings.json'
 
 stages:
 - stage: Build
@@ -51,7 +55,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
-        arguments: '-appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
         failOnStderr: true
     
     - task: PowerShell@2
@@ -70,6 +74,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Create-Container.ps1'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}"'
         failOnStderr: true
 
     - task: PowerShell@2
@@ -156,7 +161,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Run-Tests.ps1'
-        arguments: '-appFolders "$(testFolders)"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appFolders "$(testFolders)"'
         failOnStderr: true
       
     - task: PublishTestResults@2
@@ -213,6 +218,7 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Remove Unused Container Image'
+      condition: and(ne(variables['Agent.Name'],'Hosted Agent'),ne(variables['Agent.Name'],'Azure Pipelines*'))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
@@ -231,11 +237,25 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - checkout: Template
+      clean: false
+      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
+      path: 's\bcbuildtemplate'
+
     - task: DownloadPipelineArtifact@2
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
       inputs:
         path: '$(Build.ArtifactStagingDirectory)' 
-            
+
+    - task: PowerShell@2
+      displayName: 'Copy Build Template'
+      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
+      inputs:
+        targetType: filePath
+        filePath: 'bcbuildtemplate\scripts\Copy-Template.ps1'
+        arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
+        failOnStderr: true
+
     - task: PowerShell@2
       displayName: 'Validate App'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
@@ -245,7 +265,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Validate-App.ps1'
-        arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}" -branchName "$(Build.SourceBranch)" -version ${{ parameters.version }}'
         failOnStderr: true                  
 
 
@@ -263,12 +283,26 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - checkout: Template
+      clean: false
+      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
+      path: 's\bcbuildtemplate'
+
+    - task: PowerShell@2
+      displayName: 'Copy Build Template'
+      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
+      inputs:
+        targetType: filePath
+        filePath: 'bcbuildtemplate\scripts\Copy-Template.ps1'
+        arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
+        failOnStderr: true
+
     - task: PowerShell@2
       displayName: 'Reading Settings'
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
-        arguments: '-appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
         failOnStderr: true
             
     - task: DownloadPipelineArtifact@2
@@ -312,9 +346,23 @@ stages:
       skipComponentGovernanceDetection: True
 
     steps:
+    - checkout: Template
+      clean: false
+      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
+      path: 's\bcbuildtemplate'
+
     - task: DownloadPipelineArtifact@2
       inputs:
         path: '$(Build.ArtifactStagingDirectory)' 
+
+    - task: PowerShell@2
+      displayName: 'Copy Build Template'
+      condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
+      inputs:
+        targetType: filePath
+        filePath: 'bcbuildtemplate\scripts\Copy-Template.ps1'
+        arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
+        failOnStderr: true
 
     - task: PowerShell@2
       displayName: 'Upgrade Microsoft Apps'
@@ -322,7 +370,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Upgrade-MicrosoftApps.ps1'
-        arguments: '-branchName "$(Build.SourceBranch)"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -branchName "$(Build.SourceBranch)"'
         failOnStderr: true
 
     - task: PowerShell@2
@@ -334,5 +382,5 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Deploy-App.ps1'
-        arguments: '-artifactsFolder "$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}" -branchName "$(Build.SourceBranch)"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)\${{ parameters.appVersion }}" -branchName "$(Build.SourceBranch)"'
         failOnStderr: true

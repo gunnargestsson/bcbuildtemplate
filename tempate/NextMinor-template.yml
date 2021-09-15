@@ -21,4 +21,5 @@ extends:
     appVersion: "17.2"
     azureSubscription: ""
     createRuntimePackages: false
+    configurationFilePath: '.azureDevOps\build-settings.json'
 

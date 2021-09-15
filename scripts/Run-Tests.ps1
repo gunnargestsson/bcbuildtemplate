@@ -1,4 +1,7 @@
 ﻿Param(
+    [Parameter(Mandatory = $true)]
+    [string] $configurationFilePath,
+
     [ValidateSet('AzureDevOps', 'Local', 'AzureVM')]
     [Parameter(Mandatory = $false)]
     [string] $buildEnv = "AzureDevOps",
@@ -24,7 +27,7 @@
     [switch] $reRunFailedTests
 )
 
-$settings = (Get-Content ((Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
+$settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $testCompanyName = $settings.testCompanyName
 $testSuiteDisabled = $settings.testSuiteDisabled
 
