@@ -217,10 +217,11 @@ stages:
         inlineScript: >
           New-Item -Path (Join-Path '$(Build.ArtifactStagingDirectory)' 'latest') -ItemType Directory;
           foreach ($folder in ('$(appFolders)'.Split(','))) {
-            $App = @(GetChild-Item (Join-Path '$(Build.ArtifactStagingDirectory)' $folder) -Filter '*.app') | Select-Object -First 1
+            $App = @(Get-ChildItem (Join-Path '$(Build.ArtifactStagingDirectory)' $folder) -Filter '*.app') | Select-Object -First 1
             $AppJson = @(Get-ChildItem (Join-Path '$(Build.ArtifactStagngDirectory)' $folder) -Filter 'app.json') | Select-Object -First 1
             $AppConfig = Get-Content -Path $AppJson | ConvertFrom-Json
             $AppFileName = "$(Join-Path (Join-Path (Join-Path '$(Build.ArtifactStagingDirectory)' 'latest') $AppConfig.publisher) $AppConfig.Name).app"
+            New-Item -Path (Split-Path -Path $AppFileName -Parent) -ItemType Directory -ErrorAction SilentlyContinue
             Copy-Item -Path $App -Destination $AppFileName
           }
 
