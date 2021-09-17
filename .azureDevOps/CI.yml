@@ -220,7 +220,7 @@ stages:
             $App = @(GetChild-Item (Join-Path '$(Build.ArtifactStagingDirectory)' $folder) -Filter '*.app') | Select-Object -First 1
             $AppJson = @(GetChild-Item (Join-Path '$(Build.ArtifactStagngDirectory)' $folder) -Filter 'app.json') | Select-Object -First 1
             $AppConfig = Get-Content -Path $AppJson | ConvertFrom-Json
-            $AppFileName = "$(Join-Path (Join-Path (Join-Path ('$(Build.ArtifactStagingDirectory)' 'latest')) $AppConfig.publisher) $AppConfig.Name).app"
+            $AppFileName = "$(Join-Path (Join-Path (Join-Path '$(Build.ArtifactStagingDirectory)' 'latest') $AppConfig.publisher) $AppConfig.Name).app"
             Copy-Item -Path $App -Destination $AppFileName
           }
 
