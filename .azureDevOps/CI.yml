@@ -210,19 +210,19 @@ stages:
         ArtifactName: '${{ parameters.appVersion }}'
 
     - task: PowerShell@1
-      displayName: Copy App to Latest folder
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      displayName: Copy App to Release folder
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\CopyTo-LatestFolder.ps1'
-        arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)"'
+        arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -folder "${{ parameters.version }}"'
         failOnStderr: true              
 
     - task: AzureFileCopy@4
-      displayName: 'Copy Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      displayName: 'Copy Release to Azure Blob'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
-        SourcePath: '$(Build.ArtifactStagingDirectory)\*\*.app'
+        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
         Destination: AzureBlob
         storage: '$(azureStorageAccount)'
@@ -230,10 +230,10 @@ stages:
         BlobPrefix: '$(Build.Repository.Name)'
 
     - task: AzureFileCopy@4
-      displayName: 'Copy Latest to Azure Blob'
+      displayName: 'Copy Apps to Azure Blob'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
-        SourcePath: '$(Build.ArtifactStagingDirectory)\latest\*\*.app'
+        SourcePath: '$(Build.ArtifactStagingDirectory)\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
         Destination: AzureBlob
         storage: '$(azureStorageAccount)'
