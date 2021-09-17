@@ -213,18 +213,10 @@ stages:
       displayName: Copy App to Latest folder
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
-        scriptType: inlineScript
-        inlineScript: >
-          $LatestPath = Join-Path '$(Build.ArtifactStagingDirectory)' 'latest';
-          New-Item -Path $LatestPath -ItemType Directory;
-          foreach ($folder in ('$(appFolders)'.Split(','))) {
-            $App = @(Get-ChildItem (Join-Path '$(Build.ArtifactStagingDirectory)' $folder) -Filter '*.app') | Select-Object -First 1
-            $AppJson = @(Get-ChildItem (Join-Path '$(Build.ArtifactStagngDirectory)' $folder) -Filter 'app.json') | Select-Object -First 1
-            $AppConfig = Get-Content -Path $AppJson | ConvertFrom-Json
-            New-Item -Path (Join-Path $LatestPath $AppConfig.publisher) -ItemType Directory -ErrorAction SilentlyContinue
-            $AppFileName = "$(Join-Path (Join-Path $LatestPath $AppConfig.publisher) $AppConfig.Name).app"            
-            Copy-Item -Path $App -Destination $AppFileName
-          }
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\CopyTo-LatestFolder.ps1'
+        arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)"'
+        failOnStderr: true              
 
     - task: AzureFileCopy@4
       displayName: 'Copy Apps to Azure Blob'
