@@ -11,8 +11,10 @@
         - LicenseFile
         - TestLicenseFile (optional if unit tests require development license and build is using customer license)
         - Password
-        - ClientId (optional for online tenant deployment and host deployment)
-        - ClientSecret (optional for online tenant deployment and host deployment)
+        - ClientId (optional for online tenant deployment)
+        - ClientSecret (optional for online tenant deployment)
+        - PowerShellUsername (optional for powershell deployment)
+        - PowerShellPassword (optional for powershell deployment)
     - InsiderBuilds
         - InsiderSasToken
 3.	Create DevOps pipeline
