@@ -215,7 +215,7 @@ stages:
       inputs:
         scriptType: inlineScript
         inlineScript: >
-          $LatestPath = Join-Path '$(Build.ArtifactStagingDirectory)' 'latest'
+          $LatestPath = Join-Path '$(Build.ArtifactStagingDirectory)' 'latest';
           New-Item -Path $LatestPath -ItemType Directory;
           foreach ($folder in ('$(appFolders)'.Split(','))) {
             $App = @(Get-ChildItem (Join-Path '$(Build.ArtifactStagingDirectory)' $folder) -Filter '*.app') | Select-Object -First 1
