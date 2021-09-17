@@ -219,7 +219,7 @@ stages:
         failOnStderr: true              
 
     - task: AzureFileCopy@4
-      displayName: 'Copy Release to Azure Blob'
+      displayName: 'Copy Release Apps to Azure Blob'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
@@ -227,10 +227,10 @@ stages:
         Destination: AzureBlob
         storage: '$(azureStorageAccount)'
         ContainerName: '$(azureContainerName)'
-        BlobPrefix: '${{ parameters.version }}\${{ parameters.appVersion }}'
+        BlobPrefix: 'Release\${{ parameters.appVersion }}\${{ parameters.version }}'
 
     - task: AzureFileCopy@4
-      displayName: 'Copy Apps to Azure Blob'
+      displayName: 'Copy Artifact Apps to Azure Blob'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\*\*.app'
@@ -238,7 +238,7 @@ stages:
         Destination: AzureBlob
         storage: '$(azureStorageAccount)'
         ContainerName: '$(azureContainerName)'
-        BlobPrefix: '$(Build.Repository.Name)'
+        BlobPrefix: 'Artifact\$(Build.Repository.Name)'
 
     - task: AzureFileCopy@4
       displayName: 'Copy Runtime Apps to Azure Blob'
