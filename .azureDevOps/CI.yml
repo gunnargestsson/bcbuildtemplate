@@ -222,12 +222,12 @@ stages:
       displayName: 'Copy Release to Azure Blob'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
-        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\*\*.app'
+        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
         Destination: AzureBlob
         storage: '$(azureStorageAccount)'
         ContainerName: '$(azureContainerName)'
-        BlobPrefix: '$(Build.Repository.Name)'
+        BlobPrefix: '${{ parameters.version }}\${{ parameters.appVersion }}'
 
     - task: AzureFileCopy@4
       displayName: 'Copy Apps to Azure Blob'
