@@ -209,20 +209,40 @@ stages:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: '${{ parameters.appVersion }}'
 
+    - task: PowerShell@2
+      displayName: Copy App to Release folder
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\CopyTo-LatestFolder.ps1'
+        arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)"  -releaseFolder "${{ parameters.version }}\${{ parameters.appVersion }}"'
+        failOnStderr: true              
+
     - task: AzureFileCopy@4
-      displayName: 'Copy Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
+      displayName: 'Copy Release Apps to Azure Blob'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      inputs:
+        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        Destination: AzureBlob
+        storage: '$(azureStorageAccount)'
+        ContainerName: '$(azureContainerName)'
+        BlobPrefix: 'Release\${{ parameters.appVersion }}\${{ parameters.version }}'
+
+    - task: AzureFileCopy@4
+      displayName: 'Copy Artifact Apps to Azure Blob'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
         Destination: AzureBlob
         storage: '$(azureStorageAccount)'
         ContainerName: '$(azureContainerName)'
-        BlobPrefix: '$(Build.Repository.Name)'
+        BlobPrefix: 'Artifact\$(Build.Repository.Name)'
 
     - task: AzureFileCopy@4
       displayName: 'Copy Runtime Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\RuntimePackages\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
@@ -272,6 +292,8 @@ stages:
       env:
         ClientId: $(ClientId)
         ClientSecret: $(ClientSecret)
+        PowerShellUsername: $(PowerShellUsername)
+        PowerShellPassword: $(PowerShellPassword)
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Deploy-App.ps1'
