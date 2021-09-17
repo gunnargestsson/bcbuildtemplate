@@ -209,9 +209,24 @@ stages:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: '${{ parameters.appVersion }}'
 
+    - task: PowerShell@1
+      displayName: Copy App to Latest folder
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      inputs:
+        scriptType: inlineScript
+        inlineScript: >
+          New-Item -Path (Join-Path '$(Build.ArtifactStagingDirectory)' 'latest') -ItemType Directory;
+          foreach ($folder in ('$(appFolders)'.Split(','))) {
+            $App = @(GetChild-Item (Join-Path '$(Build.ArtifactStagingDirectory)' $folder) -Filter '*.app') | Select-Object -First 1
+            $AppJson = @(GetChild-Item (Join-Path '$(Build.ArtifactStagngDirectory)' $folder) -Filter 'app.json') | Select-Object -First 1
+            $AppConfig = Get-Content -Path $AppJson | ConvertFrom-Json
+            $AppFileName = "$(Join-Path (Join-Path (Join-Path ('$(Build.ArtifactStagingDirectory)' 'latest')) $AppConfig.publisher) $AppConfig.Name).app"
+            Copy-Item -Path $App -Destination $AppFileName
+          }
+
     - task: AzureFileCopy@4
       displayName: 'Copy Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
@@ -221,8 +236,19 @@ stages:
         BlobPrefix: '$(Build.Repository.Name)'
 
     - task: AzureFileCopy@4
+      displayName: 'Copy Latest to Azure Blob'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      inputs:
+        SourcePath: '$(Build.ArtifactStagingDirectory)\latest\*\*.app'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        Destination: AzureBlob
+        storage: '$(azureStorageAccount)'
+        ContainerName: '$(azureContainerName)'
+        BlobPrefix: '$(Build.Repository.Name)'
+
+    - task: AzureFileCopy@4
       displayName: 'Copy Runtime Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\RuntimePackages\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
