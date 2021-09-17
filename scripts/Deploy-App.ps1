@@ -15,7 +15,13 @@
     $clientId = $ENV:CLIENTID,
     
     [Parameter(Mandatory = $false)]
-    $clientSecret = $ENV:CLIENTSECRET
+    $clientSecret = $ENV:CLIENTSECRET,
+
+    [Parameter(Mandatory = $false)]   
+    $PowerShellUsername = $ENV:PowerShellUsername,
+
+    [Parameter(Mandatory = $false)]
+    $PowerShellPassword = $ENV:PowerShellPassword
     
 )
 
@@ -24,7 +30,11 @@ $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-Strin
 if ($clientId -is [string]) {
     if ($clientSecret -is [String]) { $clientSecret = ConvertTo-SecureString -String $clientSecret -AsPlainText -Force }
     if ($clientSecret -isnot [SecureString]) { throw "ClientSecret needs to be a SecureString or a String" }
-    $vmCredential = New-Object System.Management.Automation.PSCredential($clientId, $clientSecret);
+}
+if ($PowerShellUsername -is [string]) {
+    if ($PowerShellPassword -is [String]) { $PowerShellPassword = ConvertTo-SecureString -String $PowerShellPassword -AsPlainText -Force }
+    if ($PowerShellPassword -isnot [SecureString]) { throw "ClientSecret needs to be a SecureString or a String" }
+    $vmCredential = New-Object System.Management.Automation.PSCredential($PowerShellUsername, $PowerShellPassword);
 }
 $appFolders = $settings.appFolders
 $deployments = @()
