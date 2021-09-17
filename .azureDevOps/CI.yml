@@ -209,13 +209,13 @@ stages:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: '${{ parameters.appVersion }}'
 
-    - task: PowerShell@1
+    - task: PowerShell@2
       displayName: Copy App to Release folder
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\CopyTo-LatestFolder.ps1'
-        arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -folder "${{ parameters.version }}"'
+        arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)"  -releaseFolder "${{ parameters.version }}\${{ parameters.appVersion }}"'
         failOnStderr: true              
 
     - task: AzureFileCopy@4
