@@ -31,7 +31,7 @@ if ($unsecureArgument) {
     $Companies = Invoke-ScriptInBcContainer -containerName $containerName -scriptblock { @(Get-NAVCompany -ServerInstance BC).CompanyName }
     if (!$Companies.Contains($companyName)) {
         Write-Host "Creating company ${companyName}"
-        Invoke-ScriptInBcContainer -containerName pindstrup -scriptblock { param($companyName)New-NAVCompany -ServerInstance BC -CompanyName $companyName} -argumentList $companyName
+        Invoke-ScriptInBcContainer -containerName $containerName -scriptblock { param($companyName)New-NAVCompany -ServerInstance BC -CompanyName $companyName} -argumentList $companyName
     }    
 
     Write-Host "Setting test secret"
