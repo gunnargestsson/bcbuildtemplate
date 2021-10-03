@@ -35,7 +35,7 @@ $appFolders.Split(',') | ForEach-Object {
     $App = (Get-Item -Path (Join-Path $AppFolder '*.app')).FullName
     $AppJson = (Get-Item -Path (Join-Path $AppFolder 'app.json')).FullName
     $AppConfig = Get-Content -Path $AppJson | ConvertFrom-Json
-    New-Item -Path (Join-Path $DestinationPath $AppConfig.publisher) -ItemType Directory -ErrorAction SilentlyContinue
-    $AppFileName = "$(Join-Path (Join-Path $DestinationPath Remove-InvalidFileNameChars($AppConfig.publisher)) Remove-InvalidFileNameChars($AppConfig.Name)).app"
+    New-Item -Path (Join-Path $DestinationPath $(Remove-InvalidFileNameChars($AppConfig.publisher))) -ItemType Directory -ErrorAction SilentlyContinue
+    $AppFileName = "$(Join-Path (Join-Path $DestinationPath $(Remove-InvalidFileNameChars($AppConfig.publisher))) $(Remove-InvalidFileNameChars($AppConfig.Name))).app"
     Copy-Item -Path $App -Destination $AppFileName -Verbose
 }
