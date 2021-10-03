@@ -26,12 +26,14 @@ if (-not ($argument)) {
 if ($argument) {
     $unsecureArgument = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($argument)))
 }
+
 if ($unsecureArgument) {
+    $Companies = Invoke-ScriptInBcContainer -containerName $containerName -scriptblock { @(Get-NAVCompany -ServerInstance BC).CompanyName }
+    if (!$Companies.Contains($companyName)) {
+        Write-Host "Creating company ${companyName}"
+        Invoke-ScriptInBcContainer -containerName $containerName -scriptblock { param($companyName)New-NAVCompany -ServerInstance BC -CompanyName $companyName} -argumentList $companyName
+    }    
+
     Write-Host "Setting test secret"
-    $Companies = Invoke-ScriptInBcContainer -containerName $ContainerName -scriptblock { (Get-NAVCompany -ServerInstance BC).CompanyName }
-    if ($Companies -eq $companyName) {
-        Invoke-NavContainerCodeunit -containerName $containerName -CompanyName $companyName -Codeunitid $codeunitId -MethodName $methodName -Argument $unsecureArgument
-    } else {
-        Invoke-NavContainerCodeunit -containerName $containerName -CompanyName ($Companies | Select-Object -First 1) -Codeunitid $codeunitId -MethodName $methodName -Argument $unsecureArgument
-    }
+    Invoke-NavContainerCodeunit -containerName $containerName -CompanyName $companyName -Codeunitid $codeunitId -MethodName $methodName -Argument $unsecureArgument
 }
