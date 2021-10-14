@@ -101,7 +101,11 @@ else {
     Write-Host "Set imageName = $imageName"
     Write-Host "##vso[task.setvariable variable=imageName]$imageName"
 }
-$containerName = "$($containerNamePrefix)$("$($ENV:AGENT_NAME)" -replace '[^a-zA-Z0-9]', '')"
+$branchName = ($ENV:BUILD_SOURCEBRANCH).Split('/') | Select-Object -Last 1
+$containerName = "$($containerNamePrefix)${branchname}$("$($ENV:AGENT_NAME)" -replace '[^a-zA-Z0-9]', '')"
+if ($containerName.Length -gt 15) {
+    $containerName = $containerName.Substring(1, 15)
+}
 Write-Host "Set containerName = $containerName"
 Write-Host "##vso[task.setvariable variable=containerName]$containerName"
 
