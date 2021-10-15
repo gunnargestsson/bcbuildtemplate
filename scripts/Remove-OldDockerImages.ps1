@@ -1,4 +1,4 @@
-﻿Flush-ContainerHelperCache -keepDays 40 
+﻿Flush-ContainerHelperCache -cache "images" -keepDays 40 
 $images = docker image list --format "table {{.Repository}},{{.Tag}},{{.ID}},{{.Size}},{{.CreatedAt}}"
 $dockerImages = @()
 $imagesToRemove = @()
@@ -15,7 +15,7 @@ $images[1..$images.length] | % {
         $dockerImage | Add-Member -MemberType NoteProperty -Name Language -Value $fields[1].Split("-")[2]
         $dockerImage | Add-Member -MemberType NoteProperty -Name ID -Value $fields[2]
         $dockerImage | Add-Member -MemberType NoteProperty -Name Size -Value $fields[3]
-        $dockerImage | Add-Member -MemberType NoteProperty -Name CreatedAt -Value ([DateTime]::ParseExact($fields[4].Substring(0,$dateTimeFormat.Length),$dateTimeFormat,$null))
+        $dockerImage | Add-Member -MemberType NoteProperty -Name CreatedAt -Value ([DateTime]::ParseExact($fields[4].Substring(0, $dateTimeFormat.Length), $dateTimeFormat, $null))
         $dockerImages += $dockerImage
     }
     catch {}
