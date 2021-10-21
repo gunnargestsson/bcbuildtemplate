@@ -102,7 +102,7 @@ else {
     Write-Host "##vso[task.setvariable variable=imageName]$imageName"
 }
 $branchName = ($ENV:BUILD_SOURCEBRANCH).Split('/') | Select-Object -Last 1
-$containerName = "$($containerNamePrefix)${branchname}$("$($ENV:AGENT_NAME)" -replace '[^a-zA-Z0-9]', '')"
+$containerName = "$($containerNamePrefix)$("${branchname}$($ENV:AGENT_NAME)" -replace '[^a-zA-Z0-9]', '')"
 if ($containerName.Length -gt 15) {
     $containerName = $containerName.Substring(0, 15)
 }
