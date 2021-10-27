@@ -227,7 +227,7 @@ stages:
         Destination: AzureBlob
         storage: '$(azureStorageAccount)'
         ContainerName: '$(azureContainerName)'
-        BlobPrefix: '$(Build.Repository.Name)\$(Build.SourceBranch)\${{ parameters.appVersion }}\${{ parameters.version }}'
+        BlobPrefix: '$(Build.Repository.Name)\$(Build.SourceBranchName)\${{ parameters.appVersion }}\${{ parameters.version }}'
 
     - task: AzureFileCopy@4
       displayName: 'Copy Artifact Apps to Azure Blob'
