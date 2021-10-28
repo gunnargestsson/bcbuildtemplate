@@ -84,16 +84,21 @@
     ],
     "userProfiles": [
         {
+            "profile": "PRECISION\\GUNNAR",
+            "licenseFilePath": "01000000d08c9ddf0115d1118c7a00c04fc297eb010000009bd9187a23293f4997f81d4460996af200000000020000000000106600000001000020000000765a76d3eb947ca9ec0de3b47eff93bba4547df6fb3119e92881249279994ef0000000000e8000000002000020000000ddc56de54d1fca1b6f9831e659adfd0a0f5d5f27ec2da455650d5e1673bab94ce00000003453d4cf85f3027284b693d8547654c0f58c677d423bebfefec1299677c99878292c34e1583c9fa52ded48b87e7f7a45dd963da72de400b70e5a5f5584203bde1c9a42dff734d8091ed430faf4387d318dd6a73b79b444a9eca5dca109cfd770b543bf4cabbd02e7e9326c4c3db412036ae47357d43ea8b5d89f54a69b29b51c09449fec9eac17264c286cd0661a2cfdb2e95e19d9d55f04c77004e80a95ef64faabacc3684614a36e556eaf97689326380af54692aad210a3a011df7af26409418a6c919eb25ff12be3740b677ec4a4677c20ae5e3c3a8061070ddb9f4f9690400000007ffe92865995a0dd36abe475a0b3770b3be5239863601de84d008c43f2728e6193ebdb20c6fae26bc6caa66b21f20ecc9f7f660802f80423cd92cf4ed1011ed7",
+            "Username": "navisionguru",
+            "Password": "01000000d08c9ddf0115d1118c7a00c04fc297eb010000001692520fef1a414cbf75b22d0cc0ca4400000000020000000000106600000001000020000000869883b195b1fb59cdbfaced44072ed7a0e112ab386b398cb6c134747e979b84000000000e800000000200002000000094d7616f085694addf11cc60457b79d86f75ac88b4ca5fff3642333b9249d0452000000071f2fa158836ef93ea8062a38d9f613802da3d25bfbda855640a3683cafc687a40000000136b4c2d883dfbbf5e002951a4ab337a853a38798656018fc93d1e06006cd207521c9509c8689f047d504f0c10162e1054c08f6480980bfe36e2d97bcdcedbbf",
+            "containerParameters": {
+                "isolation": "hyperv",
+                "updateHosts": true,
+                "enableTaskScheduler": false
+            }
+        },
+        {
             "profile": "Default",
-            "bccontainerhelperPath": "",
             "licenseFilePath": "",
             "Username": "",
-            "Password": "",
-            "AzureVM": {
-                "ComputerName": "<azure VM uri>",
-                "Username": "<azure VM username>",
-                "Password": "<encrypted or plain azure VM password>"
-            }
+            "Password": ""
         }
     ]
 }
