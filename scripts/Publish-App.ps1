@@ -27,7 +27,7 @@ if (-not ($licenseFile)) {
 
 if ($licenseFile) {    
     $unsecureLicenseFile = try { ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile))) } catch { $licenseFile }
-    Import-BcContainerLicense -containerName $containerName -licenseFile $unsecureLicenseFile | Out-Null
+    Import-BcContainerLicense -containerName $containerName -licenseFile $unsecureLicenseFile 
 }
 
 Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
