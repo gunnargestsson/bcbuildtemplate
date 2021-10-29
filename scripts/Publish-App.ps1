@@ -16,7 +16,7 @@
     [string] $appFolders,
 
     [Parameter(Mandatory = $false)]
-    [securestring] $licenseFile = $null,
+    $licenseFile = $null,
 
     [switch] $skipVerification
 )
@@ -25,8 +25,8 @@ if (-not ($licenseFile)) {
     $licenseFile = try { $ENV:LICENSEFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:LICENSEFILE -AsPlainText -Force }
 }
 
-if ($licenseFile) {
-    $unsecureLicenseFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile)))
+if ($licenseFile) {    
+    $unsecureLicenseFile = try { ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile))) } catch { $licenseFile }
     Import-BcContainerLicense -containerName $containerName -licenseFile $unsecureLicenseFile
 }
 
