@@ -16,7 +16,7 @@
     [string] $appFolders,
 
     [Parameter(Mandatory = $false)]
-    [string] $licenseFile = $null,
+    [securestring] $licenseFile = $null,
 
     [switch] $skipVerification
 )
