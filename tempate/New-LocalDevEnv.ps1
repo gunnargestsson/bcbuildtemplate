@@ -55,7 +55,9 @@ else {
     if ($userProfile.containerParameters) {
         Foreach ($parameter in ($userProfile.containerParameters.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
             try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }
-            if (!([String]::IsNullOrEmpty($value))) { $parameters += @{ $parameter.Name = $value } }
+            if (!([String]::IsNullOrEmpty($value))) { 
+                try { $parameters += @{ $parameter.Name = $value } } catch { $parameters."$($parameter.Name)" = $value }
+            }
         }
     }        
 
