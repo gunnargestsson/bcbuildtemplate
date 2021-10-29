@@ -1,22 +1,22 @@
 ﻿Param(
-    [ValidateSet('AzureDevOps','Local','AzureVM')]
-    [Parameter(Mandatory=$false)]
+    [ValidateSet('AzureDevOps', 'Local', 'AzureVM')]
+    [Parameter(Mandatory = $false)]
     [string] $buildEnv = "AzureDevOps",
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string] $containerName = $ENV:CONTAINERNAME,
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH,
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string] $buildArtifactFolder = $ENV:BUILD_ARTIFACTSTAGINGDIRECTORY,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string] $appFolders,
 
     [Parameter(Mandatory = $false)]
-    [securestring] $licenseFile = $null,
+    [string] $licenseFile = $null,
 
     [switch] $skipVerification
 )
