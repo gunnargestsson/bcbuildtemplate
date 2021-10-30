@@ -24,7 +24,21 @@ else {
     $configurationFilePath = Join-Path $scriptPath 'build-settings.json'
     $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
     $userProfile = $settings.userProfiles | Where-Object -Property profile -EQ "$env:computername\$env:username"
-    if (!$userProfile) { Throw "Please create a profile for '$env:computername\$env:username' in ${configurationFilePath}" }
+    if (!$userProfile) { 
+        $userProfile = New-Object -TypeName psobject
+        $userProfile | Add-Member -MemberType NoteProperty -Name 'profile' -Value "$env:computername\$env:username"
+        $credential = Get-Credential -Message 'New Container Credentials'
+        if (-not $credential) { Throw 'Unable to create a container' }
+        $userProfile | Add-Member -MemberType NoteProperty -Name 'Username' -Value $credential.UserName
+        $userProfile | Add-Member -MemberType NoteProperty -Name "Password" -Value (ConvertFrom-SecureString $credential.Password)
+        $licenseFilePath = Read-Host -Prompt "Enter License File Path" -AsSecureString
+        $userProfile | Add-Member -MemberType NoteProperty -Name 'licenseFilePath' -Value (ConvertFrom-SecureString $licenseFilePath)
+        $containerParameters = new-object -TypeName PSobject
+        $containerParameters | Add-Member -MemberType NoteProperty -Name 'updateHosts' -Value $true
+        $userProfile | Add-Member -MemberType NoteProperty -Name 'containerParameters' -Value $containerParameters
+        $settings.userProfiles += $userProfile
+        Set-Content -Path $configurationFilePath -Encoding UTF8 -Value ($settings | ConvertTo-Json)
+    }
     $containername = $settings.name.ToLower()
     $auth = 'UserPassword'
     $artifact = $settings.versions[0].artifact
