@@ -1,7 +1,4 @@
 ﻿Param(
-    [ValidateSet('AzureDevOps','Local','AzureVM')]
-    [string] $buildEnv = "AzureDevOps",
-
     [Parameter(Mandatory=$false)]
     [string] $bccontainerhelperPath = $env:bccontainerhelperPath,
 
