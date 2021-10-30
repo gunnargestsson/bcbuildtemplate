@@ -57,7 +57,6 @@ else {
     $parameters = @{
         "Accept_Eula"     = $true
         "Accept_Outdated" = $true
-        "shortcuts"       = "None"
     }
 
     
