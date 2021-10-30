@@ -4,7 +4,7 @@
     [string] $appFolders,
     [Parameter(Mandatory = $true)]
     [string] $BaseFolder,
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [int] $PageObjectId = 0
 )
 
