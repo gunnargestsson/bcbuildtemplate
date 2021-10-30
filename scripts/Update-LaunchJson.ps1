@@ -50,9 +50,14 @@ foreach ($appFolder in $appFolders.split(',')) {
         "authentication" = $authentication
         "breakOnError"   = $true
         "launchBrowser"  = $true
-        "startupObjectType" = "Page"
-        "startupObjectId"= $PageObjectId
-    }      
+    }
+
+    if ($PageObjectId -gt 0) {
+        $launchSettings += [ordered]@{
+            "startupObjectType" = "Page"
+            "startupObjectId"= $PageObjectId
+        }
+    }
         
     $launchSettings | ConvertTo-Json | Out-Host
     $oldSettings = $launchJson.configurations | Where-Object { $_.name -eq $launchsettings.name }
