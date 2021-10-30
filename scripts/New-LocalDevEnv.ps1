@@ -25,7 +25,7 @@ if (!$IsInAdminMode) {
     Start-Process powershell -Verb runas -WorkingDirectory $scriptPath -ArgumentList $ArgumentList -WindowStyle Normal -Wait
 }
 else {
-    Invoke-Expression -Command "Function Install-BCContainerHelper { $((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Install-BCContainerHelper.ps1").Content) }"
+    Invoke-Expression -Command "Function Install-BCContainerHelper { $((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Install-BCContainerHelper.ps1").Content.Substring(1)) }"
     Install-BCContainerHelper
     $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
     $userProfile = $settings.userProfiles | Where-Object -Property profile -EQ "$env:computername\$env:username"
@@ -72,7 +72,7 @@ else {
     if ($settings.dotnetAddIns) {
         $parameters += @{ 
             "myscripts" = @( "$configurationFilePath"
-                @{ "SetupAddins.ps1" = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Copy-AddIns.ps1").Content })
+                @{ "SetupAddins.ps1" = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Copy-AddIns.ps1").Content.Substring(1) })
         }    
     }
 
@@ -111,7 +111,7 @@ else {
         Import-TestToolkitToBcContainer -containerName $containerName -testToolkitCountry $settings.testToolkitCountry
     }
 
-    Invoke-Expression -Command "Function Update-LaunchJson { $((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Update-LaunchJson.ps1").Content) }"
+    Invoke-Expression -Command "Function Update-LaunchJson { $((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Update-LaunchJson.ps1").Content.Substring(1)) }"
     Update-LaunchJson -appFolders $settings.appFolders -BaseFolder (Split-Path -Path $configurationFilePath -Parent) 
     Update-LaunchJson -appFolders $settings.testFolders -BaseFolder (Split-Path -Path $configurationFilePath -Parent) -PageObjectId 130451
 
