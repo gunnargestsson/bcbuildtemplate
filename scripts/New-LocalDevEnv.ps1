@@ -2,8 +2,8 @@ Param(
     [Parameter(Mandatory = $true)]
     [string] $configurationFilePath,
 
-    [Parameter(Mandatory = $true)]
-    [string] $scriptToStart
+    [Parameter(Mandatory = $false)]
+    [string] $scriptToStart = (Join-path $PSScriptRoot $MyInvocation.MyCommand.Name)
 
 )
 
