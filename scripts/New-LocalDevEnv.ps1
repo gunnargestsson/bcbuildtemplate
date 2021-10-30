@@ -30,7 +30,6 @@ else {
         Set-Content -Path $BCContainerHelperInstallPath -Value (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Install-BCContainerHelper.ps1").Content -Encoding UTF8        
     }
     . $BCContainerHelperInstallPath -buildEnv 'Local'
-    $configurationFilePath = Join-Path $scriptPath 'build-settings.json'
     $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
     $userProfile = $settings.userProfiles | Where-Object -Property profile -EQ "$env:computername\$env:username"
     if (!$userProfile) { 
