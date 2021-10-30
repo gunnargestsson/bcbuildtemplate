@@ -72,7 +72,7 @@ else {
     if ($settings.dotnetAddIns) {
         $parameters += @{ 
             "myscripts" = @( "$configurationFilePath"
-                @{ "SetupAddins.ps1" = ((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Copy-AddIns.ps1").Content | Out-String) })
+                @{ "SetupAddins.ps1" = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Copy-AddIns.ps1").Content })
         }    
     }
 
