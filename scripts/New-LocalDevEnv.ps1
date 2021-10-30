@@ -82,7 +82,9 @@ else {
                 try { $parameters += @{ $parameter.Name = $value } } catch { $parameters."$($parameter.Name)" = $value }
             }
         }
-    }        
+    }
+
+    Write-Host "Starting Container: $parameters"
 
     New-BCContainer @parameters `
         -containerName $containername `
