@@ -8,7 +8,6 @@
     [int] $PageObjectId = 0
 )
 
-# Update Launch Json for all apps
 foreach ($appFolder in $appFolders) {
     $vscodeFolder = Join-Path $BaseFolder (Join-Path $appFolder ".vscode")
     New-Item -Path $vscodeFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
