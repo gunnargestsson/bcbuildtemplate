@@ -19,10 +19,10 @@ $adminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator
 # Check to see if we are currently running "as Administrator"
 $IsInAdminMode = $myWindowsPrincipal.IsInRole($adminRole)
 
-if (!$IsInAdminMode) {    
-    $ArgumentList = "-noprofile -file ${scriptToStart} `"${configurationFilePath}`""
-    Write-Host "Starting '${ArgumentList}' in Admin Mode..."
-    Start-Process powershell -Verb runas -WorkingDirectory $scriptPath -ArgumentList $ArgumentList -WindowStyle Normal -Wait
+if (!$IsInAdminMode) {
+    $ArgumentList = "-noprofile -file ${scriptToStart}"
+    Write-Host "Starting '${scriptToStart}' in Admin Mode..."
+    Start-Process powershell -Verb runas -WorkingDirectory $scriptPath -ArgumentList @($ArgumentList,$configurationFilePath,$scriptToStart) -WindowStyle Normal -Wait 
 }
 else {
     Invoke-Expression -Command "Function Install-BCContainerHelper { $((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Install-BCContainerHelper.ps1").Content.Substring(1)) }"
