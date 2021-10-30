@@ -20,7 +20,7 @@ $adminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator
 $IsInAdminMode = $myWindowsPrincipal.IsInRole($adminRole)
 
 if (!$IsInAdminMode) {
-    Write-Host "Starting Script in Admin Mode..."
+    Write-Host "Starting '${scriptToStart}' in Admin Mode..."
     $ArgumentList = "-noprofile -file '${scriptToStart}' -configurationFilePath ${configurationFilePath}"
     Start-Process powershell -Verb runas -WorkingDirectory $scriptPath -ArgumentList $ArgumentList -WindowStyle Normal -Wait
 }
