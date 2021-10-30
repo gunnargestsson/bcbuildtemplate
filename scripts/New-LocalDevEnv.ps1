@@ -24,12 +24,9 @@ if (!$IsInAdminMode) {
     $ArgumentList = "-noprofile -file '${scriptToStart}' -configurationFilePath ${configurationFilePath}"
     Start-Process powershell -Verb runas -WorkingDirectory $scriptPath -ArgumentList $ArgumentList -WindowStyle Normal -Wait
 }
-else {        
-    $BCContainerHelperInstallPath = Join-Path $env:TEMP 'Install-BCContainerHelper.ps1'
-    if (-not (Test-Path -Path $BCContainerHelperInstallPath)) {
-        Set-Content -Path $BCContainerHelperInstallPath -Value ((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Install-BCContainerHelper.ps1").Content | Out-String) -Encoding UTF8        
-    }
-    . $BCContainerHelperInstallPath -bccontainerhelperVersion 'latest'
+else {
+    Invoke-Expression -Command "Function Install-BCContainerHelper { $((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Install-BCContainerHelper.ps1").Content) }"
+    Install-BCContainerHelper
     $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
     $userProfile = $settings.userProfiles | Where-Object -Property profile -EQ "$env:computername\$env:username"
     if (!$userProfile) { 
