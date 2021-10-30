@@ -3,6 +3,8 @@ Param(
     [string] $configurationFilePath
 )
 
+$scriptPath = Split-Path -Path $configurationFilePath -Parent
+
 # Get the ID and security principal of the current user account
 $myWindowsID = [System.Security.Principal.WindowsIdentity]::GetCurrent()
 $myWindowsPrincipal = new-object System.Security.Principal.WindowsPrincipal($myWindowsID)
@@ -16,11 +18,10 @@ $IsInAdminMode = $myWindowsPrincipal.IsInRole($adminRole)
 if (!$IsInAdminMode) {
     Write-Host "Starting Script in Admin Mode..."
     $ScriptToStart = (Join-path $PSScriptRoot $MyInvocation.MyCommand.Name)
-    $ArgumentList = "-noprofile -file " + $ScriptToStart + ' -configurationFilePath ' + $configurationFilePath
-    Start-Process powershell -Verb runas -WorkingDirectory $PSScriptRoot -ArgumentList $ArgumentList -WindowStyle Normal -Wait
+    $ArgumentList = "-noprofile -file '${ScriptToStart}' -configurationFilePath ${configurationFilePath}"
+    Start-Process powershell -Verb runas -WorkingDirectory $scriptPath -ArgumentList $ArgumentList -WindowStyle Normal -Wait
 }
-else {    
-    $scriptPath = Split-Path -Path $configuartionFilePath -Parent
+else {        
     $BCContainerHelperInstallPath = Join-Path $env:TEMP 'Install-BCContainerHelper.ps1'
     if (-not (Test-Path -Path $BCContainerHelperInstallPath)) {
         Set-Content -Path $BCContainerHelperInstallPath -Value (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Install-BCContainerHelper.ps1").Content -Encoding UTF8
