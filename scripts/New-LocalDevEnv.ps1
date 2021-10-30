@@ -111,7 +111,7 @@ else {
     }
 
     Invoke-Expression -Command "Function Update-LaunchJson { $((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Update-LaunchJson.ps1").Content.Substring(1)) }"
-    Update-LaunchJson -appFolders $settings.appFolders.split(',') -BaseFolder (Split-Path -Path $scriptPath -Parent) 
-    Update-LaunchJson -appFolders $settings.testFolders.split(',') -BaseFolder (Split-Path -Path $scriptPath -Parent) -PageObjectId 130451
+    Update-LaunchJson -appFolders $settings.appFolders -BaseFolder (Split-Path -Path $scriptPath -Parent) 
+    Update-LaunchJson -appFolders $settings.testFolders -BaseFolder (Split-Path -Path $scriptPath -Parent) -PageObjectId 130451
 
 }

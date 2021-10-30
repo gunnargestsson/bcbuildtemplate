@@ -8,7 +8,7 @@
     [int] $PageObjectId = 0
 )
 
-foreach ($appFolder in $appFolders) {
+foreach ($appFolder in $appFolders.split(',')) {
     $vscodeFolder = Join-Path $BaseFolder (Join-Path $appFolder ".vscode")
     New-Item -Path $vscodeFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
     $launchJsonFile = Join-Path $vscodeFolder "launch.json"
