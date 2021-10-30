@@ -1,6 +1,10 @@
 Param(
     [Parameter(Mandatory = $true)]
-    [string] $configurationFilePath
+    [string] $configurationFilePath,
+
+    [Parameter(Mandatory = $true)]
+    [string] $scriptToStart
+
 )
 
 $scriptPath = Split-Path -Path $configurationFilePath -Parent
@@ -17,8 +21,7 @@ $IsInAdminMode = $myWindowsPrincipal.IsInRole($adminRole)
 
 if (!$IsInAdminMode) {
     Write-Host "Starting Script in Admin Mode..."
-    $ScriptToStart = (Join-path $PSScriptRoot $MyInvocation.MyCommand.Name)
-    $ArgumentList = "-noprofile -file '${ScriptToStart}' -configurationFilePath ${configurationFilePath}"
+    $ArgumentList = "-noprofile -file '${scriptToStart}' -configurationFilePath ${configurationFilePath}"
     Start-Process powershell -Verb runas -WorkingDirectory $scriptPath -ArgumentList $ArgumentList -WindowStyle Normal -Wait
 }
 else {        
