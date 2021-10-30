@@ -27,7 +27,7 @@ if (!$IsInAdminMode) {
 else {        
     $BCContainerHelperInstallPath = Join-Path $env:TEMP 'Install-BCContainerHelper.ps1'
     if (-not (Test-Path -Path $BCContainerHelperInstallPath)) {
-        Set-Content -Path $BCContainerHelperInstallPath -Value (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Install-BCContainerHelper.ps1").Content -Encoding UTF8        
+        Set-Content -Path $BCContainerHelperInstallPath -Value ((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Install-BCContainerHelper.ps1").Content | Out-String) -Encoding UTF8        
     }
     . $BCContainerHelperInstallPath -bccontainerhelperVersion 'latest'
     $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
@@ -75,7 +75,7 @@ else {
     if ($settings.dotnetAddIns) {
         $parameters += @{ 
             "myscripts" = @( "$configurationFilePath"
-                @{ "SetupAddins.ps1" = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Copy-AddIns.ps1").Content })
+                @{ "SetupAddins.ps1" = ((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Copy-AddIns.ps1").Content | Out-String) })
         }    
     }
 
