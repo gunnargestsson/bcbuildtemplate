@@ -278,11 +278,9 @@ foreach ($deployment in $deployments) {
                 if ($vmSession) {
                     if ($tempAppFile) {
                         try { RemoveFileFromSession -session $vmSession -filename $tempAppFile } catch {}
-                    }
-                    Remove-PSSession -Session $vmSession
-                }
+                    }                    
+                }                
             }
-        
         }
         elseif ($deploymentType -eq "host") {
             $VM = $deployment.DeployToName
@@ -306,19 +304,20 @@ foreach ($deployment in $deployments) {
             }
             catch { }
     
-            $vmSession = $null
             $tempAppFile = ""
             try {
     
                 if ($useSession) {
-                    if ($vmCredential) {
-                        $vmSession = New-DeploymentRemoteSession -HostName $VM  -Credential $vmCredential
+                    if ($vmSession -eq $null) {
+                        if ($vmCredential) {
+                            $vmSession = New-DeploymentRemoteSession -HostName $VM  -Credential $vmCredential
+                        }
+                        else {
+                            $vmSession = New-DeploymentRemoteSession -HostName $VM
+                        }
+                        $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
+                        $sessionArgument = @{ "Session" = $vmSession }
                     }
-                    else {
-                        $vmSession = New-DeploymentRemoteSession -HostName $VM
-                    }
-                    $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
-                    $sessionArgument = @{ "Session" = $vmSession }
                 }
                 else {
                     $tempAppFile = $appFile
@@ -402,11 +401,14 @@ foreach ($deployment in $deployments) {
                 if ($vmSession) {
                     if ($tempAppFile) {
                         try { RemoveFileFromSession -session $vmSession -filename $tempAppFile } catch {}
-                    }
-                    Remove-PSSession -Session $vmSession
+                    }                    
                 }
             }
         
         }        
     }
 }
+if ($vmSession) {
+    Remove-PSSession -Session $vmSession
+}
+
