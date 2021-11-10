@@ -72,8 +72,7 @@ stages:
         PowerShellPassword: $(PowerShellPassword)
       inlineScript: |
         Write-Host "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }} -artifactsFolder $(Build.ArtifactStagingDirectory) -branchName $(Build.SourceBranch)
-  - job: Generate Release Note
-    steps:
+        
     - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
       displayName: 'Generate Build Notes'
       condition: ne(${{ parameters.releasenoteFilePath }},'')
