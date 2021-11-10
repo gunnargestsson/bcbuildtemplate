@@ -19,6 +19,10 @@ parameters:
   displayName: 'Specifies the path to the build-settings.json file'
   type: string
   default: '.azureDevOps\build-settings.json'
+- name: releasenoteFilePath
+  displayName: 'Specifies the path to the release note markdown file'
+  type: string
+  default: ''
 
 stages:
 - stage: Deployment
@@ -67,4 +71,15 @@ stages:
         PowerShellUsername: $(PowerShellUsername)
         PowerShellPassword: $(PowerShellPassword)
       inlineScript: |
-        Write-Host "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }} -artifactsFolder $(Build.ArtifactStagingDirectory) -branchName $(Build.SourceBranch)"
+        Write-Host "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }} -artifactsFolder $(Build.ArtifactStagingDirectory) -branchName $(Build.SourceBranch)
+  - job: Generate Release Note
+    steps:
+    - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
+      displayName: 'Generate Build Notes'
+      condition: ne(${{ parameters.releasenoteFilePath }},'')
+      inputs:
+        outputfile: '$(Build.ArtifactStagingDirectory)/releasenote-${{ parameters.appVersion }}.$(appBuild).$(appRevision).md'
+        templatefile: '$(Agent.ToolsDirectory)/${{ parameters.releasenoteFilePath }}'
+        checkStage: true
+        stopOnRedeploy: false
+        getParentsAndChildren: true
