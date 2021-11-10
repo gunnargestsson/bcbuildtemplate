@@ -117,7 +117,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
-        arguments: '-appFolders "$(appFolders)" -skipVerification:([String]::IsNullOrEmpty($CodeSignPfxPassword))'
+        arguments: '-appFolders "$(appFolders)" -skipVerification:([String]::IsNullOrEmpty($CodeSignPfxPassword)) -licenseFile "$(LicenseFile)"'
         failOnStderr: true
     
     - task: PowerShell@2
@@ -128,7 +128,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -skipVerification'
+        arguments: '-appFolders "$(testFolders)" -skipVerification -licenseFile "$(TestLicenseFile)"'
         failOnStderr: true
 
     - task: PowerShell@2
@@ -139,7 +139,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -skipVerification'
+        arguments: '-appFolders "$(testFolders)" -skipVerification -licenseFile "$(LicenseFile)"'
         failOnStderr: true
 
     - task: PowerShell@2

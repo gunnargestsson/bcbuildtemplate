@@ -36,6 +36,7 @@ if ($PowerShellUsername -is [string]) {
     if ($PowerShellPassword -isnot [SecureString]) { throw "ClientSecret needs to be a SecureString or a String" }
     $vmCredential = New-Object System.Management.Automation.PSCredential($PowerShellUsername, $PowerShellPassword);
 }
+$vmSession = $null
 $appFolders = $settings.appFolders
 $deployments = @()
 $deployments += $settings.deployments | Where-Object { $_.branch -eq $branchName }
@@ -186,17 +187,18 @@ foreach ($deployment in $deployments) {
                 }
             }
             catch { }
-    
-            $vmSession = $null
+                
             $tempAppFile = ""
             try {
     
                 if ($useSession) {
-                    if ($vmCredential) {
-                        $vmSession = New-DeploymentRemoteSession -HostName $VM  -Credential $vmCredential
-                    }
-                    else {
-                        $vmSession = New-DeploymentRemoteSession -HostName $VM
+                    if ($vmSession -eq $null) {
+                        if ($vmCredential) {
+                            $vmSession = New-DeploymentRemoteSession -HostName $VM  -Credential $vmCredential
+                        }
+                        else {
+                            $vmSession = New-DeploymentRemoteSession -HostName $VM
+                        }
                     }
                     $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
                     $sessionArgument = @{ "Session" = $vmSession }
@@ -276,11 +278,9 @@ foreach ($deployment in $deployments) {
                 if ($vmSession) {
                     if ($tempAppFile) {
                         try { RemoveFileFromSession -session $vmSession -filename $tempAppFile } catch {}
-                    }
-                    Remove-PSSession -Session $vmSession
-                }
+                    }                    
+                }                
             }
-        
         }
         elseif ($deploymentType -eq "host") {
             $VM = $deployment.DeployToName
@@ -304,19 +304,20 @@ foreach ($deployment in $deployments) {
             }
             catch { }
     
-            $vmSession = $null
             $tempAppFile = ""
             try {
     
                 if ($useSession) {
-                    if ($vmCredential) {
-                        $vmSession = New-DeploymentRemoteSession -HostName $VM  -Credential $vmCredential
+                    if ($vmSession -eq $null) {
+                        if ($vmCredential) {
+                            $vmSession = New-DeploymentRemoteSession -HostName $VM  -Credential $vmCredential
+                        }
+                        else {
+                            $vmSession = New-DeploymentRemoteSession -HostName $VM
+                        }
+                        $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
+                        $sessionArgument = @{ "Session" = $vmSession }
                     }
-                    else {
-                        $vmSession = New-DeploymentRemoteSession -HostName $VM
-                    }
-                    $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
-                    $sessionArgument = @{ "Session" = $vmSession }
                 }
                 else {
                     $tempAppFile = $appFile
@@ -400,11 +401,14 @@ foreach ($deployment in $deployments) {
                 if ($vmSession) {
                     if ($tempAppFile) {
                         try { RemoveFileFromSession -session $vmSession -filename $tempAppFile } catch {}
-                    }
-                    Remove-PSSession -Session $vmSession
+                    }                    
                 }
             }
         
         }        
     }
 }
+if ($vmSession) {
+    Remove-PSSession -Session $vmSession
+}
+
