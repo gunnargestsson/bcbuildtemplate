@@ -61,20 +61,18 @@ stages:
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
         arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }}'
         failOnStderr: true
-    
+
     - task: PowerShell@2
-      displayName: 'Deploy to Environment'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
-      env:
-        ClientId: $(ClientId)
-        ClientSecret: $(ClientSecret)
-        PowerShellUsername: $(PowerShellUsername)
-        PowerShellPassword: $(PowerShellPassword)
-      inlineScript: |
-        Write-Host "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }} -artifactsFolder $(Build.ArtifactStagingDirectory) -branchName $(Build.SourceBranch)
-        
+      inputs:
+        targetType: 'inline'
+        script: 'dir env:'
+
+- stage: Release Note
+  jobs:
+  - job: Generate Release Note
+    steps:
     - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
-      displayName: 'Generate Build Notes'
+      displayName: 'Generate Release Notes'
       condition: ne(${{ parameters.releasenoteFilePath }},'')
       inputs:
         outputfile: '$(Build.ArtifactStagingDirectory)/releasenote-${{ parameters.appVersion }}.$(appBuild).$(appRevision).md'
