@@ -67,9 +67,9 @@ stages:
         targetType: 'inline'
         script: 'dir env:'
 
-- stage: Release Note
+- stage: 'Release Note'
   jobs:
-  - job: Generate Release Note
+  - job: 'Generate Release Note'
     steps:
     - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
       displayName: 'Generate Release Notes'
