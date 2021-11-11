@@ -65,7 +65,7 @@ stages:
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
-        script: 'dir env:'
+        script: 'dir env: | ConvertTo-Json'
 
 - stage: ReleaseNote
   jobs:
