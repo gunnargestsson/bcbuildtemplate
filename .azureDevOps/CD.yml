@@ -88,7 +88,7 @@ stages:
       condition: ne('${{ parameters.releasenoteTemplateFilePath }}','')
       inputs:
         outputfile: "$(Build.ArtifactStagingDirectory)/releasenote-$(resources.pipeline.self-pipe.runName).md"
-        templatefile: "$(Build.Repository.LocalPath)/${{ parameters.releasenoteFilePath }}"
+        templatefile: "$(Build.Repository.LocalPath)/${{ parameters.releasenoteTemplateFilePath }}"
         checkStage: true
         stopOnRedeploy: false
         getParentsAndChildren: true
