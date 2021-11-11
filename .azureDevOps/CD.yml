@@ -67,7 +67,7 @@ stages:
         targetType: 'inline'
         script: 'dir env:'
 
-- stage: 'Release Note'
+- stage: ReleaseNote
   jobs:
   - job: 'Generate Release Note'
     steps:
