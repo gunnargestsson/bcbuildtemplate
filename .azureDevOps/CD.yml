@@ -76,7 +76,7 @@ stages:
       condition: ne('${{ parameters.releasenoteFilePath }}','')
       inputs:
         outputfile: '$(Build.ArtifactStagingDirectory)/releasenote-${{ parameters.appVersion }}.$(appBuild).$(appRevision).md'
-        templatefile: '$(Agent.ToolsDirectory)/${{ parameters.releasenoteFilePath }}'
+        templatefile: '$(Build.Repository.LocalPath)/${{ parameters.releasenoteFilePath }}'
         checkStage: true
         stopOnRedeploy: false
         getParentsAndChildren: true
