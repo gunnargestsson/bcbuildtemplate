@@ -17,6 +17,7 @@ Param(
 )
 
 if ($appVersion) {
+    Write-Host "Updating build number to $appVersion"
     write-host "##vso[build.updatebuildnumber]$appVersion"
 }
 
