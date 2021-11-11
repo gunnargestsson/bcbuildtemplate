@@ -63,7 +63,6 @@ stages:
         failOnStderr: true
 
     - download: self-pipe
-      patterns: '*.app'
       displayName: 'Download build artifacts'
 
     - task: PowerShell@2
