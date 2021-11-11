@@ -69,7 +69,7 @@ stages:
 
 - stage: ReleaseNote
   jobs:
-  - job: 'Generate Release Note'
+  - job: GenerateReleaseNote
     steps:
     - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
       displayName: 'Generate Release Notes'
