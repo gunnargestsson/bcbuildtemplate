@@ -106,5 +106,5 @@ stages:
         Destination: 'AzureBlob'
         storage: 'brightcomdevops'
         ContainerName: 'devops'
-        BlobPrefix: "Artifact/$(Build.Repository.Name)/ReleaseNotes"
+        BlobPrefix: "Artifact/$(Build.Repository.Name)/ReleaseNotes/releasenote-$(resources.pipeline.self-pipe.runName).md"
 
