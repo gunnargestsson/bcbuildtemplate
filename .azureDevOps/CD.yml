@@ -59,7 +59,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "Release of ${{ parameters.appVersion }}.$(appBuild).$(appRevision) to PROD" -version ${{ parameters.version }}'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "Release of $(resourses.pipeline.self-pipeline.runname)" -version ${{ parameters.version }}'
         failOnStderr: true
 
     - task: PowerShell@2
@@ -75,7 +75,7 @@ stages:
       displayName: 'Generate Release Notes'
       condition: ne('${{ parameters.releasenoteFilePath }}','')
       inputs:
-        outputfile: '$(Build.ArtifactStagingDirectory)/releasenote-${{ parameters.appVersion }}.$(appBuild).$(appRevision).md'
+        outputfile: '$(Build.ArtifactStagingDirectory)/releasenote-$(resourses.pipeline.self-pipeline.runname).md'
         templatefile: '$(Build.Repository.LocalPath)/${{ parameters.releasenoteFilePath }}'
         checkStage: true
         stopOnRedeploy: false
