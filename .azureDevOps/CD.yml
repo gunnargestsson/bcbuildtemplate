@@ -59,7 +59,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "Release of $($env:RESOURCES_PIPELINE_SELF_PIPE_RUNNAME)" -version ${{ parameters.version }}'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "$($env:RESOURCES_PIPELINE_SELF_PIPE_RUNNAME)" -version ${{ parameters.version }}'
         failOnStderr: true
 
     - task: PowerShell@2
