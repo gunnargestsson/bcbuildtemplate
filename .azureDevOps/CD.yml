@@ -92,3 +92,8 @@ stages:
         checkStage: true
         stopOnRedeploy: false
         getParentsAndChildren: true
+        dumpPayloadToConsole: true
+        dumpPayloadToFile: false
+        replaceFile: True
+        checkForManuallyLinkedWI: True
+
