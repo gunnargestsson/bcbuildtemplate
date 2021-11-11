@@ -73,7 +73,7 @@ stages:
     steps:
     - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
       displayName: 'Generate Release Notes'
-      condition: and(succeeded(), ne('${{ parameters.releasenoteFilePath }}','')
+      condition: ne('${{ parameters.releasenoteFilePath }}','')
       inputs:
         outputfile: '$(Build.ArtifactStagingDirectory)/releasenote-${{ parameters.appVersion }}.$(appBuild).$(appRevision).md'
         templatefile: '$(Agent.ToolsDirectory)/${{ parameters.releasenoteFilePath }}'
