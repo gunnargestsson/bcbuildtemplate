@@ -73,12 +73,6 @@ stages:
         filePath: 'bcbuildtemplate\scripts\Deploy-App.ps1'
         arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Pipeline.Workspace)/self-pipe/${{ parameters.appVersion }}" -branchName "$(resources.pipeline.self-pipe.sourceBranch)"'
     
-    - task: PowerShell@2
-      inputs:
-        displayName: 'Write Env Variables'
-        targetType: 'inline'
-        script: 'dir env: | ConvertTo-Json'
-
 - stage: ReleaseNote
   jobs:
   - job: 'ReleaseNote'
@@ -96,6 +90,7 @@ stages:
         dumpPayloadToFile: false
         replaceFile: True
         checkForManuallyLinkedWI: True
+        stopOnError: true
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
