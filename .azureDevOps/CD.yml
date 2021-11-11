@@ -62,9 +62,16 @@ stages:
         arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "$(resources.pipeline.self-pipe.runName)" -version ${{ parameters.version }}'
         failOnStderr: true
 
-    - download: [ self-pipe ]
+    - download: self-pipe
       patterns: '*.app'
       displayName: 'Download build artifacts'
+
+    - task: PowerShell@2
+      displayName: 'Deploy App to Prod'
+      inputs:
+        targetType: filePath
+        filePath: './$(System.DefaultWorkingDirectory)/bcbuildtemplate/scripts/Deploy-App.ps1'
+        arguments: '-configurationFilePath "$($ENV:SYSTEM_ARTIFACTSDIRECTORY)\SourceRepo\$($ENV:CONFIGURATIONFILEPATHQA)" -artifactsFolder "$($ENV:SYSTEM_ARTIFACTSDIRECTORY)\Build\$($ENV:APPVERSION)" -branchName "$($ENV:RELEASE_ARTIFACTS_BUILD_SOURCEBRANCH)"'
 
     - task: PowerShell@2
       inputs:
