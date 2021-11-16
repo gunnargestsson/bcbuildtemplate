@@ -102,8 +102,8 @@ else {
     Write-Host "Set imageName = $imageName"
     Write-Host "##vso[task.setvariable variable=imageName]$imageName"
 }
-$branchName = $ENV:BUILD_BUILDNUMBER + $ENV:BUILD_SOURCEBRANCHNAME
-$containerName = "$($containerNamePrefix)$("${branchname}$($ENV:AGENT_NAME)" -replace '[^a-zA-Z0-9]', '')"
+$buildName = $appVersion.Split('.')[2] + $ENV:BUILD_SOURCEBRANCHNAME
+$containerName = "$($containerNamePrefix)$("${buildName}$($ENV:AGENT_NAME)" -replace '[^a-zA-Z0-9]', '')"
 if ($containerName.Length -gt 15) {
     $containerName = $containerName.Substring(0, 15)
 }
