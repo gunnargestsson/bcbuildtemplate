@@ -94,16 +94,16 @@ if ("$($ENV:AGENT_NAME)" -eq "Hosted Agent" -or "$($ENV:AGENT_NAME)" -like "Azur
 }
 else {
     if ($imageName -eq "") {
-        $containerNamePrefix = "bld-"
+        $containerNamePrefix = "bld"
     }
     else {
-        $containerNamePrefix = "$imageName-"
+        $containerNamePrefix = "$imageName"
     }
     Write-Host "Set imageName = $imageName"
     Write-Host "##vso[task.setvariable variable=imageName]$imageName"
 }
-$buildName = $appVersion.Split('.')[2] + $ENV:BUILD_SOURCEBRANCHNAME
-$containerName = "$($containerNamePrefix)$("${buildName}$($ENV:AGENT_NAME)" -replace '[^a-zA-Z0-9]', '')"
+$buildName = $ENV:BUILD_SOURCEBRANCHNAME + $appVersion.Split('.')[2]
+$containerName = "$($containerNamePrefix)$("${buildName}$($ENV:AGENT_NAME)" -replace '[^a-zA-Z0-9]', '')".ToUpper()
 if ($containerName.Length -gt 15) {
     $containerName = $containerName.Substring(0, 15)
 }
