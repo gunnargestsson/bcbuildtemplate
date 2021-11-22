@@ -8,69 +8,73 @@
     [int] $PageObjectId = 0
 )
 
-foreach ($appFolder in $appFolders.split(',')) {
-    $vscodeFolder = Join-Path $BaseFolder (Join-Path $appFolder ".vscode")
-    New-Item -Path $vscodeFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
-    $launchJsonFile = Join-Path $vscodeFolder "launch.json"
-    if (Test-Path $launchJsonFile) {
-        Write-Host "Modifying $launchJsonFile"
-        $launchJson = Get-Content $LaunchJsonFile | ConvertFrom-Json
-    }
-    else {
-        Write-Host "Creating $launchJsonFile"
-        $dir = [System.IO.Path]::GetDirectoryName($launchJsonFile)
-        if (!(Test-Path $dir)) {
-            New-Item -Path $dir -ItemType Directory | Out-Null
+if ([string]::IsNullOrEmpty($appFolders)) {
+    Write-Host "No App specified for Launch.json update"
+}
+else {
+    foreach ($appFolder in $appFolders.split(',')) {
+        $vscodeFolder = Join-Path $BaseFolder (Join-Path $appFolder ".vscode")
+        New-Item -Path $vscodeFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+        $launchJsonFile = Join-Path $vscodeFolder "launch.json"
+        if (Test-Path $launchJsonFile) {
+            Write-Host "Modifying $launchJsonFile"
+            $launchJson = Get-Content $LaunchJsonFile | ConvertFrom-Json
         }
-        $launchJson = @{ "version" = "0.2.0"; "configurations" = @() } | ConvertTo-Json | ConvertFrom-Json
-    }
-
-    $config = Get-BcContainerServerConfiguration -ContainerName $containerName
-    if ($config.DeveloperServicesSSLEnabled -eq "true") {
-        $devserverUrl = "https://$containerName"
-    }
-    else {
-        $devserverUrl = "http://$containerName"
-    }
-    if ($config.ClientServicesCredentialType -eq "Windows") {
-        $authentication = "Windows"
-    }
-    else {
-        $authentication = "UserPassword"
-    }
-
-    $launchSettings = [ordered]@{
-        "type"           = 'al'
-        "request"        = 'launch'
-        "name"           = $containerName
-        "server"         = $devserverUrl
-        "serverInstance" = $config.ServerInstance
-        "port"           = [int]($config.DeveloperServicesPort)
-        "tenant"         = 'default'
-        "authentication" = $authentication
-        "breakOnError"   = $true
-        "launchBrowser"  = $true
-    }
-
-    if ($PageObjectId -gt 0) {
-        $launchSettings += [ordered]@{
-            "startupObjectType" = "Page"
-            "startupObjectId"= $PageObjectId
+        else {
+            Write-Host "Creating $launchJsonFile"
+            $dir = [System.IO.Path]::GetDirectoryName($launchJsonFile)
+            if (!(Test-Path $dir)) {
+                New-Item -Path $dir -ItemType Directory | Out-Null
+            }
+            $launchJson = @{ "version" = "0.2.0"; "configurations" = @() } | ConvertTo-Json | ConvertFrom-Json
         }
-    }
-        
-    $launchSettings | ConvertTo-Json | Out-Host
-    $oldSettings = $launchJson.configurations | Where-Object { $_.name -eq $launchsettings.name }
-    if ($oldSettings) {
-        $oldSettings.PSObject.Properties | % {
-            $prop = $_.Name
-            if (!($launchSettings.Keys | Where-Object { $_ -eq $prop } )) {
-                $launchSettings += @{ "$prop" = $oldSettings."$prop" }
+
+        $config = Get-BcContainerServerConfiguration -ContainerName $containerName
+        if ($config.DeveloperServicesSSLEnabled -eq "true") {
+            $devserverUrl = "https://$containerName"
+        }
+        else {
+            $devserverUrl = "http://$containerName"
+        }
+        if ($config.ClientServicesCredentialType -eq "Windows") {
+            $authentication = "Windows"
+        }
+        else {
+            $authentication = "UserPassword"
+        }
+
+        $launchSettings = [ordered]@{
+            "type"           = 'al'
+            "request"        = 'launch'
+            "name"           = $containerName
+            "server"         = $devserverUrl
+            "serverInstance" = $config.ServerInstance
+            "port"           = [int]($config.DeveloperServicesPort)
+            "tenant"         = 'default'
+            "authentication" = $authentication
+            "breakOnError"   = $true
+            "launchBrowser"  = $true
+        }
+
+        if ($PageObjectId -gt 0) {
+            $launchSettings += [ordered]@{
+                "startupObjectType" = "Page"
+                "startupObjectId"   = $PageObjectId
             }
         }
+            
+        $launchSettings | ConvertTo-Json | Out-Host
+        $oldSettings = $launchJson.configurations | Where-Object { $_.name -eq $launchsettings.name }
+        if ($oldSettings) {
+            $oldSettings.PSObject.Properties | % {
+                $prop = $_.Name
+                if (!($launchSettings.Keys | Where-Object { $_ -eq $prop } )) {
+                    $launchSettings += @{ "$prop" = $oldSettings."$prop" }
+                }
+            }
+        }
+        $launchJson.configurations = @($launchJson.configurations | Where-Object { $_.name -ne $launchsettings.name })
+        $launchJson.configurations += $launchSettings
+        $launchJson | ConvertTo-Json -Depth 10 | Set-Content $launchJsonFile
     }
-    $launchJson.configurations = @($launchJson.configurations | Where-Object { $_.name -ne $launchsettings.name })
-    $launchJson.configurations += $launchSettings
-    $launchJson | ConvertTo-Json -Depth 10 | Set-Content $launchJsonFile
-
 }
