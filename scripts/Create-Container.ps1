@@ -106,7 +106,7 @@ elseif ($buildenv -eq "AzureDevOps") {
     if ($settings.dotnetAddIns) {
         $parameters += @{ 
             "myscripts" = @( (Get-ChildItem -Path $buildProjectFolder -Filter "build-settings.json" -Recurse).FullName
-                @{ "SetupAddIns.ps1" = (Get-Content -Path "${PSScriptRoot}\Copy-AddIns.ps1" -Encoding UTF8 | Out-String) })
+                @{ "SetupAddIns.ps1" = (Get-Content -Path "${PSScriptRoot}\Copy-AddIns.ps1" -Encoding UTF8) })
         }
     }    
 }
