@@ -13,7 +13,10 @@ Param(
     [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH,
 
     [Parameter(Mandatory = $false)]
-    [string] $appVersion = ""
+    [string] $appVersion = "",
+
+    [Parameter(Mandatory = $true)]
+    [string] $branchName
 )
 
 if ($appVersion) {
@@ -53,10 +56,23 @@ Write-Host "##vso[task.setvariable variable=testFolders]$testFolders"
 
 $property = $settings.PSObject.Properties.Match('azureBlob')
 if ($property.Value) {
-    Write-Host "Set azureStorageAccount = $($settings.azureBlob.azureStorageAccount)"
-    Write-Host "##vso[task.setvariable variable=azureStorageAccount]$($settings.azureBlob.azureStorageAccount)"
-    Write-Host "Set azureContainerName = $($settings.azureBlob.azureContainerName)"
-    Write-Host "##vso[task.setvariable variable=azureContainerName]$($settings.azureBlob.azureContainerName)"            
+    $branches = $settings.azureBlob.branchNames
+    if ($branches) {
+        if ($branches -icontains $branchName) {
+            Write-Host "Set azureStorageAccount = $($settings.azureBlob.azureStorageAccount)"
+            Write-Host "##vso[task.setvariable variable=azureStorageAccount]$($settings.azureBlob.azureStorageAccount)"
+            Write-Host "Set azureContainerName = $($settings.azureBlob.azureContainerName)"
+            Write-Host "##vso[task.setvariable variable=azureContainerName]$($settings.azureBlob.azureContainerName)"            
+        } else {
+            Write-Host "Set azureStorageAccount = ''"
+            Write-Host "##vso[task.setvariable variable=azureStorageAccount]''"        
+        }
+    } else {
+        Write-Host "Set azureStorageAccount = $($settings.azureBlob.azureStorageAccount)"
+        Write-Host "##vso[task.setvariable variable=azureStorageAccount]$($settings.azureBlob.azureStorageAccount)"
+        Write-Host "Set azureContainerName = $($settings.azureBlob.azureContainerName)"
+        Write-Host "##vso[task.setvariable variable=azureContainerName]$($settings.azureBlob.azureContainerName)"            
+    }
 }
 else {
     Write-Host "Set azureStorageAccount = ''"

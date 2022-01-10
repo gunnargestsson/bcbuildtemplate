@@ -20,7 +20,8 @@
     },
     "azureBlob": {
         "azureStorageAccount": "",
-        "azureContainerName": ""
+        "azureContainerName": "",
+        "branchNames": [""]
     },
     "testMethod": {
         "companyName": "My Company",
