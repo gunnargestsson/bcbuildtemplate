@@ -36,7 +36,6 @@ if ($PowerShellUsername -is [string]) {
     if ($PowerShellPassword -isnot [SecureString]) { throw "ClientSecret needs to be a SecureString or a String" }
     $vmCredential = New-Object System.Management.Automation.PSCredential($PowerShellUsername, $PowerShellPassword);
 }
-$vmSession = $null
 $appFolders = $settings.appFolders
 $deployments = @()
 $deployments += $settings.deployments | Where-Object { $_.branch -eq $branchName }
@@ -45,6 +44,7 @@ foreach ($deployment in $deployments) {
 
     $artifactsFolder = (Get-Item $artifactsFolder).FullName
     Write-Host "Folder: $artifactsFolder"
+    $vmSession = $null
 
     Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $artifactsFolder -WarningAction SilentlyContinue | ForEach-Object {
         
@@ -408,8 +408,9 @@ foreach ($deployment in $deployments) {
         
         }        
     }
+    if ($vmSession) {
+        Remove-PSSession -Session $vmSession    
 }
-if ($vmSession) {
-    Remove-PSSession -Session $vmSession
+
 }
 
