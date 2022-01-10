@@ -65,7 +65,7 @@ if ($property.Value) {
             Write-Host "##vso[task.setvariable variable=azureContainerName]$($settings.azureBlob.azureContainerName)"            
         } else {
             Write-Host "Set azureStorageAccount = ''"
-            Write-Host "##vso[task.setvariable variable=azureStorageAccount]''"        
+            Write-Host "##vso[task.setvariable variable=azureStorageAccount]"        
         }
     } catch {
         Write-Host "Set azureStorageAccount = $($settings.azureBlob.azureStorageAccount)"
@@ -76,7 +76,7 @@ if ($property.Value) {
 }
 else {
     Write-Host "Set azureStorageAccount = ''"
-    Write-Host "##vso[task.setvariable variable=azureStorageAccount]''"
+    Write-Host "##vso[task.setvariable variable=azureStorageAccount]"
 }
 
 $imageversion = $settings.versions | Where-Object { $_.version -eq $version }
