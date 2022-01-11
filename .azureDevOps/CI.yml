@@ -174,7 +174,7 @@ stages:
     
     - task: PowerShell@2
       displayName: 'Get App RuntimePackage'
-      condition: and(succeeded(),eq(variables['createRuntimePackages'],'True'))
+      condition: and(succeeded(),eq('${{ parameters.createRuntimePackages}}','True'))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Get-AppRuntimePackage.ps1'
@@ -183,7 +183,7 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Sign RuntimePackage'
-      condition: and(succeeded(),eq(variables['createRuntimePackages'],'True'),ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''))
+      condition: and(succeeded(),eq('${{ parameters.createRuntimePackages}}','True'),ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''))
       env:
         codeSignPfxFile: $(CodeSignPfxFile)
         codeSignPfxPassword: $(CodeSignPfxPassword)
@@ -242,7 +242,7 @@ stages:
 
     - task: AzureFileCopy@4
       displayName: 'Copy Runtime Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.createRuntimePackages}}','True'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\RuntimePackages\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
