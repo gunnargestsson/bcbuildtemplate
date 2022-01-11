@@ -56,9 +56,9 @@ Write-Host "##vso[task.setvariable variable=testFolders]$testFolders"
 
 $property = $settings.PSObject.Properties.Match('azureBlob')
 if ($property.Value) {
-    try {
-        $branches = $settings.azureBlob.branchNames
-        if ($branches -icontains $branchName) {
+    $branches = $settings.azureBlob.PSObject.Properties.Match('BranchNames')
+    if ($branches.Value) {
+        if ($branches.Value -icontains $branchName) {
             Write-Host "Set azureStorageAccount = $($settings.azureBlob.azureStorageAccount)"
             Write-Host "##vso[task.setvariable variable=azureStorageAccount]$($settings.azureBlob.azureStorageAccount)"
             Write-Host "Set azureContainerName = $($settings.azureBlob.azureContainerName)"
@@ -67,14 +67,13 @@ if ($property.Value) {
             Write-Host "Set azureStorageAccount = ''"
             Write-Host "##vso[task.setvariable variable=azureStorageAccount]"        
         }
-    } catch {
+    } else {
         Write-Host "Set azureStorageAccount = $($settings.azureBlob.azureStorageAccount)"
         Write-Host "##vso[task.setvariable variable=azureStorageAccount]$($settings.azureBlob.azureStorageAccount)"
         Write-Host "Set azureContainerName = $($settings.azureBlob.azureContainerName)"
         Write-Host "##vso[task.setvariable variable=azureContainerName]$($settings.azureBlob.azureContainerName)"            
     }
-}
-else {
+} else {
     Write-Host "Set azureStorageAccount = ''"
     Write-Host "##vso[task.setvariable variable=azureStorageAccount]"
 }
