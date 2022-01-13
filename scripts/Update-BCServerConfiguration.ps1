@@ -1,5 +1,3 @@
-Add-Type -AssemblyName System.Net.Http
-
 $settings = (Get-Content ((Get-ChildItem -Path 'C:\Run\My' -Filter "build-settings.json" -Recurse).FullName) -Encoding UTF8 | Out-String | ConvertFrom-Json)
 
 if ($settings.serverConfiguration) {
