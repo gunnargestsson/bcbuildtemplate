@@ -122,6 +122,24 @@ else {
 
 }
 
+if ($settings.serverConfiguration) {
+    $serverConfiguration = ''
+    Foreach ($parameter in ($settings.serverConfiguration.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
+        try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }
+        if (!([String]::IsNullOrEmpty($value))) { 
+            if ($serverConfiguration -eq '') {
+                $serverConfiguration =  "$($parameter.Name)=$($value)"
+            } else {
+                $serverConfiguration =  ",$($parameter.Name)=$($value)"
+            }
+        } 
+    }
+    if ($serverConfiguration -ne '') {
+        $additionalParameters = @("--env CustomNavSettings=${serverConfiguration}")
+    }
+}
+
+
 $restoreDb = $reuseContainer -and (Test-BCContainer -containerName $containerName)
 if ($restoreDb) {
     try {
@@ -146,6 +164,12 @@ if ($restoreDb) {
 if ($imageName) {
     $parameters += @{ "imageName" = $imageName }
 }
+
+
+Write-Host "------------------"
+$parameters
+$additionalParameters
+Write-Host "------------------"
 
 if (!$restoreDb) {
     New-BCContainer @Parameters `
