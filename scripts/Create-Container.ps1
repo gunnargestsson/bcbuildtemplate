@@ -103,12 +103,13 @@ elseif ($buildenv -eq "AzureDevOps") {
     $parameters += @{ 
         "shortcuts" = "None"
     }
-    if ($settings.dotnetAddIns) {
+    if ($settings.dotnetAddIns -or $settings.serverConfiguration) {
         $NewConfigFilePath = Join-Path $env:Agent_TempDirectory "build-settings.json"
         Copy-Item -Path $configurationFilePath -Destination $NewConfigFilePath -Force
         $parameters += @{ 
             "myscripts" = @( "$NewConfigFilePath",
-                @{ "SetupAddIns.ps1" = (Get-Content -Path "${PSScriptRoot}\Copy-AddIns.ps1" -Encoding UTF8 | Out-String) })
+                @{ "SetupAddIns.ps1" = (Get-Content -Path "${PSScriptRoot}\Copy-AddIns.ps1" -Encoding UTF8 | Out-String)
+                   "SetupInstance.ps1" = (Get-Content -Path "${PSScriptRoot}\Update-BCServerConfiguration.ps1" -Encoding UTF8 | Out-String) })
         }
     }    
 }
