@@ -19,8 +19,7 @@
         "useCleanDatabase": false
     },
     "serverConfiguration": {
-        "EnableUserConsistencyValidationOnTasks": false,
-        "EnableTaskScheduler": false
+        "EnableUserConsistencyValidationOnTasks": false
     },    
     "azureBlob": {
         "azureStorageAccount": "",
