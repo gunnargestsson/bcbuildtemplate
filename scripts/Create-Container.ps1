@@ -130,7 +130,7 @@ if ($settings.serverConfiguration) {
             if ($serverConfiguration -eq '') {
                 $serverConfiguration =  "$($parameter.Name)=$($value)"
             } else {
-                $serverConfiguration =  ",$($parameter.Name)=$($value)"
+                $serverConfiguration +=  ",$($parameter.Name)=$($value)"
             }
         } 
     }

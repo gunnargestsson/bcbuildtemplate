@@ -18,6 +18,10 @@
         "useNewDatabase": false,
         "useCleanDatabase": false
     },
+    "serverConfiguration": {
+        "EnableUserConsistencyValidationOnTasks": false,
+        "EnableTaskScheduler": false
+    },    
     "azureBlob": {
         "azureStorageAccount": "",
         "azureContainerName": "",
