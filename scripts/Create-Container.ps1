@@ -135,7 +135,7 @@ if ($settings.serverConfiguration) {
         } 
     }
     if ($serverConfiguration -ne '') {
-        $additionalParameters = @("--env CustomNavSettings=${serverConfiguration}")
+        $additionalParameters += @("--env CustomNavSettings=${serverConfiguration}")
     }
 }
 
