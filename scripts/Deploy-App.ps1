@@ -39,6 +39,7 @@ if ($PowerShellUsername -is [string]) {
 $appFolders = $settings.appFolders
 $deployments = @()
 $deployments += $settings.deployments | Where-Object { $_.branch -eq $branchName }
+$deployments += $settings.deployments | Where-Object { $_.branch -eq ($branchName.split('/') | Select-Object -Last 1)}
 foreach ($deployment in $deployments) {
     $deploymentType = $deployment.DeploymentType
 

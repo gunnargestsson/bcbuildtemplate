@@ -58,7 +58,7 @@ $property = $settings.PSObject.Properties.Match('azureBlob')
 if ($property.Value) {
     $branches = $settings.azureBlob.PSObject.Properties.Match('BranchNames')
     if ($branches.Value) {
-        if ($branches.Value -icontains $branchName) {
+        if ($branches.Value -icontains $branchName -or $branches.Value -icontains ($branchName.split('/') | Select-Object -Last 1)) {
             Write-Host "Set azureStorageAccount = $($settings.azureBlob.azureStorageAccount)"
             Write-Host "##vso[task.setvariable variable=azureStorageAccount]$($settings.azureBlob.azureStorageAccount)"
             Write-Host "Set azureContainerName = $($settings.azureBlob.azureContainerName)"
