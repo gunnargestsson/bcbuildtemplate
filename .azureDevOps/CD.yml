@@ -59,7 +59,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: 'bcbuildtemplate\scripts\Read-Settings.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "$(resources.pipeline.self-pipe.runName)" -version ${{ parameters.version }}'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "$(resources.pipeline.self-pipe.runName)" -version ${{ parameters.version }} -branchName "$(Build.SourceBranchName)"'
         failOnStderr: true
 
     - download: self-pipe
