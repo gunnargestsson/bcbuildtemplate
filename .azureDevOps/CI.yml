@@ -84,11 +84,11 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Publish Custom Base App'
-      condition: and(succeeded(),ne(${{ parameters.configurationFilePath }},''))
+      condition: and(succeeded(),ne('${{ parameters.customBaseAppUrl}}',''))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-CustomBaseApp'
-        arguments: '-customBaseAppUrl ${{ parameters.configurationFilePath }}'
+        arguments: '-customBaseAppUrl ${{ parameters.customBaseAppUrl }}'
         failOnStderr: true
 
     - task: PowerShell@2
