@@ -87,7 +87,7 @@ stages:
       condition: and(succeeded(),ne('${{ parameters.customBaseAppUrl}}',''))
       inputs:
         targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-CustomBaseApp'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-CustomBaseApp.ps1'
         arguments: '-customBaseAppUrl ${{ parameters.customBaseAppUrl }}'
         failOnStderr: true
 
