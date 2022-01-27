@@ -15,8 +15,8 @@
         "locale": "",
         "AuthenticationEmail": "",
         "addFontsFromPath": "${env:SystemRoot}\\Fonts\\*.ttf",
-        "useNewDatabase": "false",
-        "useCleanDatabase": "false"
+        "useNewDatabase": false,
+        "useCleanDatabase": false
     },
     "serverConfiguration": {
         "EnableUserConsistencyValidationOnTasks": "false"
