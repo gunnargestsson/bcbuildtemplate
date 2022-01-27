@@ -135,6 +135,7 @@ if ($settings.serverConfiguration) {
         } 
     }
     if ($serverConfiguration -ne '') {
+        Write-Host "Adding configured server configuration: ${serverConfiguration}"
         $additionalParameters += @("--env CustomNavSettings=${serverConfiguration}")
     }
 }
