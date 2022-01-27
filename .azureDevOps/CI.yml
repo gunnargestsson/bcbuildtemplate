@@ -19,6 +19,11 @@ parameters:
   displayName: 'Specifies the path to the build-settings.json file'
   type: string
   default: '.azureDevOps\build-settings.json'
+- name: customBaseAppUrl
+  displayName: 'Specifies the url to the a Customer Base App to use in build container'
+  type: string
+  default: ''
+
 
 stages:
 - stage: Build
@@ -75,6 +80,15 @@ stages:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Create-Container.ps1'
         arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}"'
+        failOnStderr: true
+
+    - task: PowerShell@2
+      displayName: 'Publish Custom Base App'
+      condition: and(succeeded(),ne(${{ parameters.configurationFilePath }},''))
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-CustomBaseApp'
+        arguments: '-customBaseAppUrl ${{ parameters.configurationFilePath }}'
         failOnStderr: true
 
     - task: PowerShell@2
