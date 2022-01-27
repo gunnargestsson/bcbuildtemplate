@@ -77,8 +77,6 @@ $parameters = @{
 
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 
-$settings
-
 if ($settings.containerParameters) {
     Write-Host "Updating container properties"
     Foreach ($parameter in ($settings.containerParameters.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
