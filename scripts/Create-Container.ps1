@@ -133,7 +133,7 @@ if ($settings.serverConfiguration) {
     $serverConfiguration = ''
     Write-Host "Updating server configuration properties"
     Foreach ($parameter in ($settings.serverConfiguration.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
-        try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }        
+        $value = $parameter.Value
         Write-Host "Adding server configuration property: $($parameter.Name) = ${value}"
         if ($serverConfiguration -eq '') {
             $serverConfiguration =  "$($parameter.Name)=$($value)"
