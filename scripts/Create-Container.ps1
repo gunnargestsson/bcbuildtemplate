@@ -80,12 +80,15 @@ $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-Strin
 $settings
 
 if ($settings.containerParameters) {
-    Write-Host "Udating container properties"
+    Write-Host "Updating container properties"
     Foreach ($parameter in ($settings.containerParameters.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
         try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }
         if (!([String]::IsNullOrEmpty($value))) { 
             Write-Host "Adding container property: $($parameter.Name) = ${value}"
-            $parameters += @{ $parameter.Name = $value } }
+            $parameters += @{ $parameter.Name = $value } 
+        } else {
+            Write-Host "Not adding property: $($parameter.Name) = ${value} "
+        }
     }
 }
 
@@ -130,17 +133,19 @@ else {
 
 if ($settings.serverConfiguration) {
     $serverConfiguration = ''
-    Write-Host "Udating server configuration properties"
+    Write-Host "Updating server configuration properties"
     Foreach ($parameter in ($settings.serverConfiguration.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
-        try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }
+        try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }        
         if (!([String]::IsNullOrEmpty($value))) { 
+            Write-Host "Adding server configuration property: $($parameter.Name) = ${value}"
             if ($serverConfiguration -eq '') {
                 $serverConfiguration =  "$($parameter.Name)=$($value)"
             } else {
                 $serverConfiguration +=  ",$($parameter.Name)=$($value)"
-            }
-            Write-Host "Adding server configuration property: $($parameter.Name) = ${value}"
-        } 
+            }            
+        } else {
+            Write-Host "Not adding property: $($parameter.Name) = ${value} "
+        }
     }
     if ($serverConfiguration -ne '') {
         Write-Host "Adding configured server configuration: ${serverConfiguration}"
