@@ -134,16 +134,12 @@ if ($settings.serverConfiguration) {
     Write-Host "Updating server configuration properties"
     Foreach ($parameter in ($settings.serverConfiguration.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
         try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }        
-        if (!([String]::IsNullOrEmpty($value))) { 
-            Write-Host "Adding server configuration property: $($parameter.Name) = ${value}"
-            if ($serverConfiguration -eq '') {
-                $serverConfiguration =  "$($parameter.Name)=$($value)"
-            } else {
-                $serverConfiguration +=  ",$($parameter.Name)=$($value)"
-            }            
+        Write-Host "Adding server configuration property: $($parameter.Name) = ${value}"
+        if ($serverConfiguration -eq '') {
+            $serverConfiguration =  "$($parameter.Name)=$($value)"
         } else {
-            Write-Host "Not adding property: $($parameter.Name) = ${value} "
-        }
+            $serverConfiguration +=  ",$($parameter.Name)=$($value)"
+        }            
     }
     if ($serverConfiguration -ne '') {
         Write-Host "Adding configured server configuration: ${serverConfiguration}"
