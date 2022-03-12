@@ -47,8 +47,14 @@ else {
     $containername = $settings.name.ToLower()
     $auth = 'UserPassword'
     $artifact = $settings.versions[0].artifact
-    $segments = "$artifact/////".Split('/')
-    $artifactUrl = Get-BCArtifactUrl -storageAccount $segments[0] -type $segments[1] -version $segments[2] -country $segments[3] -select $segments[4] | Select-Object -First 1   
+
+    if ($artifact -like "https://*") {
+        $artifactUrl = $artifact
+    } else {
+        $segments = "$artifact/////".Split('/')
+        $artifactUrl = Get-BCArtifactUrl -storageAccount $segments[0] -type $segments[1] -version $segments[2] -country $segments[3] -select $segments[4] | Select-Object -First 1   
+    }
+
     $username = $userProfile.Username
     $password = ConvertTo-SecureString -String $userProfile.Password
     $credential = New-Object System.Management.Automation.PSCredential ($username, $password)
@@ -110,8 +116,53 @@ else {
         -licenseFile $licenseFile
 
     $settings.dependencies | ForEach-Object {
+        #Write-Host "Publishing $_"
+        #Publish-BCContainerApp -containerName $containerName -appFile $_ -skipVerification -sync -install
         Write-Host "Publishing $_"
-        Publish-BCContainerApp -containerName $containerName -appFile $_ -skipVerification -sync -install
+        
+        $guid = New-Guid
+        $appFile = Join-Path $env:TEMP $guid.Guid
+        Write-Host "Downloading app file ${$_} to ${$appFile}"    
+        Download-File -sourceUrl $_ -destinationFile $appFile
+    
+        Write-Host "Container deployment to ${containerName}"
+        Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -scope Global
+        $containerPath = Join-Path "C:\Run\My" (Split-Path -Path $appFile -Leaf)
+        Copy-FileToBcContainer -containerName $containerName -localPath $appFile -containerPath $containerPath 
+        
+        $appName = Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
+            param($appFile)
+            return (Get-NAVAppInfo -Path $appFile).Name
+        } -argumentList $containerPath
+    
+        Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
+            Param($appName)
+            $ServerInstance = (Get-NAVServerInstance | Where-Object -Property Default -EQ True).ServerInstance
+            Write-Host "Updating app '${appName}' on server instance '${ServerInstance}'..."
+    
+            foreach ($Tenant in (Get-NAVTenant -ServerInstance $ServerInstance).Id) {                                      
+                $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties -Name $appName
+                foreach ($app in $apps | Sort-Object -Property Version) {
+                    Write-Host "Investigating app $($app.Name) v$($app.version) installed=$($app.isInstalled)"
+                    $NewApp = $apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.version                            
+                    if ($NewApp) {
+                        if (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $Newapp.Name | Where-Object -Property Version -LT $Newapp.Version | Where-Object -Property IsInstalled -EQ $true) {
+                            Write-Host "upgrading app $($app.Name) v$($app.Version) to v$($NewApp.Version) in tenant $($Tenant)"
+                            Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force
+                            Start-NAVAppDataUpgrade -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force
+                        }
+                        else {
+                            Write-Host "Newer App is available"
+                        }
+                    }
+                    elseif (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -EQ $app.Version | Where-Object -Property IsInstalled -EQ $false) {
+                        Write-Host "installing app $($app.Name) v$($app.Version) in tenant $($Tenant)"
+                        Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
+                        Install-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
+                    }                   
+                }
+            }
+        } -argumentList $appName
     }
 
     if ($settings.includeTestRunnerOnly) {
