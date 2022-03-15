@@ -103,7 +103,7 @@ else {
 }
 
 if ("$($ENV:AGENT_NAME)" -eq "Hosted Agent" -or "$($ENV:AGENT_NAME)" -like "Azure Pipelines*") {
-    $containerNamePrefix = ""
+    $containerNamePrefix = "ci"
     Write-Host "Set imageName = ''"
     Write-Host "##vso[task.setvariable variable=imageName]"
 }
