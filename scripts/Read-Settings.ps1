@@ -117,6 +117,8 @@ else {
     Write-Host "Set imageName = $imageName"
     Write-Host "##vso[task.setvariable variable=imageName]$imageName"
 }
+
+Write-Host "Repository: $($ENV:BUILD_REPOSITORY_NAME)"
 $buildName = ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '').Substring(8)
 $buildName += $ENV:BUILD_REPOSITORY_NAME
 $containerName = "$($containerNamePrefix)$("${buildName}" -replace '[^a-zA-Z0-9]', '')".ToUpper()
