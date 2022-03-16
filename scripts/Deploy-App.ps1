@@ -43,7 +43,7 @@ $deployments += $settings.deployments | Where-Object { $_.branch -eq ($branchNam
 foreach ($deployment in $deployments) {
     $deploymentType = $deployment.DeploymentType
     if (!([String]::IsNullOrEmpty($deployment.reason))) {
-        if ($ENV:BUILD_REASON -ine $deployment.reason) {
+        if ($ENV:BUILD_REASON -notin $deployment.reason) {
             Write-Host "Skip deployment $($deploymentType), Reason: $($ENV:BUILD_REASON) <> $($deployment.reason) "
             continue
         }
