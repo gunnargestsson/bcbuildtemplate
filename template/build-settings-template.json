@@ -69,6 +69,7 @@
     "deployments": [
         {
             "branch": "<disabled>",
+            "reason": ["Schedule","Manual"],
             "DeploymentType": "host",
             "DeployToName": "<hostname>",
             "DeployToInstance": "<blank for default incance>",
@@ -79,6 +80,7 @@
         },
         {
             "branch": "<disabled>",
+            "reason": [],
             "DeploymentType": "onlineTenant",
             "DeployToName": "Sandbox",
             "DeployToTenants": [
