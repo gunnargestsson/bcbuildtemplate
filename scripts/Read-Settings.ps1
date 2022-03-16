@@ -119,6 +119,7 @@ else {
 }
 
 Write-Host "Repository: $($ENV:BUILD_REPOSITORY_NAME)"
+Write-Host "Build Reason: $($ENV:BUILD_REASON)"
 $buildName = ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '').Substring(8)
 $buildName += ($ENV:BUILD_REPOSITORY_NAME).Split('/')[1]
 $containerName = "$($containerNamePrefix)$("${buildName}" -replace '[^a-zA-Z0-9]', '')".ToUpper()
