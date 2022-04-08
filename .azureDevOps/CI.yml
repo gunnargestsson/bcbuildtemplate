@@ -24,7 +24,7 @@ stages:
 - stage: Build
   jobs:
   - job: Build
-    timeoutInMinutes: 360
+    timeoutInMinutes: 120
     cancelTimeoutInMinutes: 10
     variables:      
       build.clean: all

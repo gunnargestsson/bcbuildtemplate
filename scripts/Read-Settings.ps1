@@ -103,7 +103,7 @@ else {
 }
 
 if ("$($ENV:AGENT_NAME)" -eq "Hosted Agent" -or "$($ENV:AGENT_NAME)" -like "Azure Pipelines*") {
-    $containerNamePrefix = ""
+    $containerNamePrefix = "ci"
     Write-Host "Set imageName = ''"
     Write-Host "##vso[task.setvariable variable=imageName]"
 }
@@ -117,8 +117,12 @@ else {
     Write-Host "Set imageName = $imageName"
     Write-Host "##vso[task.setvariable variable=imageName]$imageName"
 }
-$buildName = $ENV:BUILD_SOURCEBRANCHNAME + $appVersion.Split('.')[2]
-$containerName = "$($containerNamePrefix)$("${buildName}$($ENV:AGENT_NAME)" -replace '[^a-zA-Z0-9]', '')".ToUpper()
+
+Write-Host "Repository: $($ENV:BUILD_REPOSITORY_NAME)"
+Write-Host "Build Reason: $($ENV:BUILD_REASON)"
+$buildName = ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '').Substring(8)
+$buildName += ($ENV:BUILD_REPOSITORY_NAME).Split('/')[1]
+$containerName = "$($containerNamePrefix)$("${buildName}" -replace '[^a-zA-Z0-9]', '')".ToUpper()
 if ($containerName.Length -gt 15) {
     $containerName = $containerName.Substring(0, 15)
 }
