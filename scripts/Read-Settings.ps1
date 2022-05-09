@@ -111,21 +111,28 @@ else {
     if ($imageName -eq "") {
         $containerNamePrefix = "bld"
     }
-    else {
-        $containerNamePrefix = "$imageName"
-    }
+    
     Write-Host "Set imageName = $imageName"
     Write-Host "##vso[task.setvariable variable=imageName]$imageName"
 }
 
 Write-Host "Repository: $($ENV:BUILD_REPOSITORY_NAME)"
 Write-Host "Build Reason: $($ENV:BUILD_REASON)"
-$buildName = ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '').Substring(8)
-$buildName += ($ENV:BUILD_REPOSITORY_NAME).Split('/')[1]
+
+$buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[1]
+
+if ([string]::IsNullOrEmpty($buildName)) {
+    $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[0]
+}
+
+$buildName = $buildName + ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '').Substring(8)
+
 $containerName = "$($containerNamePrefix)$("${buildName}" -replace '[^a-zA-Z0-9]', '')".ToUpper()
+
 if ($containerName.Length -gt 15) {
     $containerName = $containerName.Substring(0, 15)
 }
+
 Write-Host "Set containerName = $containerName"
 Write-Host "##vso[task.setvariable variable=containerName]$containerName"
 
