@@ -63,17 +63,20 @@ if ($property.Value) {
             Write-Host "##vso[task.setvariable variable=azureStorageAccount]$($settings.azureBlob.azureStorageAccount)"
             Write-Host "Set azureContainerName = $($settings.azureBlob.azureContainerName)"
             Write-Host "##vso[task.setvariable variable=azureContainerName]$($settings.azureBlob.azureContainerName)"            
-        } else {
+        }
+        else {
             Write-Host "Set azureStorageAccount = ''"
             Write-Host "##vso[task.setvariable variable=azureStorageAccount]"        
         }
-    } else {
+    }
+    else {
         Write-Host "Set azureStorageAccount = $($settings.azureBlob.azureStorageAccount)"
         Write-Host "##vso[task.setvariable variable=azureStorageAccount]$($settings.azureBlob.azureStorageAccount)"
         Write-Host "Set azureContainerName = $($settings.azureBlob.azureContainerName)"
         Write-Host "##vso[task.setvariable variable=azureContainerName]$($settings.azureBlob.azureContainerName)"            
     }
-} else {
+}
+else {
     Write-Host "Set azureStorageAccount = ''"
     Write-Host "##vso[task.setvariable variable=azureStorageAccount]"
 }
@@ -118,6 +121,7 @@ else {
 
 Write-Host "Repository: $($ENV:BUILD_REPOSITORY_NAME)"
 Write-Host "Build Reason: $($ENV:BUILD_REASON)"
+Write-Host "Container Name Prefx: ${containerNamePrefix}"
 
 $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[1]
 
@@ -125,9 +129,11 @@ if ([string]::IsNullOrEmpty($buildName)) {
     $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[0]
 }
 
-$buildName = $buildName + ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '').Substring(8)
+$buildName = ($buildName -replace '[^a-zA-Z0-9]', '') + ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '').Substring(8)
 
-$containerName = "$($containerNamePrefix)$("${buildName}" -replace '[^a-zA-Z0-9]', '')".ToUpper()
+Write-Host "Build Name: ${buildName}"
+
+$containerName = "${containerNamePrefix}${buildName}".ToUpper()
 
 if ($containerName.Length -gt 15) {
     $containerName = $containerName.Substring(0, 15)
