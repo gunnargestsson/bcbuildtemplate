@@ -130,7 +130,7 @@ if ([string]::IsNullOrEmpty($buildName)) {
 }
 
 if ($buildName.Length -gt 10) {
-    $buildName = $containerName.Substring(0, 10)
+    $buildName = $buildName.Substring(0, 10)
 }
 
 $buildName = ($buildName -replace '[^a-zA-Z0-9]', '') + ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '').Substring(8)
