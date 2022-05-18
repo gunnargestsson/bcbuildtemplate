@@ -129,6 +129,10 @@ if ([string]::IsNullOrEmpty($buildName)) {
     $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[0]
 }
 
+if ($buildName.Length -gt 10) {
+    $buildName = $containerName.Substring(0, 10)
+}
+
 $buildName = ($buildName -replace '[^a-zA-Z0-9]', '') + ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '').Substring(8)
 
 Write-Host "Build Name: ${buildName}"
