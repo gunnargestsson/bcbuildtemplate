@@ -87,7 +87,6 @@ if ($userProfile) {
     }
 }  
        
-
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 if ($settings.containerParameters) {
     Foreach ($parameter in ($settings.containerParameters.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
@@ -96,6 +95,7 @@ if ($settings.containerParameters) {
     }
 }
 
+Write-Host "Custom Container Properties: " $parameters
 
 if ($licenseFile) {
     $unsecureLicenseFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile)))
