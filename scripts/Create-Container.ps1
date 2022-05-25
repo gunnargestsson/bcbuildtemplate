@@ -75,6 +75,19 @@ $parameters = @{
     "Accept_Outdated" = $true
 }
 
+$userProfile = $settings.userProfiles | Where-Object -Property profile -EQ "$($ENV:AGENT_NAME)"
+if ($userProfile) { 
+    if ($userProfile.containerParameters) {
+        Foreach ($parameter in ($userProfile.containerParameters.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
+            try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }
+            if (!([String]::IsNullOrEmpty($value))) { 
+                try { $parameters += @{ $parameter.Name = $value } } catch { $parameters."$($parameter.Name)" = $value }
+            }
+        }
+    }
+}  
+       
+
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 if ($settings.containerParameters) {
     Foreach ($parameter in ($settings.containerParameters.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
@@ -82,6 +95,7 @@ if ($settings.containerParameters) {
         if (!([String]::IsNullOrEmpty($value))) { $parameters += @{ $parameter.Name = $value } }
     }
 }
+
 
 if ($licenseFile) {
     $unsecureLicenseFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile)))
@@ -127,9 +141,10 @@ if ($settings.serverConfiguration) {
     Foreach ($parameter in ($settings.serverConfiguration.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
         $value = $parameter.Value
         if ($serverConfiguration -eq '') {
-            $serverConfiguration =  "$($parameter.Name)=$($value)"
-        } else {
-            $serverConfiguration +=  ",$($parameter.Name)=$($value)"
+            $serverConfiguration = "$($parameter.Name)=$($value)"
+        }
+        else {
+            $serverConfiguration += ",$($parameter.Name)=$($value)"
         }
     }
     if ($serverConfiguration -ne '') {
