@@ -75,6 +75,9 @@ $parameters = @{
     "Accept_Outdated" = $true
 }
 
+
+$settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
+
 $userProfile = $settings.userProfiles | Where-Object -Property profile -EQ "$($ENV:AGENT_NAME)"
 if ($userProfile) { 
     if ($userProfile.containerParameters) {
@@ -87,7 +90,6 @@ if ($userProfile) {
     }
 }  
        
-$settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 if ($settings.containerParameters) {
     Foreach ($parameter in ($settings.containerParameters.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
         try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }
