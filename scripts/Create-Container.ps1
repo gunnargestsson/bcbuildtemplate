@@ -97,8 +97,6 @@ if ($settings.containerParameters) {
     }
 }
 
-Write-Host "Custom Container Properties: " $parameters
-
 if ($licenseFile) {
     $unsecureLicenseFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile)))
     $parameters += @{
