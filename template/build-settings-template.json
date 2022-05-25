@@ -20,11 +20,13 @@
     },
     "serverConfiguration": {
         "EnableUserConsistencyValidationOnTasks": "false"
-    },    
+    },
     "azureBlob": {
         "azureStorageAccount": "",
         "azureContainerName": "",
-        "branchNames": [""]
+        "branchNames": [
+            ""
+        ]
     },
     "testMethod": {
         "companyName": "My Company",
@@ -69,7 +71,10 @@
     "deployments": [
         {
             "branch": "<disabled>",
-            "reason": ["Schedule","Manual"],
+            "reason": [
+                "Schedule",
+                "Manual"
+            ],
             "DeploymentType": "host",
             "DeployToName": "<hostname>",
             "DeployToInstance": "<blank for default incance>",
@@ -98,6 +103,13 @@
                 "isolation": "hyperv",
                 "updateHosts": true,
                 "enableTaskScheduler": false
+            }
+        },
+        {
+            "profile": "AGENT-NAME",
+            "containerParameters": {
+                "isolation": "hyperv",
+                "usegenericimage": "mcr.Microsoft.com/businesscentral:10.0.19041.985"
             }
         },
         {
