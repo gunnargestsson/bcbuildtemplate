@@ -1,8 +1,8 @@
 Param(
-    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyname=$true)]
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyname = $true)]
     [string] $configurationFilePath,
 
-    [Parameter(Mandatory = $false, ValueFromPipelineByPropertyname=$true)]
+    [Parameter(Mandatory = $false, ValueFromPipelineByPropertyname = $true)]
     [string] $scriptToStart = (Join-path $PSScriptRoot $MyInvocation.MyCommand.Name)
 
 )
@@ -22,7 +22,7 @@ $IsInAdminMode = $myWindowsPrincipal.IsInRole($adminRole)
 if (!$IsInAdminMode) {
     $ArgumentList = "-noprofile -file ${scriptToStart}"
     Write-Host "Starting '${scriptToStart}' in Admin Mode..."
-    Start-Process powershell -Verb runas -WorkingDirectory $scriptPath -ArgumentList @($ArgumentList,$configurationFilePath,$scriptToStart) -WindowStyle Normal -Wait 
+    Start-Process powershell -Verb runas -WorkingDirectory $scriptPath -ArgumentList @($ArgumentList, $configurationFilePath, $scriptToStart) -WindowStyle Normal -Wait 
 }
 else {
     Invoke-Expression -Command "Function Install-BCContainerHelper { $((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Install-BCContainerHelper.ps1").Content.Substring(1)) }"
@@ -50,7 +50,8 @@ else {
 
     if ($artifact -like "https://*") {
         $artifactUrl = $artifact
-    } else {
+    }
+    else {
         $segments = "$artifact/////".Split('/')
         $artifactUrl = Get-BCArtifactUrl -storageAccount $segments[0] -type $segments[1] -version $segments[2] -country $segments[3] -select $segments[4] | Select-Object -First 1   
     }
@@ -75,8 +76,10 @@ else {
 
 
     if ($settings.dotnetAddIns) {
+        $NewConfigFilePath = Join-Path $env:TEMP "build-settings.json"
+        Copy-Item -Path $configurationFilePath -Destination $NewConfigFilePath -Force
         $parameters += @{ 
-            "myscripts" = @( "$configurationFilePath"
+            "myscripts" = @( "$NewConfigFilePath"
                 @{ "SetupAddins.ps1" = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Copy-AddIns.ps1").Content })
         }    
     }
@@ -96,9 +99,10 @@ else {
             try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }
             if (!([String]::IsNullOrEmpty($value))) { 
                 if ($serverConfiguration -eq '') {
-                    $serverConfiguration =  "$($parameter.Name)=$($value)"
-                } else {
-                    $serverConfiguration +=  ",$($parameter.Name)=$($value)"
+                    $serverConfiguration = "$($parameter.Name)=$($value)"
+                }
+                else {
+                    $serverConfiguration += ",$($parameter.Name)=$($value)"
                 }
             } 
         }
