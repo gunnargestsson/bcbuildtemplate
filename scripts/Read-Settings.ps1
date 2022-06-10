@@ -137,7 +137,8 @@ if ($buildName.Length -gt 10) {
     $buildName = $buildName.Substring(0, 10)
 }
 
-$buildName = ($buildName -replace '[^a-zA-Z0-9]', '') + ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '').Substring(7)
+try { $buildName = ($buildName -replace '[^a-zA-Z0-9]', '') + ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '').Substring(8) }
+catch { $buildName = ($buildName -replace '[^a-zA-Z0-9]', '') + ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '') }
 
 Write-Host "Build Name: ${buildName}"
 
