@@ -148,7 +148,7 @@ if ($buildNumber.Length -gt 8) {
 
 Write-Host "Build Number: ${buildNumber}"
 
-$containerName = "${containerNamePrefix}${buildName}${buildNumer}".ToUpper()
+$containerName = "${containerNamePrefix}${buildName}${buildNumber}".ToUpper()
 
 if ($containerName.Length -gt 15) {
     $containerName = $containerName.Substring(0, 15)
