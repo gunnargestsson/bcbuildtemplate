@@ -133,16 +133,22 @@ if ([string]::IsNullOrEmpty($buildName)) {
     $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[0]
 }
 
+$buildName = $buildName -replace '[^a-zA-Z0-9]', ''
+
 if ($buildName.Length -gt 10) {
     $buildName = $buildName.Substring(0, 10)
 }
 
-try { $buildName = ($buildName -replace '[^a-zA-Z0-9]', '') + ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '').Substring(8) }
-catch { $buildName = ($buildName -replace '[^a-zA-Z0-9]', '') + ($ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', '') }
-
 Write-Host "Build Name: ${buildName}"
 
-$containerName = "${containerNamePrefix}${buildName}".ToUpper()
+$buildNumber = $ENV:BUILD_BUILDNUMBER -replace '[^a-zA-Z0-9]', ''
+if ($buildNumber.Length -gt 8) {
+    $buildNumber = $buildNumber.Substring(8)
+}
+
+Write-Host "Build Number: ${buildNumber}"
+
+$containerName = "${containerNamePrefix}${buildName}${buildNumer}".ToUpper()
 
 if ($containerName.Length -gt 15) {
     $containerName = $containerName.Substring(0, 15)
