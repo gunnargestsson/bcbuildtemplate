@@ -211,7 +211,7 @@ stages:
 
     - task: PowerShell@2
       displayName: Copy App to Release folder
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\CopyTo-LatestFolder.ps1'
@@ -220,7 +220,7 @@ stages:
 
     - task: AzureFileCopy@4
       displayName: 'Copy Release Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
@@ -231,7 +231,7 @@ stages:
 
     - task: AzureFileCopy@4
       displayName: 'Copy Artifact Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
@@ -242,7 +242,7 @@ stages:
 
     - task: AzureFileCopy@4
       displayName: 'Copy Runtime Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.createRuntimePackages}}','True'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),eq('${{ parameters.createRuntimePackages}}','True'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\RuntimePackages\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
