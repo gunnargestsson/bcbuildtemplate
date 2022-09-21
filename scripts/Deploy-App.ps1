@@ -25,7 +25,7 @@
     
 )
 
-Write-Host "Deploying apps from ${artifactFolder} to branch ${branchName} ..."
+Write-Host "Deploying apps from ${artifactsFolder} to branch ${branchName} ..."
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 if ($clientId -is [string]) {
     if ($clientSecret -is [String]) { $clientSecret = ConvertTo-SecureString -String $clientSecret -AsPlainText -Force }
@@ -33,7 +33,7 @@ if ($clientId -is [string]) {
 }
 if ($PowerShellUsername -is [string]) {
     if ($PowerShellPassword -is [String]) { $PowerShellPassword = ConvertTo-SecureString -String $PowerShellPassword -AsPlainText -Force }
-    if ($PowerShellPassword -isnot [SecureString]) { throw "ClientSecret needs to be a SecureString or a String" }
+    if ($PowerShellPassword -isnot [SecureString]) { throw "PowerShellPassword needs to be a SecureString or a String" }
     $vmCredential = New-Object System.Management.Automation.PSCredential($PowerShellUsername, $PowerShellPassword);
 }
 $appFolders = $settings.appFolders
