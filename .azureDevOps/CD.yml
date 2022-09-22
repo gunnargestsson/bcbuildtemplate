@@ -108,9 +108,9 @@ stages:
         displayName: 'Copy Release Note to Azure Storage'
         condition: and(succeeded(),ne('${{ parameters.releasenoteTemplateFilePath }}',''),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
         SourcePath: "$(Build.ArtifactStagingDirectory)/releasenote-$(resources.pipeline.self-pipe.runName).md"
-        azureSubscription: 'BC_Production_DevOps'
-        Destination: 'AzureBlob'
-        storage: 'brightcomdevops'
-        ContainerName: 'devops'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        Destination: AzureBlob
+        storage: '$(azureStorageAccount)'
+        ContainerName: '$(azureContainerName)'
         BlobPrefix: "Artifact/$(Build.Repository.Name)/ReleaseNotes/releasenote-$(resources.pipeline.self-pipe.runName).md"
 
