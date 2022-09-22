@@ -97,6 +97,18 @@ stages:
         checkForManuallyLinkedWI: True
         stopOnError: true
 
+    - checkout: Template
+      clean: false
+      path: 's\bcbuildtemplate'
+
+    - task: PowerShell@2
+      displayName: 'Copy Build Template'
+      inputs:
+        targetType: filePath
+        filePath: 'bcbuildtemplate\scripts\Copy-Template.ps1'
+        arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
+        failOnStderr: true
+        
     - task: PowerShell@2
       displayName: 'Reading Settings'
       inputs:
@@ -104,7 +116,7 @@ stages:
         filePath: 'bcbuildtemplate\scripts\Read-Settings.ps1'
         arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "$(resources.pipeline.self-pipe.runName)" -version ${{ parameters.version }} -branchName "$(resources.pipeline.self-pipe.sourceBranch)"'
         failOnStderr: true
-        
+
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
       inputs:
