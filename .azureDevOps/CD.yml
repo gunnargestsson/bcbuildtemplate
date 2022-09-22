@@ -82,6 +82,11 @@ stages:
   jobs:
   - job: 'ReleaseNote'
     steps:
+    steps:
+    - checkout: self
+      clean: true
+      path: 's'
+
     - checkout: Template
       clean: false
       path: 's\bcbuildtemplate'
@@ -90,7 +95,7 @@ stages:
       displayName: 'Copy Build Template'
       inputs:
         targetType: filePath
-        filePath: 'scripts\Copy-Template.ps1'
+        filePath: 'bcbuildtemplate\scripts\Copy-Template.ps1'
         arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
         failOnStderr: true
 
@@ -98,8 +103,8 @@ stages:
       displayName: 'Reading Settings'
       inputs:
         targetType: filePath
-        filePath: 'scripts\Read-Settings.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\..\${{ parameters.configurationFilePath }}" -appVersion "$(resources.pipeline.self-pipe.runName)" -version ${{ parameters.version }} -branchName "$(resources.pipeline.self-pipe.sourceBranch)"'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }} -branchName "$(Build.SourceBranch)"'
         failOnStderr: true
 
     - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
