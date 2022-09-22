@@ -82,7 +82,6 @@ stages:
   jobs:
   - job: 'ReleaseNote'
     steps:
-    steps:
     - checkout: self
       clean: true
       path: 's'
