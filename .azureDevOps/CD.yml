@@ -99,7 +99,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: 'scripts\Read-Settings.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "$(resources.pipeline.self-pipe.runName)" -version ${{ parameters.version }} -branchName "$(resources.pipeline.self-pipe.sourceBranch)"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\..\${{ parameters.configurationFilePath }}" -appVersion "$(resources.pipeline.self-pipe.runName)" -version ${{ parameters.version }} -branchName "$(resources.pipeline.self-pipe.sourceBranch)"'
         failOnStderr: true
 
     - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
