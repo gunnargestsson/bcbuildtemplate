@@ -97,6 +97,14 @@ stages:
         checkForManuallyLinkedWI: True
         stopOnError: true
 
+    - task: PowerShell@2
+      displayName: 'Reading Settings'
+      inputs:
+        targetType: filePath
+        filePath: 'bcbuildtemplate\scripts\Read-Settings.ps1'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "$(resources.pipeline.self-pipe.runName)" -version ${{ parameters.version }} -branchName "$(resources.pipeline.self-pipe.sourceBranch)"'
+        failOnStderr: true
+        
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
       inputs:
