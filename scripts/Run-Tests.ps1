@@ -27,6 +27,8 @@
     [switch] $reRunFailedTests
 )
 
+Start-Sleep -seconds 30
+
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $testCompanyName = $settings.testCompanyName
 $testSuiteDisabled = $settings.testSuiteDisabled
