@@ -19,6 +19,10 @@ parameters:
   displayName: 'Specifies the path to the build-settings.json file'
   type: string
   default: '.azureDevOps\build-settings.json'
+- name: publishTestApps
+  displayName: 'Specifies if test apps are to be published as artifacts and to Azure Blob'
+  type: boolean
+  default: False
 
 stages:
 - stage: Build
@@ -195,7 +199,7 @@ stages:
         
     - task: PowerShell@1
       displayName: Remove Test App from Artifact Staging Directory
-      condition: and(succeeded(),ne(variables['testFolders'],''))
+      condition: and(succeeded(),ne(variables['testFolders'],''),eq('${{ parameters.publishTestApps }}','False'))
       inputs:
         scriptType: inlineScript
         inlineScript: >
