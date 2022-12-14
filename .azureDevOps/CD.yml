@@ -79,7 +79,7 @@ stages:
               arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Pipeline.Workspace)/self-pipe/${{ parameters.appVersion }}" -branchName "$(resources.pipeline.self-pipe.sourceBranch)"'
 
   - stage: ReleaseNote
-    condition: ne('${{ parameters.releasenoteTemplateFilePath }}','')
+    condition: and(succeeded(),ne('${{ parameters.releasenoteTemplateFilePath }}',''))
     jobs:
       - job: "ReleaseNote"
         steps:
