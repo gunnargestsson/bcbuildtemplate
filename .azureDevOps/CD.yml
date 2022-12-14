@@ -107,7 +107,7 @@ stages:
               arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -version ${{ parameters.version }} -branchName "$(Build.SourceBranch)"'
               failOnStderr: true
 
-          - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes
+          - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@4
             displayName: "Generate Release Notes"
             inputs:
               outputfile: "$(Build.ArtifactStagingDirectory)/releasenote-$(resources.pipeline.self-pipe.runName).md"
