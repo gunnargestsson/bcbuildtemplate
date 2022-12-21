@@ -70,7 +70,8 @@ stages:
         failOnStderr: true
         
     - task: PowerShell@2
-      displayName: 'Create Build Container'
+      displayName: 'Create Build Container using Default License'
+      condition: and(succeeded(),eq(variables['ContainerLicenseFile'],''))
       env:
         Password: $(Password)
         LicenseFile: $(LicenseFile)
@@ -80,6 +81,20 @@ stages:
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Create-Container.ps1'
         arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}"'
         failOnStderr: true
+
+    - task: PowerShell@2
+      displayName: 'Create Build Container using Container License'
+      condition: and(succeeded(),ne(variables['ContainerLicenseFile'],''))
+      env:
+        Password: $(Password)
+        LicenseFile: $(ContainerLicenseFile)
+        InsiderSasToken: $(InsiderSasToken)
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Create-Container.ps1'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}"'
+        failOnStderr: true
+
 
     - task: PowerShell@2
       displayName: 'Compile App'
