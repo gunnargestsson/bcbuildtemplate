@@ -95,7 +95,6 @@ stages:
         arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}"'
         failOnStderr: true
 
-
     - task: PowerShell@2
       displayName: 'Compile App'
       env:
