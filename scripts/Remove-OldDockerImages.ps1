@@ -3,7 +3,7 @@
     [string] $cleanAllImages = 'False'
 
 )
-Flush-ContainerHelperCache -cache "images" -keepDays 40
+Flush-ContainerHelperCache -keepDays 40
 if ($cleanAllImages -ieq "true") {
     Write-Host "Removing all Docker Images"
     $images = docker image list --format "table {{.Repository}},{{.Tag}},{{.ID}},{{.Size}},{{.CreatedAt}}"
