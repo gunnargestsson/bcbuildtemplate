@@ -23,6 +23,10 @@ parameters:
   displayName: 'Specifies if test apps are to be published as artifacts and to Azure Blob'
   type: boolean
   default: False
+- name: cleanAllImages
+  displayName: 'Specifies if all images should be cleaned after the build'
+  type: boolean
+  default: False
 
 stages:
 - stage: Build
@@ -284,6 +288,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
+        arguments: '-cleanAllImages ${{ parameters.cleanAllImages }}'
 
     - task: PowerShell@2
       displayName: 'Validate App'
