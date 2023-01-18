@@ -288,7 +288,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
-        arguments: '-cleanAllImages ${{ parameters.cleanAllImages }}'
+        arguments: '-cleanAllImages "${{ parameters.cleanAllImages }}"'
 
     - task: PowerShell@2
       displayName: 'Validate App'
