@@ -1,10 +1,10 @@
 ﻿Param(
     [Parameter(Mandatory = $false, ValueFromPipelineByPropertyname=$true)]
-    [boolean] $cleanAllImages = $false
+    [string] $cleanAllImages = 'False'
 
 )
 Flush-ContainerHelperCache -cache "images" -keepDays 40
-if ($cleanAllImages) {
+if ($cleanAllImages -ieq "true") {
     Write-Host "Removing all Docker Images"
     $images = docker image list --format "table {{.Repository}},{{.Tag}},{{.ID}},{{.Size}},{{.CreatedAt}}"
     $dockerImages = @()
