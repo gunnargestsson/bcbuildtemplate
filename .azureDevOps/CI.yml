@@ -30,6 +30,8 @@ stages:
   - job: Build
     timeoutInMinutes: 120
     cancelTimeoutInMinutes: 10
+    workspace:
+      clean: outputs | resources | all 
     variables:      
       build.clean: all
       platform: x64
