@@ -5,6 +5,7 @@
 )
 Flush-ContainerHelperCache -cache "images" -keepDays 40
 if ($cleanAllImages) {
+    Write-Host "Removing all Docker Images"
     $images = docker image list --format "table {{.Repository}},{{.Tag}},{{.ID}},{{.Size}},{{.CreatedAt}}"
     $dockerImages = @()
     $imagesToRemove = @()
@@ -44,4 +45,6 @@ if ($cleanAllImages) {
             }        
         }    
     }
+} else {
+    Write-Host "Not Removing old Docker Images"
 }
