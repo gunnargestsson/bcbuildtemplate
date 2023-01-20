@@ -111,7 +111,7 @@ if ("$($ENV:AGENT_NAME)" -eq "Hosted Agent" -or "$($ENV:AGENT_NAME)" -like "Azur
     Write-Host "##vso[task.setvariable variable=imageName]"
 }
 else {
-    if ($imageName -iin ("", "build")) {
+    if ($imageName -iin ("", "build", "ci")) {
         $containerNamePrefix = $settings.name
     }
     else {
