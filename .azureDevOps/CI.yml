@@ -27,6 +27,13 @@ parameters:
   displayName: 'Specifies if all images should be cleaned after the build'
   type: boolean
   default: False
+- name: SyncAppMode
+  displayName: Publish Sync-NAVApp Mode
+  type: string
+  default: Add
+  values:
+  - Add
+  - ForceSync
 
 stages:
 - stage: Build
@@ -51,6 +58,12 @@ stages:
     - checkout: Template
       clean: false
       path: 's\bcbuildtemplate'
+
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "SyncAppMode: ${{ parameters.SyncAppMode }}"  
 
     - task: PowerShell@2
       displayName: 'Copy Build Template'
@@ -322,5 +335,5 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Deploy-App.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)" -SyncAppMode ${{ parameters.SyncAppMode }}'
         failOnStderr: true
