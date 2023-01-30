@@ -1,0 +1,37 @@
+parameters:
+- name: SyncAppMode
+  displayName: Publish Sync-NAVApp Mode
+  type: string
+  default: Add
+  values:
+  - Add
+  - ForceSync
+
+trigger:
+- '*'
+
+pr: 
+- '*'
+
+pool: Default
+
+resources:
+  repositories:
+    - repository: Template
+      type: github
+      endpoint: gunnargestsson # Service Connection
+      name: gunnargestsson/bcbuildtemplate
+      ref: master
+
+variables:
+- group: BuildVariables
+
+extends:
+  template: /.azureDevOps/CI.yml@Template
+  parameters:
+    version: "current"
+    appVersion: "17.2"
+    azureSubscription: ""
+    createRuntimePackages: true
+    configurationFilePath: '.azureDevOps\build-settings.json'
+    SyncAppMode: ${{ parameters.SyncAppMode }}
