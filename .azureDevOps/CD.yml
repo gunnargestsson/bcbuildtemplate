@@ -130,9 +130,9 @@ stages:
               ArtifactName: "releasenote-$(resources.pipeline.self-pipe.runName).md"
 
           - task: AzureFileCopy@4
+            displayName: "Copy Release Note to Azure Storage"
+            condition: and(succeeded(),ne(variables['azureStorageAccount'],''))
             inputs:
-              displayName: "Copy Release Note to Azure Storage"
-              condition: and(succeeded(),ne(variables['azureStorageAccount'],''))
               SourcePath: "$(Build.ArtifactStagingDirectory)/releasenote-$(resources.pipeline.self-pipe.runName).md"
               azureSubscription: "${{ parameters.azureSubscription }}"
               Destination: AzureBlob
