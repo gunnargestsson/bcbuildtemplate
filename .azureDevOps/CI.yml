@@ -251,7 +251,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\CopyTo-LatestFolder.ps1'
-        arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)"  -releaseFolder "${{ parameters.version }}\${{ parameters.appVersion }}"'
+        arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -releaseFolder "${{ parameters.version }}\${{ parameters.appVersion }}"'
         failOnStderr: true              
 
     - task: AzureFileCopy@5

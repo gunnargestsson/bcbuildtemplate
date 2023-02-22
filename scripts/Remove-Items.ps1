@@ -7,6 +7,6 @@ Param(
     
 )
 
-foreach ($folder in ($(appFolders).Split(','))) {
+foreach ($folder in ($($appFolders).Split(','))) {
     Remove-Item (Join-Path $artifactsFolder $folder) -Recurse -Force
   }
