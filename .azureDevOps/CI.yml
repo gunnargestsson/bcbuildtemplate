@@ -230,7 +230,7 @@ stages:
         arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)\RuntimePackages"'
         failOnStderr: true
         
-    - task: PowerShell@1
+    - task: PowerShell@2
       displayName: Remove Test App from Artifact Staging Directory
       condition: and(succeeded(),ne(variables['testFolders'],''),eq('${{ parameters.publishTestApps }}','False'))
       inputs:
@@ -255,7 +255,7 @@ stages:
         arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)"  -releaseFolder "${{ parameters.version }}\${{ parameters.appVersion }}"'
         failOnStderr: true              
 
-    - task: AzureFileCopy@4
+    - task: AzureFileCopy@5
       displayName: 'Copy Release Apps to Azure Blob'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
@@ -266,7 +266,7 @@ stages:
         ContainerName: '$(azureContainerName)'
         BlobPrefix: '$(Build.Repository.Name)\$(Build.SourceBranchName)\${{ parameters.appVersion }}\${{ parameters.version }}'
 
-    - task: AzureFileCopy@4
+    - task: AzureFileCopy@5
       displayName: 'Copy Artifact Apps to Azure Blob'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
@@ -277,7 +277,7 @@ stages:
         ContainerName: '$(azureContainerName)'
         BlobPrefix: 'Artifact\$(Build.Repository.Name)'
 
-    - task: AzureFileCopy@4
+    - task: AzureFileCopy@5
       displayName: 'Copy Runtime Apps to Azure Blob'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),eq('${{ parameters.createRuntimePackages}}','True'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
