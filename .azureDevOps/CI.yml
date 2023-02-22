@@ -234,12 +234,11 @@ stages:
       displayName: Remove Test App from Artifact Staging Directory
       condition: and(succeeded(),ne(variables['testFolders'],''),eq('${{ parameters.publishTestApps }}','False'))
       inputs:
-        scriptType: inlineScript
-        inlineScript: >
-          foreach ($folder in ('$(testFolders)'.Split(','))) {
-            Remove-Item (Join-Path '$(Build.ArtifactStagingDirectory)' $folder) -Recurse -Force
-          }
-
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-Items.ps1'
+        arguments: '-appFolders "$(testFolders)" -artifactsFolder "$(Build.ArtifactStagingDirectory)"'
+        failOnStderr: true
+       
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
       inputs:
