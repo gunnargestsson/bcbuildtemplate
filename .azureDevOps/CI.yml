@@ -207,7 +207,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Run-Tests.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appFolders "$(testFolders)" -reRunFailedTests:"${{ parameters.ReRunFailedTests }}"" -debugMode:"${{ parameters.TestsDebugMode }}"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appFolders "$(testFolders)" -reRunFailedTests:(${{ parameters.ReRunFailedTests }}) -debugMode:(${{ parameters.TestsDebugMode }})'
         failOnStderr: true
       
     - task: PublishTestResults@2

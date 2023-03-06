@@ -28,8 +28,6 @@
     [switch] $debugMode
 )
 
-Start-Sleep -seconds 30
-
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $testCompanyName = $settings.testCompanyName
 $testSuiteDisabled = $settings.testSuiteDisabled
@@ -88,6 +86,7 @@ if ($NavVersion -ge "15.0.0.0") {
                     -companyName $testCompanyName `
                     -credential $credential `
                     -XUnitResultFileName $TempTestResultFile `
+                    -debugMode:$debugMode `
                     -detailed
             }
             else {
@@ -143,6 +142,7 @@ else {
         -containerName $containerName `
         -companyName $testCompanyName `
         -credential $credential `
+        -debugMode:$debugMode `
         -XUnitResultFileName $TempTestResultFile 
 }
 
