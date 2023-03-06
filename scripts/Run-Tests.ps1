@@ -40,6 +40,12 @@ if ([String]::IsNullOrEmpty($testCompanyName)) {
 }
 
 Write-Host "Executing tests on company '${testCompanyName}' and saving results in '${testResultsFile}'"
+if ($debugMode) {
+    Write-Host "Debug mode is enabled"
+}
+if ($reRunFailedTests) {
+    Write-Host "Re-running failed tests"
+}
 
 if (-not ($credential)) {
     $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
