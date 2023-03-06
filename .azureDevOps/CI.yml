@@ -306,14 +306,14 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Remove Build Container'
-      condition: and(ne(variables['reuseContainer'],'True'),eq('${{ parameters.RemoveBuildContainer}}','True'))
+      condition: and(ne(variables['reuseContainer'],'True'),eq('${{ parameters.RemoveBuildContainer }}','True'))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-Container.ps1'
 
     - task: PowerShell@2
       displayName: 'Remove Unused Container Image'
-      condition: and(ne(variables['Agent.Name'],'Hosted Agent'),ne(variables['Agent.Name'],'Azure Pipelines*'),eq('${{ parameters.FlushContainerCache}}','True'))
+      condition: and(ne(variables['Agent.Name'],'Hosted Agent'),ne(variables['Agent.Name'],'Azure Pipelines*'),eq('${{ parameters.FlushContainerCache }}','True'))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
