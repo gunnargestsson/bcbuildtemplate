@@ -23,6 +23,13 @@ parameters:
     displayName: "Specifies the path to the release note template markdown file"
     type: string
     default: ""
+  - name: SyncAppMode
+    displayName: Publish Sync-NAVApp Mode
+    type: string
+    default: Add
+    values:
+    - Add
+    - ForceSync    
 
 stages:
   - stage: Deployment
@@ -47,6 +54,12 @@ stages:
           - checkout: Template
             clean: false
             path: 's\bcbuildtemplate'
+
+          - task: PowerShell@2
+            inputs:
+              targetType: 'inline'
+              script: |
+                Write-Host "SyncAppMode: ${{ parameters.SyncAppMode }}"  
 
           - task: PowerShell@2
             displayName: "Copy Build Template"
@@ -78,7 +91,7 @@ stages:
             inputs:
               targetType: filePath
               filePath: 'bcbuildtemplate\scripts\Deploy-App.ps1'
-              arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Pipeline.Workspace)/self-pipe/${{ parameters.appVersion }}" -branchName "$(resources.pipeline.self-pipe.sourceBranch)"'
+              arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Pipeline.Workspace)/self-pipe/${{ parameters.appVersion }}" -branchName "$(resources.pipeline.self-pipe.sourceBranch)" -SyncAppMode ${{ parameters.SyncAppMode }}'
 
   - stage: ReleaseNote
     condition: and(succeeded(),ne('${{ parameters.releasenoteTemplateFilePath }}',''))
