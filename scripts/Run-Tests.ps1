@@ -127,7 +127,7 @@ if ($NavVersion -ge "15.0.0.0") {
                 }
                 if ($rerunTests.Count -gt 0 -and $reRunFailedTests) {
                     Restart-BCContainer -containerName $containername
-                    $rerunTests | % {
+                    $rerunTests | ForEach-Object {
                         if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
                                     -containerName $containerName `
                                     -companyName $testCompanyName `
