@@ -7,6 +7,10 @@ parameters:
   displayName: ReRun Unit Tests that are failing
   type: boolean
   default: False
+- name: RemoveBuildContainer
+  displayName: Remove build container after build
+  type: boolean
+  default: True  
 
 trigger:
 - '*'
@@ -37,4 +41,5 @@ extends:
     configurationFilePath: '.azureDevOps\build-settings.json'
     TestsDebugMode: ${{ parameters.TestsDebugMode }}
     ReRunFailedTests: ${{ parameters.ReRunFailedTests }}
+    RemoveBuildContainer: ${{ parameters.RemoveBuildContainer }}
 
