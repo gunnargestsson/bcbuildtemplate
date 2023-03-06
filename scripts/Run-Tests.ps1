@@ -24,7 +24,8 @@
     [Parameter(Mandatory = $false)]
     [string] $testResultsFile = (Join-Path $ENV:BUILD_REPOSITORY_LOCALPATH "TestResults.xml"),
 
-    [switch] $reRunFailedTests
+    [switch] $reRunFailedTests,
+    [switch] $debugMode
 )
 
 Start-Sleep -seconds 30
@@ -99,7 +100,8 @@ if ($NavVersion -ge "15.0.0.0") {
                     -containerName $containerName `
                     -credential $credential `
                     -ignoreGroups `
-                    -testSuite $testSuite -debugMode
+                    -testSuite $testSuite `
+                    -debugMode:$debugMode
         
                 $tests | ForEach-Object {
                     if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
@@ -111,6 +113,7 @@ if ($NavVersion -ge "15.0.0.0") {
                                 -testSuite $testSuite `
                                 -testCodeunit $_.Id `
                                 -returnTrueIfAllPassed `
+                                -debugMode:$debugMode `
                                 -restartContainerAndRetry)) { $rerunTests += $_ }
                     $first = $false
                 }
@@ -126,6 +129,7 @@ if ($NavVersion -ge "15.0.0.0") {
                                     -testSuite $testSuite `
                                     -testCodeunit $_.Id `
                                     -returnTrueIfAllPassed `
+                                    -debugMode:$debugMode `
                                     -restartContainerAndRetry)) { $failedTests += $_ }
                         $first = $false
                     }

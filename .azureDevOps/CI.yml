@@ -34,6 +34,15 @@ parameters:
   values:
   - Add
   - ForceSync
+- name: TestsDebugMode
+  displayName: Run Unit Tests in Debug Mode
+  type: boolean
+  default: False
+- name: ReRunFailedTests
+  displayName: ReRun Unit Tests that are failing
+  type: boolean
+  default: False
+
 
 stages:
 - stage: Build
@@ -198,7 +207,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Run-Tests.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appFolders "$(testFolders)"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appFolders "$(testFolders)" -reRunFailedTests:"${{ parameters.ReRunFailedTests }}"" -debugMode:"${{ parameters.TestsDebugMode }}"'
         failOnStderr: true
       
     - task: PublishTestResults@2

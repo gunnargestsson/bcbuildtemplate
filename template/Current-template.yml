@@ -1,3 +1,13 @@
+parameters:
+- name: TestsDebugMode
+  displayName: Run Unit Tests in Debug Mode
+  type: boolean
+  default: False
+- name: ReRunFailedTests
+  displayName: ReRun Unit Tests that are failing
+  type: boolean
+  default: False
+
 trigger:
 - '*'
 
@@ -25,4 +35,6 @@ extends:
     azureSubscription: ""
     createRuntimePackages: true
     configurationFilePath: '.azureDevOps\build-settings.json'
+    TestsDebugMode: ${{ parameters.TestsDebugMode }}
+    ReRunFailedTests: ${{ parameters.ReRunFailedTests }}
 
