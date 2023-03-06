@@ -44,7 +44,10 @@ if ($debugMode) {
     Write-Host "Debug mode is enabled"
 }
 if ($reRunFailedTests) {
-    Write-Host "Re-running failed tests"
+    Write-Host "Re-running failed tests if needed"
+}
+if ($testSuiteDisabled) {
+    Write-Host "Test suite is disabled"
 }
 
 if (-not ($credential)) {
