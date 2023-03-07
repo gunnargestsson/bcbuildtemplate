@@ -24,7 +24,8 @@ Param(
     [Parameter(Mandatory=$false)]
     [string] $appVersion = "",
     
-    [switch] $updateSymbols
+    [switch] $updateSymbols,
+    [switch] $updateDependencies
 )
 
 if (-not ($credential)) {
@@ -50,7 +51,7 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
     }
 
     Write-Host "Compiling $_"
-    $appFile = Compile-AppInBCContainer -containerName $containerName -credential $credential -appProjectFolder $appProjectFolder -appSymbolsFolder $buildSymbolsFolder -appOutputFolder (Join-Path $buildArtifactFolder $_) -UpdateSymbols:$updateSymbols -AzureDevOps:($buildenv -eq "AzureDevOps")
+    $appFile = Compile-AppInBCContainer -containerName $containerName -credential $credential -appProjectFolder $appProjectFolder -appSymbolsFolder $buildSymbolsFolder -appOutputFolder (Join-Path $buildArtifactFolder $_) -UpdateSymbols:$updateSymbols -UpdateDependencies:$updateDependencies -AzureDevOps:($buildenv -eq "AzureDevOps")
     if ($appFile -and (Test-Path $appFile)) {
         Copy-Item -Path $appFile -Destination $buildSymbolsFolder -Force
         Copy-Item -Path (Join-Path $buildProjectFolder "$_\app.json") -Destination (Join-Path $buildArtifactFolder "$_\app.json") 
