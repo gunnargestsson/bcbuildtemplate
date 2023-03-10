@@ -25,7 +25,9 @@ Param(
     [string] $appVersion = "",
     
     [switch] $updateSymbols,
-    [switch] $updateDependencies
+    [switch] $updateDependencies,
+    [switch] $publishApp,
+    [switch] $skipVerification
 )
 
 if (-not ($credential)) {
@@ -54,6 +56,10 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
     $appFile = Compile-AppInBCContainer -containerName $containerName -credential $credential -appProjectFolder $appProjectFolder -appSymbolsFolder $buildSymbolsFolder -appOutputFolder (Join-Path $buildArtifactFolder $_) -UpdateSymbols:$updateSymbols -UpdateDependencies:$updateDependencies -AzureDevOps:($buildenv -eq "AzureDevOps")
     if ($appFile -and (Test-Path $appFile)) {
         Copy-Item -Path $appFile -Destination $buildSymbolsFolder -Force
-        Copy-Item -Path (Join-Path $buildProjectFolder "$_\app.json") -Destination (Join-Path $buildArtifactFolder "$_\app.json") 
+        Copy-Item -Path (Join-Path $buildProjectFolder "$_\app.json") -Destination (Join-Path $buildArtifactFolder "$_\app.json")
+        if ($publishApp) {
+            Write-Host "Publishing $_"
+            Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification:$skipVerification -sync -install
+        } 
     }
 }

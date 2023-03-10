@@ -50,6 +50,10 @@ parameters:
   displayName: Remove build container after build
   type: boolean
   default: True
+- name: PublishOnCompile
+  displayName: Publish app to container after compile
+  type: boolean
+  default: False
 
 
 stages:
@@ -132,7 +136,30 @@ stages:
         failOnStderr: true
 
     - task: PowerShell@2
+      displayName: 'Compile and publish App'
+      condition: and(succeeded(),eq('${{ parameters.PublishOnCompile}}','True'))
+      env:
+        Password: $(Password)
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
+        arguments: '-appFolders "$(appFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -publishApp -skipVerification'
+        failOnStderr: true
+    
+    - task: PowerShell@2
+      displayName: 'Compile and publish Test App'
+      condition: and(succeeded(),ne(variables['testFolders'],''),eq('${{ parameters.PublishOnCompile}}','True'))
+      env:
+        Password: $(Password)
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
+        arguments: '-appFolders "$(testFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)"  -publishApp -skipVerification'
+        failOnStderr: true
+
+    - task: PowerShell@2
       displayName: 'Compile App'
+      condition: and(succeeded(),ne('${{ parameters.PublishOnCompile}}','True'))
       env:
         Password: $(Password)
       inputs:
@@ -143,7 +170,7 @@ stages:
     
     - task: PowerShell@2
       displayName: 'Compile Test App'
-      condition: and(succeeded(),ne(variables['testFolders'],''))
+      condition: and(succeeded(),ne(variables['testFolders'],''),ne('${{ parameters.PublishOnCompile}}','True'))
       env:
         Password: $(Password)
       inputs:
@@ -166,6 +193,7 @@ stages:
     
     - task: PowerShell@2
       displayName: 'Publish App'
+      condition: and(succeeded(),ne('${{ parameters.PublishOnCompile}}','True'))
       env:
         LicenseFile: $(LicenseFile)
       inputs:
@@ -176,7 +204,7 @@ stages:
     
     - task: PowerShell@2
       displayName: 'Publish Test App using Test License File'
-      condition: and(succeeded(),ne(variables['testFolders'],''),ne(variables['TestLicenseFile'],''))
+      condition: and(succeeded(),ne(variables['testFolders'],''),ne(variables['TestLicenseFile'],''),ne('${{ parameters.PublishOnCompile}}','True'))
       env:
         LicenseFile: $(TestLicenseFile)
       inputs:
@@ -187,7 +215,7 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Publish Test App using Build License File'
-      condition: and(succeeded(),ne(variables['testFolders'],''),eq(variables['TestLicenseFile'],''))
+      condition: and(succeeded(),ne(variables['testFolders'],''),eq(variables['TestLicenseFile'],''),ne('${{ parameters.PublishOnCompile}}','True'))
       env:
         LicenseFile: $(LicenseFile)
       inputs:
