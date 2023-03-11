@@ -136,47 +136,25 @@ stages:
         failOnStderr: true
 
     - task: PowerShell@2
-      displayName: 'Compile and publish App'
-      condition: and(succeeded(),eq('${{ parameters.PublishOnCompile}}','True'))
-      env:
-        Password: $(Password)
-      inputs:
-        targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
-        arguments: '-appFolders "$(appFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -publishApp -skipVerification'
-        failOnStderr: true
-    
-    - task: PowerShell@2
-      displayName: 'Compile and publish Test App'
-      condition: and(succeeded(),ne(variables['testFolders'],''),eq('${{ parameters.PublishOnCompile}}','True'))
-      env:
-        Password: $(Password)
-      inputs:
-        targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)"  -publishApp -skipVerification'
-        failOnStderr: true
-
-    - task: PowerShell@2
       displayName: 'Compile App'
-      condition: and(succeeded(),ne('${{ parameters.PublishOnCompile}}','True'))
+      condition: and(succeeded())
       env:
         Password: $(Password)
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
-        arguments: '-appFolders "$(appFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -updateDependencies'
+        arguments: '-appFolders "$(appFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification'
         failOnStderr: true
     
     - task: PowerShell@2
       displayName: 'Compile Test App'
-      condition: and(succeeded(),ne(variables['testFolders'],''),ne('${{ parameters.PublishOnCompile}}','True'))
+      condition: and(succeeded(),ne(variables['testFolders'],''))
       env:
         Password: $(Password)
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)"'
+        arguments: '-appFolders "$(testFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification'
         failOnStderr: true
     
     - task: PowerShell@2
