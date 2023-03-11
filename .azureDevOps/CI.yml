@@ -137,7 +137,7 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Compile App'
-      condition: and(succeeded())
+      condition: succeeded()
       env:
         Password: $(Password)
       inputs:
