@@ -1,9 +1,11 @@
 ﻿Param(
     [Parameter(Mandatory = $false, ValueFromPipelineByPropertyname=$true)]
-    [string] $cleanAllImages = 'False'
+    [string] $cleanAllImages = 'False',
+    [Parameter(Mandatory = $false, ValueFromPipelineByPropertyname=$true)]
+    [string] $keepDays = 40
 
 )
-Flush-ContainerHelperCache -keepDays 40
+Flush-ContainerHelperCache -keepDays $keepDays
 if ($cleanAllImages -ieq "true") {
     Write-Host "Removing all Docker Images"
     $images = docker image list --format "table {{.Repository}},{{.Tag}},{{.ID}},{{.Size}},{{.CreatedAt}}"
