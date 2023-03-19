@@ -28,7 +28,7 @@ foreach ($dockerImage in ($dockerImages | Where-Object -Property Repository -eq 
 }    
 
 if ($cleanAllImages -ieq "true") {
-    Write-Host "Removing all Docker Images"
+    Write-Host "Removing old Docker Images"
     $images = docker image list --format "table {{.Repository}},{{.Tag}},{{.ID}},{{.Size}},{{.CreatedAt}}"
     $dockerImages = @()
     $imagesToRemove = @()
