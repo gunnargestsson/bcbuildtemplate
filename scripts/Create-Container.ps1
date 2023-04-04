@@ -59,11 +59,9 @@ else {
     }
 }
 
+if ($ENV:PASSWORD -eq "`$(Password)") { $ENV:PASSWORD = ConvertTo-SecureString -String ([System.Web.Security.Membership]::GeneratePassword(10, 2)) -AsPlainText -Force }
+
 if (-not ($credential)) {
-    if (!$ENV:PASSWORD) { 
-        Add-Type -AssemblyName 'System.Web'
-        $ENV:PASSWORD = ConvertTo-SecureString -String ([System.Web.Security.Membership]::GeneratePassword(10, 2)) -AsPlainText -Force
-    }
     $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
     $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
 }
