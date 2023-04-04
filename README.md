@@ -8,9 +8,9 @@
     - BuildVariables
         - CodeSignPfxFile (optional for signing the apps)
         - CodeSignPfxPassword (optional for signing the apps)
-        - LicenseFile
+        - LicenseFile (optional - will use Cronus license if not specified)
         - TestLicenseFile (optional if unit tests require development license and build is using customer license)
-        - Password
+        - Password (optional - will create random password if not specified)
         - ClientId (optional for online tenant deployment)
         - ClientSecret (optional for online tenant deployment)
         - PowerShellUsername (optional for powershell deployment)
