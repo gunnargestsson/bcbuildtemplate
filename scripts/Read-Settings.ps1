@@ -21,6 +21,7 @@ Param(
 
 if ($ENV:PASSWORD -eq "`$(Password)") { 
     Write-Host "Generating password"
+    add-type -AssemblyName System.Web
     $ENV:PASSWORD = ConvertTo-SecureString -String ([System.Web.Security.Membership]::GeneratePassword(10, 2)) -AsPlainText -Force 
 }
 
