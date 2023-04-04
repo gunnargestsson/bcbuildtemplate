@@ -97,11 +97,12 @@ if ($settings.containerParameters) {
     }
 }
 
-if (!([String]::IsNullOrEmpty($licenseFile))) {
+if ($licenseFile) {
+    $unsecureLicenseFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile)))
     $parameters += @{
         "licenseFile" = $unsecureLicenseFile
     }
-} elseif (!([String]::IsNullOrEmpty($ENV:LICENSEFILE)) -and $ENV:LICENSEFILE -ne "`$(LicenseFile)") {
+} elseif ($ENV:LICENSEFILE -ne "`$(LicenseFile)" -and $ENV:LICENSEFILE -ne "") {
     $parameters += @{
         "licenseFile" = $ENV:LICENSEFILE
     }
