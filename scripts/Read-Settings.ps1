@@ -26,6 +26,9 @@ if ($ENV:PASSWORD -eq "`$(Password)") {
     Write-Host "##vso[task.setvariable variable=Password]$Password" 
 }
 
+Write-Host "Set SyncAppMode = $ENV:SyncAppMode"
+Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode" 
+
 
 if ($appVersion) {
     Write-Host "Updating build number to $appVersion"

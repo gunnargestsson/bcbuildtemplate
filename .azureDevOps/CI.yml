@@ -81,12 +81,6 @@ stages:
       path: 's\bcbuildtemplate'
 
     - task: PowerShell@2
-      inputs:
-        targetType: 'inline'
-        script: |
-          Write-Host "SyncAppMode: ${{ parameters.SyncAppMode }}"  
-
-    - task: PowerShell@2
       displayName: 'Copy Build Template'
       inputs:
         targetType: filePath
@@ -97,7 +91,8 @@ stages:
     - task: PowerShell@2
       displayName: 'Reading Settings'
       env:
-        Password: $(Password)      
+        Password: $(Password)
+        SyncAppMode: ${{ parameters.SyncAppMode }}"       
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
