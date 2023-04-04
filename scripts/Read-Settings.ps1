@@ -19,7 +19,7 @@ Param(
     [string] $branchName
 )
 
-if ($ENV:PASSWORD -eq "`$(Password)") { 
+if ($ENV:PASSWORD -eq "`$(Password)" -or $ENV:PASSWORD -eq "") { 
     add-type -AssemblyName System.Web
     $Password = [System.Web.Security.Membership]::GeneratePassword(10, 2)
     Write-Host "Set Password = $Password"
