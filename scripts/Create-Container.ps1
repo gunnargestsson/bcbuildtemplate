@@ -97,12 +97,11 @@ if ($settings.containerParameters) {
     }
 }
 
-if ($licenseFile -eq "`$(LicenseFile)") { $licenseFile = $null }
 if (!([String]::IsNullOrEmpty($licenseFile))) {
     $parameters += @{
         "licenseFile" = $unsecureLicenseFile
     }
-} elseif (!([String]::IsNullOrEmpty($ENV:LICENSEFILE))) {
+} elseif (!([String]::IsNullOrEmpty($ENV:LICENSEFILE)) -and $ENV:LICENSEFILE -ne "`$(LicenseFile)") {
     $parameters += @{
         "licenseFile" = $ENV:LICENSEFILE
     }
