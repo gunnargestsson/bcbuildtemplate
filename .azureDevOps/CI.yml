@@ -107,24 +107,11 @@ stages:
         failOnStderr: true
         
     - task: PowerShell@2
-      displayName: 'Create Build Container using Default License'
-      condition: and(succeeded(),eq(variables['ContainerLicenseFile'],''))
+      displayName: 'Create Build Container'
+      condition: and(succeeded())
       env:
         Password: $(Password)
         LicenseFile: $(LicenseFile)
-        InsiderSasToken: $(InsiderSasToken)
-      inputs:
-        targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Create-Container.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}"'
-        failOnStderr: true
-
-    - task: PowerShell@2
-      displayName: 'Create Build Container using Container License'
-      condition: and(succeeded(),ne(variables['ContainerLicenseFile'],''))
-      env:
-        Password: $(Password)
-        LicenseFile: $(ContainerLicenseFile)
         InsiderSasToken: $(InsiderSasToken)
       inputs:
         targetType: filePath
@@ -169,34 +156,19 @@ stages:
     - task: PowerShell@2
       displayName: 'Publish App'
       condition: and(succeeded(),ne('${{ parameters.PublishOnCompile}}','True'))
-      env:
-        LicenseFile: $(LicenseFile)
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
-        arguments: '-appFolders "$(appFolders)" -skipVerification:([String]::IsNullOrEmpty($CodeSignPfxPassword)) -licenseFile "$(LicenseFile)"'
-        failOnStderr: true
-    
-    - task: PowerShell@2
-      displayName: 'Publish Test App using Test License File'
-      condition: and(succeeded(),ne(variables['testFolders'],''),ne(variables['TestLicenseFile'],''),ne('${{ parameters.PublishOnCompile}}','True'))
-      env:
-        LicenseFile: $(TestLicenseFile)
-      inputs:
-        targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -skipVerification -licenseFile "$(TestLicenseFile)"'
+        arguments: '-appFolders "$(appFolders)" -skipVerification:([String]::IsNullOrEmpty($CodeSignPfxPassword))'
         failOnStderr: true
 
     - task: PowerShell@2
-      displayName: 'Publish Test App using Build License File'
-      condition: and(succeeded(),ne(variables['testFolders'],''),eq(variables['TestLicenseFile'],''),ne('${{ parameters.PublishOnCompile}}','True'))
-      env:
-        LicenseFile: $(LicenseFile)
+      displayName: 'Publish Test App'
+      condition: and(succeeded(),ne(variables['testFolders'],''),ne('${{ parameters.PublishOnCompile}}','True'))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -skipVerification -licenseFile "$(LicenseFile)"'
+        arguments: '-appFolders "$(testFolders)" -skipVerification'
         failOnStderr: true
 
     - task: PowerShell@2
