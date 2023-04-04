@@ -19,6 +19,12 @@ Param(
     [string] $branchName
 )
 
+if ($ENV:PASSWORD -eq "`$(Password)") { 
+    Write-Host "Generating password"
+    $ENV:PASSWORD = ConvertTo-SecureString -String ([System.Web.Security.Membership]::GeneratePassword(10, 2)) -AsPlainText -Force 
+}
+
+
 if ($appVersion) {
     Write-Host "Updating build number to $appVersion"
     write-host "##vso[build.updatebuildnumber]$appVersion"
