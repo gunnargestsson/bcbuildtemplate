@@ -68,10 +68,6 @@ if (-not ($credential)) {
     $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
 }
 
-if (-not ($licenseFile)) {
-    $licenseFile = try { $ENV:LICENSEFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:LICENSEFILE -AsPlainText -Force }
-}
-
 Write-Host "Create $containerName from $($artifactUrl.split('?')[0])"
 
 $parameters = @{
@@ -99,6 +95,10 @@ if ($settings.containerParameters) {
         try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }
         if (!([String]::IsNullOrEmpty($value))) { $parameters += @{ $parameter.Name = $value } }
     }
+}
+
+if (-not ($licenseFile) -and ($ENV:LICENSEFILE)) {
+    $licenseFile = try { $ENV:LICENSEFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:LICENSEFILE -AsPlainText -Force }
 }
 
 if ($licenseFile) {
