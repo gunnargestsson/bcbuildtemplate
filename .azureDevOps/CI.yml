@@ -108,7 +108,7 @@ stages:
         
     - task: PowerShell@2
       displayName: 'Create Build Container'
-      condition: and(succeeded())
+      condition: succeeded()
       env:
         Password: $(Password)
         LicenseFile: $(LicenseFile)
