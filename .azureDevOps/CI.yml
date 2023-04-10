@@ -244,7 +244,16 @@ stages:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\CopyTo-LatestFolder.ps1'
         arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -releaseFolder "${{ parameters.version }}\${{ parameters.appVersion }}"'
-        failOnStderr: true              
+        failOnStderr: true
+
+    - task: PowerShell@2
+      displayName: Copy Test App to Release folder
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['testFolders'],''),eq('${{ parameters.publishTestApps }}','True'))
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\CopyTo-LatestFolder.ps1'
+        arguments: '-appFolders "$(testFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -releaseFolder "${{ parameters.version }}\${{ parameters.appVersion }}"'
+        failOnStderr: true   
 
     - task: AzureFileCopy@5
       displayName: 'Copy Release Apps to Azure Blob'
