@@ -56,12 +56,6 @@ stages:
             path: 's\bcbuildtemplate'
 
           - task: PowerShell@2
-            inputs:
-              targetType: 'inline'
-              script: |
-                Write-Host "SyncAppMode: ${{ parameters.SyncAppMode }}"  
-
-          - task: PowerShell@2
             displayName: "Copy Build Template"
             inputs:
               targetType: filePath
