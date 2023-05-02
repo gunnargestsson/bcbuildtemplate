@@ -122,6 +122,7 @@ else {
     $settings.dependencies | ForEach-Object {
         Write-Host "Publishing $_"
         
+        $guid = New-Guid        
         if ($_.EndsWith(".zip", "OrdinalIgnoreCase") -or $_.Contains(".zip?")) {        
             $appFolder = Join-Path $env:TEMP $guid.Guid
             $appFile = Join-Path $env:TEMP "$($guid.Guid).zip"
@@ -178,7 +179,7 @@ else {
         } -argumentList $appName
 
         Remove-Item -Path $appFile -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path $appFolder -Force -Recurse -ErrorAction SilentlyContinue
+        if ($appFolder) { Remove-Item -Path $appFolder -Force -Recurse -ErrorAction SilentlyContinue }
     }
 
     if ($settings.includeTestRunnerOnly) {

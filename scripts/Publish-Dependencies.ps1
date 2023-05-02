@@ -76,5 +76,5 @@ $settings.dependencies | ForEach-Object {
     } -argumentList $appName
 
     Remove-Item -Path $appFile -Force -ErrorAction SilentlyContinue
-    Remove-Item -Path $appFolder -Force -Recurse -ErrorAction SilentlyContinue
+    if ($appFolder) { Remove-Item -Path $appFolder -Force -Recurse -ErrorAction SilentlyContinue }
 }
