@@ -26,8 +26,8 @@ $settings.dependencies | ForEach-Object {
     if ($_.EndsWith(".zip", "OrdinalIgnoreCase")) {
         $appFolder = Join-Path $env:TEMP $guid.Guid
         Write-Host "Extracting .zip file "
-        Expand-Archive -Path $_ -DestinationPath $appFolder
-        Remove-Item -Path $_ -Force
+        Expand-Archive -Path $appFile -DestinationPath $appFolder
+        Remove-Item -Path $appFile -Force
         $appFile = Get-ChildItem -Path $appFolder -Recurse -Include *.app -File | Select-Object -First 1
     }  
 
