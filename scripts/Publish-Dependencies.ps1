@@ -32,7 +32,7 @@ $settings.dependencies | ForEach-Object {
         $appFile = Get-ChildItem -Path $appFolder -Recurse -Include *.app -File | Select-Object -First 1
     }  else {
         Write-Host "Downloading app file $($_) to $($appFile)"        
-        $appFile = Join-Path $env:TEMP $guid.Guid    
+        $appFile = Join-Path $env:TEMP "$($guid.Guid).app"   
         Download-File -sourceUrl $_ -destinationFile $appFile
     }
 
@@ -45,9 +45,6 @@ $settings.dependencies | ForEach-Object {
         param($appFile)
         return (Get-NAVAppInfo -Path $appFile).Name
     } -argumentList $containerPath
-
-    Remove-Item -Path $appFile -Force
-    Remove-Item -Path $appFolder -Force -Recurse -ErrorAction SilentlyContinue
 
     Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
         Param($appName)
@@ -77,4 +74,7 @@ $settings.dependencies | ForEach-Object {
             }
         }
     } -argumentList $appName
+
+    Remove-Item -Path $appFile -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path $appFolder -Force -Recurse -ErrorAction SilentlyContinue
 }
