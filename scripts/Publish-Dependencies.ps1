@@ -25,6 +25,7 @@ $settings.dependencies | ForEach-Object {
     Download-File -sourceUrl $_ -destinationFile $appFile
     if ($_.EndsWith(".zip", "OrdinalIgnoreCase") -or $_.Contains(".zip?")) {
         $appFolder = Join-Path $env:TEMP $guid.Guid
+        New-Item -ItemType Directory -Path $appFolder -Force | Out-Null
         Write-Host "Extracting .zip file "
         Expand-Archive -Path $appFile -DestinationPath $appFolder
         Remove-Item -Path $appFile -Force
@@ -40,6 +41,8 @@ $settings.dependencies | ForEach-Object {
         param($appFile)
         return (Get-NAVAppInfo -Path $appFile).Name
     } -argumentList $containerPath
+
+    Remove-Item -Path $appFile -Recurse -Force
 
     Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
         Param($appName)
