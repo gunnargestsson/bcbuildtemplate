@@ -26,6 +26,7 @@ $settings.dependencies | ForEach-Object {
     if ($_.EndsWith(".zip", "OrdinalIgnoreCase") -or $_.Contains(".zip?")) {
         $guid = New-Guid
         $appFolder = Join-Path $env:TEMP $guid.Guid
+        $appFile = Join-Path $env:TEMP "$($guid.Guid).zip"
         New-Item -ItemType Directory -Path $appFolder -Force | Out-Null
         Write-Host "Extracting .zip file "
         Expand-Archive -Path $appFile -DestinationPath $appFolder
