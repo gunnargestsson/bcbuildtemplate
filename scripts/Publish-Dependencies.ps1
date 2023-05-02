@@ -21,8 +21,15 @@ $settings.dependencies | ForEach-Object {
     
     $guid = New-Guid
     $appFile = Join-Path $env:TEMP $guid.Guid
-    Write-Host "Downloading app file ${$_} to ${$appFile}"    
+    Write-Host "Downloading app file $($_) to $($appFile)"    
     Download-File -sourceUrl $_ -destinationFile $appFile
+    if ($_.EndsWith(".zip", "OrdinalIgnoreCase")) {
+        $appFolder = Join-Path $env:TEMP $guid.Guid
+        Write-Host "Extracting .zip file "
+        Expand-Archive -Path $_ -DestinationPath $appFolder
+        Remove-Item -Path $_ -Force
+        $appFile = Get-ChildItem -Path $appFolder -Recurse -Include *.app -File | Select-Object -First 1
+    }  
 
     Write-Host "Container deployment to ${containerName}"
     Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -scope Global
