@@ -23,7 +23,7 @@ $settings.dependencies | ForEach-Object {
     $appFile = Join-Path $env:TEMP $guid.Guid
     Write-Host "Downloading app file $($_) to $($appFile)"    
     Download-File -sourceUrl $_ -destinationFile $appFile
-    if ($_.EndsWith(".zip", "OrdinalIgnoreCase")) {
+    if ($_.EndsWith(".zip", "OrdinalIgnoreCase") -or $_.Contains(".zip?")) {
         $appFolder = Join-Path $env:TEMP $guid.Guid
         Write-Host "Extracting .zip file "
         Expand-Archive -Path $appFile -DestinationPath $appFolder
