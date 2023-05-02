@@ -42,7 +42,8 @@ $settings.dependencies | ForEach-Object {
         return (Get-NAVAppInfo -Path $appFile).Name
     } -argumentList $containerPath
 
-    Remove-Item -Path $appFile -Recurse -Force
+    Remove-Item -Path $appFile -Force
+    Remove-Item -Path $appFolder -Force -Recurse -ErrorAction SilentlyContinue
 
     Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
         Param($appName)
