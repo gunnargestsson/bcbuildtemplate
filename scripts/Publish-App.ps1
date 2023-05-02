@@ -15,20 +15,8 @@
     [Parameter(Mandatory = $true)]
     [string] $appFolders,
 
-    [Parameter(Mandatory = $false)]
-    $licenseFile = $null,
-
     [switch] $skipVerification
 )
-
-if (-not ($licenseFile)) {
-    $licenseFile = try { $ENV:LICENSEFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:LICENSEFILE -AsPlainText -Force }
-}
-
-if ($licenseFile) {    
-    $unsecureLicenseFile = try { ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile))) } catch { $licenseFile }
-    Import-BcContainerLicense -containerName $containerName -licenseFile $unsecureLicenseFile 
-}
 
 Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
     Write-Host "Publishing $_"

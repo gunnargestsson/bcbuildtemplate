@@ -28,7 +28,7 @@ Function Remove-InvalidFileNameChars {
 }
 
 $DestinationPath = Join-Path $buildArtifactFolder $releaseFolder;
-New-Item -Path $DestinationPath -ItemType Directory;
+if (!(Test-Path $DestinationPath -PathType Container)) { New-Item -Path $DestinationPath -ItemType Directory }
 $appFolders.Split(',') | ForEach-Object {
     $AppFolder = Join-Path $buildArtifactFolder $_
     Write-Host "Reading App information in ${AppFolder}"

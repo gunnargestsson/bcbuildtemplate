@@ -64,10 +64,6 @@ if (-not ($credential)) {
     $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
 }
 
-if (-not ($licenseFile)) {
-    $licenseFile = try { $ENV:LICENSEFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:LICENSEFILE -AsPlainText -Force }
-}
-
 Write-Host "Create $containerName from $($artifactUrl.split('?')[0])"
 
 $parameters = @{
@@ -101,6 +97,10 @@ if ($licenseFile) {
     $unsecureLicenseFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile)))
     $parameters += @{
         "licenseFile" = $unsecureLicenseFile
+    }
+} elseif ($ENV:LICENSEFILE -ne "`$(LicenseFile)" -and $ENV:LICENSEFILE -ne "") {
+    $parameters += @{
+        "licenseFile" = $ENV:LICENSEFILE
     }
 }
 

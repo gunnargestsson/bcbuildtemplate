@@ -19,6 +19,17 @@ Param(
     [string] $branchName
 )
 
+if ($ENV:PASSWORD -eq "`$(Password)" -or $ENV:PASSWORD -eq "") { 
+    add-type -AssemblyName System.Web
+    $Password = [System.Web.Security.Membership]::GeneratePassword(10, 2)
+    Write-Host "Set Password = $Password"
+    Write-Host "##vso[task.setvariable variable=Password]$Password" 
+}
+
+Write-Host "Set SyncAppMode = $ENV:SyncAppMode"
+Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode" 
+
+
 if ($appVersion) {
     Write-Host "Updating build number to $appVersion"
     write-host "##vso[build.updatebuildnumber]$appVersion"
