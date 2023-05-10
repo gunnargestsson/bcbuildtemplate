@@ -159,11 +159,11 @@ if ($buildNumber.Length -gt 8) {
 
 Write-Host "Build Number: ${buildNumber}"
 
-$containerName = "${containerNamePrefix}${buildName}${buildNumber}".ToUpper()
-
-if ($containerName.Length -gt 15) {
-    $containerName = $containerName.Substring(0, 15)
+$containerName = "${containerNamePrefix}${buildName}".ToUpper()
+if ($containerName.Length -gt (15 - $buildNumber.Length)) {
+    $containerName = $containerName.Substring(0, (15 - $buildNumber.Length))
 }
+$containerName = "${containerName}${buildNumber}"
 
 Write-Host "Set containerName = $containerName"
 Write-Host "##vso[task.setvariable variable=containerName]$containerName"
