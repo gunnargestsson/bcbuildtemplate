@@ -187,6 +187,8 @@ stages:
       env:
         Password: $(Password)
         TestParameters: $(TestParameters)
+        LicenseFile: $(LicenseFile)
+        TestLicenseFile: $(TestLicenseFile)
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Run-Tests.ps1'
