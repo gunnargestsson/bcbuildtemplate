@@ -51,8 +51,10 @@ if (-not ($testLicenseFile)) {
 
 if ($testLicenseFile) {    
     $unsecureLicenseFile = try { ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($testLicenseFile))) } catch { $testLicenseFile }
-    Write-Host "Importing Test License"
-    Import-BcContainerLicense -containerName $containerName -licenseFile $unsecureLicenseFile 
+    if ($unsecureLicenseFile -ne '$(TestLicenseFile)') {
+        Write-Host "Importing Test License"
+        Import-BcContainerLicense -containerName $containerName -licenseFile $unsecureLicenseFile 
+    }
 }
 
 Write-Host "Executing tests on company '${testCompanyName}' and saving results in '${testResultsFile}'"
@@ -177,8 +179,10 @@ if (-not ($licenseFile)) {
 
 if ($licenseFile) {    
     $unsecureLicenseFile = try { ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile))) } catch { $licenseFile }
-    Write-Host "Importing License"
-    Import-BcContainerLicense -containerName $containerName -licenseFile $unsecureLicenseFile 
+    if ($unsecureLicenseFile -ne '$(LicenseFile)') {
+        Write-Host "Importing License"
+        Import-BcContainerLicense -containerName $containerName -licenseFile $unsecureLicenseFile 
+    }
 }
 
 
