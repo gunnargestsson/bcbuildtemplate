@@ -54,7 +54,10 @@ parameters:
   displayName: Publish app to container after compile
   type: boolean
   default: False
-
+- name: AzureBlobFolderForVersion
+  displayName: Create a folder structure in Azure Blob for each version
+  type: boolean
+  default: True
 
 stages:
 - stage: Build
@@ -256,8 +259,8 @@ stages:
         failOnStderr: true   
 
     - task: AzureFileCopy@5
-      displayName: 'Copy Release Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      displayName: 'Copy Release Apps to Azure Blob with versions'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),eq('${{ parameters.AzureBlobFolderForVersion}}','True'))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
@@ -265,6 +268,17 @@ stages:
         storage: '$(azureStorageAccount)'
         ContainerName: '$(azureContainerName)'
         BlobPrefix: '$(Build.Repository.Name)\$(Build.SourceBranchName)\${{ parameters.appVersion }}\${{ parameters.version }}'
+
+    - task: AzureFileCopy@5
+      displayName: 'Copy Release Apps to Azure Blob latest'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),ne('${{ parameters.AzureBlobFolderForVersion}}','True'))
+      inputs:
+        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        Destination: AzureBlob
+        storage: '$(azureStorageAccount)'
+        ContainerName: '$(azureContainerName)'
+        BlobPrefix: '$(Build.Repository.Name)\$(Build.SourceBranchName)\latest'
 
     - task: AzureFileCopy@5
       displayName: 'Copy Artifact Apps to Azure Blob'

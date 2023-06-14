@@ -1,6 +1,6 @@
 {
     "name": "BLOB",
-    "imageName": "ci",
+    "imageName": "my",
     "appFolders": "app",
     "testFolders": "test",
     "dependencies": [],
@@ -37,7 +37,7 @@
         {
             "version": "current",
             "artifact": "bcartifacts.azureedge.net/sandbox//w1/latest",
-            "imageName": "ci",
+            "imageName": "my",
             "insiderBuild": false
         },
         {
