@@ -22,6 +22,12 @@
     [pscredential] $credential = $null,
 
     [Parameter(Mandatory = $false)]
+    [securestring] $licenseFile = $null,
+
+    [Parameter(Mandatory = $false)]
+    [securestring] $testLicenseFile = $null,
+
+    [Parameter(Mandatory = $false)]
     [string] $testResultsFile = (Join-Path $ENV:BUILD_REPOSITORY_LOCALPATH "TestResults.xml"),
 
     [switch] $reRunFailedTests,
@@ -37,6 +43,18 @@ if ([String]::IsNullOrEmpty($testCompanyName)) {
         $ServerInstance = (Get-NAVServerInstance | Where-Object -Property Default -EQ True).ServerInstance
         @(Get-NAVCompany -ServerInstance $ServerInstance -Tenant default).CompanyName
     } | Select-Object -First 1
+}
+
+if (-not ($testLicenseFile)) {
+    $testLicenseFile = try { $ENV:TESTLICENSEFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:TESTLICENSEFILE -AsPlainText -Force }
+}
+
+if ($testLicenseFile) {    
+    $unsecureLicenseFile = try { ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($testLicenseFile))) } catch { $testLicenseFile }
+    if ($unsecureLicenseFile -ne '$(TestLicenseFile)') {
+        Write-Host "Importing Test License"
+        Import-BcContainerLicense -containerName $containerName -licenseFile $unsecureLicenseFile 
+    }
 }
 
 Write-Host "Executing tests on company '${testCompanyName}' and saving results in '${testResultsFile}'"
@@ -154,5 +172,18 @@ else {
         -debugMode:$debugMode `
         -XUnitResultFileName $TempTestResultFile 
 }
+
+if (-not ($licenseFile)) {
+    $licenseFile = try { $ENV:LICENSEFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:LICENSEFILE -AsPlainText -Force }
+}
+
+if ($licenseFile) {    
+    $unsecureLicenseFile = try { ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile))) } catch { $licenseFile }
+    if ($unsecureLicenseFile -ne '$(LicenseFile)') {
+        Write-Host "Importing License"
+        Import-BcContainerLicense -containerName $containerName -licenseFile $unsecureLicenseFile 
+    }
+}
+
 
 Copy-Item -Path $TempTestResultFile -Destination $testResultsFile -Force

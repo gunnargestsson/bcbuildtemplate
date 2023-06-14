@@ -331,9 +331,9 @@ foreach ($deployment in $deployments) {
                         else {
                             $vmSession = New-DeploymentRemoteSession -HostName $VM
                         }
-                        $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
-                        $sessionArgument = @{ "Session" = $vmSession }
                     }
+                    $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
+                    $sessionArgument = @{ "Session" = $vmSession }
                 }
                 else {
                     $tempAppFile = $appFile
