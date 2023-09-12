@@ -27,6 +27,8 @@
     [bool] $reuseContainer = ($ENV:REUSECONTAINER -eq "True")
 )
 
+. (Join-Path $PSScriptRoot "HelperFunctions.ps1")
+
 if (-not ($artifact)) {
     if ($ENV:ARTIFACTURL) {
         Write-Host "Using Artifact Url variable"
@@ -102,6 +104,11 @@ if ($licenseFile) {
     $parameters += @{
         "licenseFile" = $ENV:LICENSEFILE
     }
+}
+
+# If azure storage App Registration information is provided and Url contains blob.core.windows.net, download licensefile using Oauth2 authentication
+if ($parameters.licenseFile -ne "" -and $ENV:DOWNLOADFROMPRIVATEAZURESTORAGE -and $parameters.licenseFile.Contains("blob.core.windows.net")) {
+    $parameters.licenseFile = Get-BlobFromPrivateAzureStorageOauth2 -blobUri $parameters.licenseFile
 }
 
 if ($buildenv -eq "Local") {
