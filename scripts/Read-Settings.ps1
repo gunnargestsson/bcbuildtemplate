@@ -179,3 +179,12 @@ Write-Host "##vso[task.setvariable variable=testCodeunitId]$testCodeunitId"
 $testMethodName = $settings.TestMethod.MethodName
 Write-Host "Set testMethodName = $testMethodName"
 Write-Host "##vso[task.setvariable variable=testMethodName]$testMethodName"
+
+if ($ENV:AZSTORAGETENANTID -ne "`$(AzStorageTenantId)" -and $ENV:AZSTORAGETENANTID -ne "") { $AzStorageTenantIdIsSet = $true } else { $AzStorageTenantIdIsSet = $false }
+if ($ENV:AZSTORAGECLIENTID -ne "`$(AzStorageClientId)" -and $ENV:AZSTORAGECLIENTID -ne "") { $AzStorageClientIdIsSet = $true } else { $AzStorageClientIdIsSet = $false }
+if ($ENV:AZSTORAGECLIENTSECRET -ne "`$(AzStorageClientSecret)" -and $ENV:AZSTORAGECLIENTSECRET -ne "") { $AzStorageClientSecretIsSet = $true } else { $AzStorageClientSecretIsSet = $false }
+
+if ($AzStorageTenantIdIsSet -and $AzStorageClientIdIsSet -and $AzStorageClientSecretIsSet) {
+    Write-Host "Set downloadFromPrivateAzureStorage = $true"
+    Write-Host "##vso[task.setvariable variable=downloadFromPrivateAzureStorage]$true"
+}

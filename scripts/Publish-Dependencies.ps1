@@ -15,6 +15,8 @@ Param(
     [switch] $skipVerification
 )
 
+. (Join-Path $PSScriptRoot "HelperFunctions.ps1")
+
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $settings.dependencies | ForEach-Object {
     Write-Host "Publishing $_"
@@ -23,17 +25,32 @@ $settings.dependencies | ForEach-Object {
     if ($_.EndsWith(".zip", "OrdinalIgnoreCase") -or $_.Contains(".zip?")) {        
         $appFolder = Join-Path $env:TEMP $guid.Guid
         $appFile = Join-Path $env:TEMP "$($guid.Guid).zip"
-        Write-Host "Downloading app file $($_) to $($appFile)"        
-        Download-File -sourceUrl $_ -destinationFile $appFile
+        Write-Host "Downloading app file $($_) to $($appFile)"  
+        
+        # If azure storage App Registration information is provided and Url contains blob.core.windows.net, download dependency zip using Oauth2 authentication        
+        if ($ENV:DOWNLOADFROMPRIVATEAZURESTORAGE -and $_.Contains("blob.core.windows.net")) {
+            $appFile = Get-BlobFromPrivateAzureStorageOauth2 -blobUri $_
+        }
+        else {
+            Download-File -sourceUrl $_ -destinationFile $appFile
+        }
+               
         New-Item -ItemType Directory -Path $appFolder -Force | Out-Null
         Write-Host "Extracting .zip file "
         Expand-Archive -Path $appFile -DestinationPath $appFolder
         Remove-Item -Path $appFile -Force
         $appFile = Get-ChildItem -Path $appFolder -Recurse -Include *.app -File | Select-Object -First 1
-    }  else {
+    } else {
         Write-Host "Downloading app file $($_) to $($appFile)"        
         $appFile = Join-Path $env:TEMP "$($guid.Guid).app"   
-        Download-File -sourceUrl $_ -destinationFile $appFile
+        
+        # If azure storage App Registration information is provided and Url contains blob.core.windows.net, download dependency app using Oauth2 authentication
+        if ($ENV:DOWNLOADFROMPRIVATEAZURESTORAGE -and $_.Contains("blob.core.windows.net")) {
+            $appFile = Get-BlobFromPrivateAzureStorageOauth2 -blobUri $_
+        }
+        else {
+            Download-File -sourceUrl $_ -destinationFile $appFile
+        }
     }
 
     Write-Host "Container deployment to ${containerName}"

@@ -19,6 +19,8 @@
     [securestring] $codeSignPfxPassword = $null
 )
 
+. (Join-Path $PSScriptRoot "HelperFunctions.ps1")
+
 if (-not ($CodeSignPfxFile)) {
     $CodeSignPfxFile = try { $ENV:CODESIGNPFXFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:CODESIGNPFXFILE -AsPlainText -Force }
 }
@@ -28,6 +30,12 @@ if (-not ($CodeSignPfxPassword)) {
 }
 
 $unsecurepfxFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($codeSignPfxFile)))
+
+# If azure storage App Registration information is provided and Url contains blob.core.windows.net, download certificate using Oauth2 authentication
+if ($ENV:DOWNLOADFROMPRIVATEAZURESTORAGE -and $unsecurepfxFile.Contains("blob.core.windows.net")) {
+    $unsecurepfxFile = Get-BlobFromPrivateAzureStorageOauth2 -blobUri $unsecurepfxFile
+}
+
 $appFolders.Split(',') | ForEach-Object {
     Write-Host "Signing $_"
     Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) -Filter "*.app" | ForEach-Object {
