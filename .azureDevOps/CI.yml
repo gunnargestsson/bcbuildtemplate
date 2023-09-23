@@ -81,7 +81,7 @@ stages:
     steps:
     - checkout: self
       persistCredentials: true
-      fetchDepth: 2
+      fetchDepth: 0
       fetchTags: true
       clean: true
       path: 's'
