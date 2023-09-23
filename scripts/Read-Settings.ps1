@@ -51,10 +51,41 @@ if ("$version" -eq "") {
 if ($changesOnly) {
     Write-Host "Looking for changed files"
     $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
-    $temp=$files -split ' '
-    $count=$temp.Length
+    $count=$files -split ' '
     Write-Host "Total changed $count files"
-    $temp
+    $changedFolders = @()
+    foreach ($file in $files -split ' ') {
+        $folder = $file.Substring(0, $file.IndexOf('/'))
+        if ($folder -notin $changedFolders) {
+            $changedFolders += $folder
+        }
+    }
+    $appsToBuild = @()
+    foreach ($appToBuild in @($settings.appFolders -split ',')) {
+        if ($appToBuild -in $changedFolders) {
+            $appsToBuild += $appToBuild
+        }
+    }
+    $testAppsToBuild = @()
+    foreach ($testAppToBuild in @($settings.testFolders -split ',')) {
+        if ($testAppToBuild -in $changedFolders) {
+            $testAppsToBuild += $testAppToBuild
+        }
+    }
+    foreach ($testAppToBuild in $testAppsToBuild) {
+        foreach ($app in @($settings.appFolders -split ',')) {
+            if ($testAppToBuild.IndexOf($app) -eq 0) {
+                if ($app -notin $appsToBuild) {
+                    $appsToBuild += $app
+                }
+            }
+        }
+    }
+    $settings.appFolders = $appsToBuild -join ','
+    $settings.testFolders = $testAppsToBuild -join ','
+    Write-Host "Apps to build: $($settings.appFolders)"
+    Write-Host "Test apps to build: $($settings.testFolders)"
+    Set-Content -Path $configurationFilePath -Value ($settings | ConvertTo-Json -Depth 100)   
 }
 
 $imageName = "build"
