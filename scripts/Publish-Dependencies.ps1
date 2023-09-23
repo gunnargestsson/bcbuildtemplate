@@ -59,7 +59,7 @@ $settings.dependencies | ForEach-Object {
     }
 
     Write-Host "Container deployment to ${containerName}"
-    Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -useDevEndpoint -credential $credential
+    Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -useDevEndpoint -credential $credential -install -upgrade
     $containerPath = Join-Path "C:\Run\My" (Split-Path -Path $appFile -Leaf)
     Copy-FileToBcContainer -containerName $containerName -localPath $appFile -containerPath $containerPath 
     
