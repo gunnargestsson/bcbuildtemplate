@@ -56,16 +56,8 @@ if ($changesOnly) {
     } else {
         Write-Host "Looking for changed files using 'git diff HEAD..$target --name-only'"
         git fetch origin $target
-        git fetch origin $branchName
-        git diff --name-only $branchName $target --
-        git diff --name-only $branchName "origin/$target" --
         git diff --name-only HEAD "origin/$target" --
-        git diff --name-only HEAD $target --
-        $branchName = 'improvement/ERP-8867_TestNewBuildTypes';
-        git fetch origin $branchName
-        git diff --name-only $branchName $target --
-        git diff --name-only "origin/$branchName" "origin/$target" --        
-        $files=$(git diff --name-only HEAD $target --)
+        $files=$(git diff --name-only HEAD "origin/$target" --)
     }
     $count=($files -split ' ').Length
     Write-Host "Total changed $count files"
