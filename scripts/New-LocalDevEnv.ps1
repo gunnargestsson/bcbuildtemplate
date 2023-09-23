@@ -140,7 +140,7 @@ else {
         }        
     
         Write-Host "Container deployment to ${containerName}"
-        Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -scope Global
+        Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -scope Tenant
         $containerPath = Join-Path "C:\Run\My" (Split-Path -Path $appFile -Leaf)
         Copy-FileToBcContainer -containerName $containerName -localPath $appFile -containerPath $containerPath 
         
