@@ -51,7 +51,7 @@ if ("$version" -eq "") {
 if ($changesOnly) {
     Write-Host "Looking for changed files"
     $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
-    $count=$files -split ' '
+    $count=($files -split ' ').Length
     Write-Host "Total changed $count files"
     $changedFolders = @()
     foreach ($file in $files -split ' ') {
@@ -83,7 +83,7 @@ if ($changesOnly) {
     }
     foreach ($appToBuild in $appsToBuild) {
         foreach ($testApp in @($settings.testFolders -split ',')) {
-            if ($appToBuild.IndexOf($testApp) -eq 0) {
+            if ($testApp.IndexOf($appToBuild) -eq 0) {
                 if ($testApp -notin $testAppsToBuild) {
                     $testAppsToBuild += $testApp
                 }
