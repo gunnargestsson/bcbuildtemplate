@@ -94,7 +94,10 @@ if ($changesOnly) {
     $settings.testFolders = $testAppsToBuild -join ','
     Write-Host "Apps to build: $($settings.appFolders)"
     Write-Host "Test apps to build: $($settings.testFolders)"
-    Set-Content -Path $configurationFilePath -Value ($settings | ConvertTo-Json -Depth 100)   
+    Set-Content -Path $configurationFilePath -Value ($settings | ConvertTo-Json -Depth 100)
+    if ($settings.appFolders -eq "") {
+        Write-Host "No changes found, nothing to build!"
+    }
 }
 
 $imageName = "build"
