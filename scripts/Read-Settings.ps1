@@ -50,8 +50,6 @@ if ("$version" -eq "") {
 
 if ($changesOnly) {
     $target = $ENV:TargetBranch
-    git config --global user.email "bcbuildtemplate@github.com"
-    git config --global user.name "BC Build Template"
     if ([String]::IsNullOrEmpty($target)) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
@@ -59,8 +57,8 @@ if ($changesOnly) {
         Write-Host "Looking for changed files using 'git diff HEAD..$target --name-only'"
         git fetch origin $target
         git fetch origin $branchName
-        git diff $branchName..$target --name-only
-        $files=$(git diff HEAD..$target --name-only)
+        git diff --name-only $branchName..$target --
+        $files=$(git diff --name-only HEAD..$target --)
     }
     $count=($files -split ' ').Length
     Write-Host "Total changed $count files"
