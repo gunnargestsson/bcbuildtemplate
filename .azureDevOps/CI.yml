@@ -222,7 +222,7 @@ stages:
     
     - task: PowerShell@2
       displayName: 'Get App RuntimePackage'
-      condition: and(succeeded(),eq('${{ parameters.createRuntimePackages}}','True'),ne(variables['appFolders'],'')
+      condition: and(succeeded(),eq('${{ parameters.createRuntimePackages}}','True'),ne(variables['appFolders'],''))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Get-AppRuntimePackage.ps1'
@@ -231,7 +231,7 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Sign RuntimePackage'
-      condition: and(succeeded(),eq('${{ parameters.createRuntimePackages}}','True'),ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''),ne(variables['appFolders'],'')
+      condition: and(succeeded(),eq('${{ parameters.createRuntimePackages}}','True'),ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''),ne(variables['appFolders'],''))
       env:
         codeSignPfxFile: $(CodeSignPfxFile)
         codeSignPfxPassword: $(CodeSignPfxPassword)
