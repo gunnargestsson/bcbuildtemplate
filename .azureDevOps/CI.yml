@@ -58,6 +58,10 @@ parameters:
   displayName: Create a folder structure in Azure Blob for each version
   type: boolean
   default: True
+- name: changeBuild
+  displayName: Build only changed apps
+  type: boolean
+  default: False
 
 stages:
 - stage: Build
@@ -102,7 +106,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }} -branchName "$(Build.SourceBranch)" -sourceVersion "$(Build.SourceVersion)" -changesOnly ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)")'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }} -branchName "$(Build.SourceBranch)" -sourceVersion "$(Build.SourceVersion)" -changesOnly (${{ parameters.changeBuild }} -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)"))'
         failOnStderr: true
     
     - task: PowerShell@2
