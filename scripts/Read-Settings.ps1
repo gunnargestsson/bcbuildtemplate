@@ -54,10 +54,10 @@ if ($changesOnly) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
     } else {
-        Write-Host "Looking for changed files from '$($branchName.split('/') | Select-Object -Last 1)' to '$target'"
-        $files=$(git diff-tree --no-commit-id --name-only HEAD "${target}")
+        Write-Host "Looking for changed files using 'git diff HEAD..$target --name-only'"
+        $files=$(git diff HEAD..$target --name-only)
     $count=($files -split ' ').Length
-    Write-Host "Total changed $count folders"
+    Write-Host "Total changed $count files"
     $changedFolders = @()
     foreach ($file in $files -split ' ') {
         $folder = $file.Substring(0, $file.IndexOf('/'))
