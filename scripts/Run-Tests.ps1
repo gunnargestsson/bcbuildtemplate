@@ -22,9 +22,16 @@
     [pscredential] $credential = $null,
 
     [Parameter(Mandatory = $false)]
+    [securestring] $licenseFile = $null,
+
+    [Parameter(Mandatory = $false)]
+    [securestring] $testLicenseFile = $null,
+
+    [Parameter(Mandatory = $false)]
     [string] $testResultsFile = (Join-Path $ENV:BUILD_REPOSITORY_LOCALPATH "TestResults.xml"),
 
-    [switch] $reRunFailedTests
+    [switch] $reRunFailedTests,
+    [switch] $debugMode
 )
 
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
@@ -38,7 +45,28 @@ if ([String]::IsNullOrEmpty($testCompanyName)) {
     } | Select-Object -First 1
 }
 
+if (-not ($testLicenseFile)) {
+    $testLicenseFile = try { $ENV:TESTLICENSEFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:TESTLICENSEFILE -AsPlainText -Force }
+}
+
+if ($testLicenseFile) {    
+    $unsecureLicenseFile = try { ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($testLicenseFile))) } catch { $testLicenseFile }
+    if ($unsecureLicenseFile -ne '$(TestLicenseFile)') {
+        Write-Host "Importing Test License"
+        Import-BcContainerLicense -containerName $containerName -licenseFile $unsecureLicenseFile 
+    }
+}
+
 Write-Host "Executing tests on company '${testCompanyName}' and saving results in '${testResultsFile}'"
+if ($debugMode) {
+    Write-Host "Debug mode is enabled"
+}
+if ($reRunFailedTests) {
+    Write-Host "Re-running failed tests if needed"
+}
+if ($testSuiteDisabled) {
+    Write-Host "Test suite is disabled"
+}
 
 if (-not ($credential)) {
     $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
@@ -85,6 +113,7 @@ if ($NavVersion -ge "15.0.0.0") {
                     -companyName $testCompanyName `
                     -credential $credential `
                     -XUnitResultFileName $TempTestResultFile `
+                    -debugMode:$debugMode `
                     -detailed
             }
             else {
@@ -97,7 +126,8 @@ if ($NavVersion -ge "15.0.0.0") {
                     -containerName $containerName `
                     -credential $credential `
                     -ignoreGroups `
-                    -testSuite $testSuite -debugMode
+                    -testSuite $testSuite `
+                    -debugMode:$debugMode
         
                 $tests | ForEach-Object {
                     if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
@@ -109,12 +139,13 @@ if ($NavVersion -ge "15.0.0.0") {
                                 -testSuite $testSuite `
                                 -testCodeunit $_.Id `
                                 -returnTrueIfAllPassed `
+                                -debugMode:$debugMode `
                                 -restartContainerAndRetry)) { $rerunTests += $_ }
                     $first = $false
                 }
                 if ($rerunTests.Count -gt 0 -and $reRunFailedTests) {
                     Restart-BCContainer -containerName $containername
-                    $rerunTests | % {
+                    $rerunTests | ForEach-Object {
                         if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
                                     -containerName $containerName `
                                     -companyName $testCompanyName `
@@ -124,6 +155,7 @@ if ($NavVersion -ge "15.0.0.0") {
                                     -testSuite $testSuite `
                                     -testCodeunit $_.Id `
                                     -returnTrueIfAllPassed `
+                                    -debugMode:$debugMode `
                                     -restartContainerAndRetry)) { $failedTests += $_ }
                         $first = $false
                     }
@@ -137,7 +169,21 @@ else {
         -containerName $containerName `
         -companyName $testCompanyName `
         -credential $credential `
+        -debugMode:$debugMode `
         -XUnitResultFileName $TempTestResultFile 
 }
+
+if (-not ($licenseFile)) {
+    $licenseFile = try { $ENV:LICENSEFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:LICENSEFILE -AsPlainText -Force }
+}
+
+if ($licenseFile) {    
+    $unsecureLicenseFile = try { ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile))) } catch { $licenseFile }
+    if ($unsecureLicenseFile -ne '$(LicenseFile)') {
+        Write-Host "Importing License"
+        Import-BcContainerLicense -containerName $containerName -licenseFile $unsecureLicenseFile 
+    }
+}
+
 
 Copy-Item -Path $TempTestResultFile -Destination $testResultsFile -Force

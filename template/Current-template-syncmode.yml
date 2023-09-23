@@ -1,16 +1,11 @@
 parameters:
-- name: TestsDebugMode
-  displayName: Run Unit Tests in Debug Mode
-  type: boolean
-  default: False
-- name: ReRunFailedTests
-  displayName: ReRun Unit Tests that are failing
-  type: boolean
-  default: False
-- name: RemoveBuildContainer
-  displayName: Remove build container after build
-  type: boolean
-  default: True  
+- name: SyncAppMode
+  displayName: Publish Sync-NAVApp Mode
+  type: string
+  default: Add
+  values:
+  - Add
+  - ForceSync
 
 trigger:
 - '*'
@@ -39,7 +34,4 @@ extends:
     azureSubscription: ""
     createRuntimePackages: true
     configurationFilePath: '.azureDevOps\build-settings.json'
-    TestsDebugMode: ${{ parameters.TestsDebugMode }}
-    ReRunFailedTests: ${{ parameters.ReRunFailedTests }}
-    RemoveBuildContainer: ${{ parameters.RemoveBuildContainer }}
-
+    SyncAppMode: ${{ parameters.SyncAppMode }}

@@ -177,25 +177,25 @@ Function New-DeploymentRemoteSession {
     }    
     try {
         $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
-        $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption
+        $vmSession = New-PSSession -ComputerName $HostName -SessionOption $sessionOption
         return $vmSession
     }
     catch {}
     try {
         $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
-        $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption
+        $vmSession = New-PSSession -ComputerName $HostName -SessionOption $sessionOption
         return $vmSession        
     }    
     catch {}
     try {
         $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -IncludePortInSPN
-        $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption -UseSSL
+        $vmSession = New-PSSession -ComputerName $HostName -SessionOption $sessionOption -UseSSL
         return $vmSession
     }
     catch {}
     try {
         $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
-        $vmSession = New-PSSession -ComputerName $VM -SessionOption $sessionOption -UseSSL
+        $vmSession = New-PSSession -ComputerName $HostName -SessionOption $sessionOption -UseSSL
         return $vmSession        
     }   
     catch {}    

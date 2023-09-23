@@ -1,111 +1,148 @@
 parameters:
-- name: version
-  displayName: 'Specify build platform version'
-  type: string
-  default: "current"
-- name: appVersion
-  displayName: 'Specify build app version'
-  type: string
-  default: "18.0"
-- name: azureSubscription
-  displayName: 'Specify azure subscription name'
-  type: string
-  default: 'My Azure Service Connection'
-- name: createRuntimePackages
-  displayName: 'Specify boolean value for runtime package creation'
-  type: boolean
-  default: True
-- name: configurationFilePath
-  displayName: 'Specifies the path to the build-settings.json file'
-  type: string
-  default: '.azureDevOps\build-settings.json'
-- name: releasenoteTemplateFilePath
-  displayName: 'Specifies the path to the release note template markdown file'
-  type: string
-  default: ''
+  - name: version
+    displayName: "Specify build platform version"
+    type: string
+    default: "current"
+  - name: appVersion
+    displayName: "Specify build app version"
+    type: string
+    default: "18.0"
+  - name: azureSubscription
+    displayName: "Specify azure subscription name"
+    type: string
+    default: "My Azure Service Connection"
+  - name: createRuntimePackages
+    displayName: "Specify boolean value for runtime package creation"
+    type: boolean
+    default: True
+  - name: configurationFilePath
+    displayName: "Specifies the path to the build-settings.json file"
+    type: string
+    default: '.azureDevOps\build-settings.json'
+  - name: releasenoteTemplateFilePath
+    displayName: "Specifies the path to the release note template markdown file"
+    type: string
+    default: ""
+  - name: SyncAppMode
+    displayName: Publish Sync-NAVApp Mode
+    type: string
+    default: Add
+    values:
+    - Add
+    - ForceSync    
 
 stages:
-- stage: Deployment
-  jobs:
-  - job: Build
-    timeoutInMinutes: 360
-    cancelTimeoutInMinutes: 10
-    variables:      
-      build.clean: all
-      platform: x64
-      appBuild: $[counter(variables['appVersion'],0)]
-      appRevision: 0
-      skipComponentGovernanceDetection: True
+  - stage: Deployment
+    jobs:
+      - job: Build
+        timeoutInMinutes: 360
+        cancelTimeoutInMinutes: 10
+        workspace:
+          clean: outputs | resources | all | none
+        variables:
+          build.clean: all
+          platform: x64
+          appBuild: $[counter(variables['appVersion'],0)]
+          appRevision: 0
+          skipComponentGovernanceDetection: True
 
-    steps:
-    - checkout: self
-      clean: true
-      path: 's'
+        steps:
+          - checkout: self
+            clean: true
+            path: "s"
 
-    - checkout: Template
-      clean: false
-      path: 's\bcbuildtemplate'
+          - checkout: Template
+            clean: false
+            path: 's\bcbuildtemplate'
 
-    - task: PowerShell@2
-      displayName: 'Copy Build Template'
-      inputs:
-        targetType: filePath
-        filePath: 'bcbuildtemplate\scripts\Copy-Template.ps1'
-        arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
-        failOnStderr: true
+          - task: PowerShell@2
+            displayName: "Copy Build Template"
+            inputs:
+              targetType: filePath
+              filePath: 'bcbuildtemplate\scripts\Copy-Template.ps1'
+              arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
+              failOnStderr: true
 
-    - task: PowerShell@2
-      displayName: 'Reading Settings'
-      inputs:
-        targetType: filePath
-        filePath: 'bcbuildtemplate\scripts\Read-Settings.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "$(resources.pipeline.self-pipe.runName)" -version ${{ parameters.version }} -branchName "$(resources.pipeline.self-pipe.sourceBranch)"'
-        failOnStderr: true
+          - task: PowerShell@2
+            displayName: "Reading Settings"
+            inputs:
+              targetType: filePath
+              filePath: 'bcbuildtemplate\scripts\Read-Settings.ps1'
+              arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "$(resources.pipeline.self-pipe.runName)" -version ${{ parameters.version }} -branchName "$(resources.pipeline.self-pipe.sourceBranch)"'
+              failOnStderr: true
 
-    - download: self-pipe
-      displayName: 'Download build artifacts'
+          - download: self-pipe
+            displayName: "Download build artifacts"
 
-    - task: PowerShell@2
-      displayName: 'Deploy to Environment'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
-      inputs:
-        targetType: filePath
-        filePath: 'bcbuildtemplate\scripts\Deploy-App.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Pipeline.Workspace)/self-pipe/${{ parameters.appVersion }}" -branchName "$(resources.pipeline.self-pipe.sourceBranch)"'
-    
-- stage: ReleaseNote
-  jobs:
-  - job: 'ReleaseNote'
-    steps:
-    - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
-      displayName: 'Generate Release Notes'
-      condition: ne('${{ parameters.releasenoteTemplateFilePath }}','')
-      inputs:
-        outputfile: "$(Build.ArtifactStagingDirectory)/releasenote-$(resources.pipeline.self-pipe.runName).md"
-        templatefile: "$(Build.Repository.LocalPath)/${{ parameters.releasenoteTemplateFilePath }}"
-        checkStage: true
-        stopOnRedeploy: false
-        getParentsAndChildren: true
-        dumpPayloadToConsole: true
-        dumpPayloadToFile: false
-        replaceFile: True
-        checkForManuallyLinkedWI: True
-        stopOnError: true
+          - task: PowerShell@2
+            displayName: "Deploy to Environment"
+            condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'))
+            env:
+              ClientId: $(ClientId)
+              ClientSecret: $(ClientSecret)
+              PowerShellUsername: $(PowerShellUsername)
+              PowerShellPassword: $(PowerShellPassword)
+            inputs:
+              targetType: filePath
+              filePath: 'bcbuildtemplate\scripts\Deploy-App.ps1'
+              arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Pipeline.Workspace)/self-pipe/${{ parameters.appVersion }}" -branchName "$(resources.pipeline.self-pipe.sourceBranch)" -SyncAppMode ${{ parameters.SyncAppMode }}'
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifacts'
-      inputs:
-        PathtoPublish: "$(Build.ArtifactStagingDirectory)"
-        ArtifactName: "releasenote-$(resources.pipeline.self-pipe.runName).md"
+  - stage: ReleaseNote
+    condition: and(succeeded(),ne('${{ parameters.releasenoteTemplateFilePath }}',''))
+    jobs:
+      - job: "ReleaseNote"
+        steps:
+          - checkout: self
+            clean: true
+            path: "s"
 
-    - task: AzureFileCopy@4
-      inputs:
-        displayName: 'Copy Release Note to Azure Storage'
-        condition: and(succeeded(),ne('${{ parameters.releasenoteTemplateFilePath }}',''),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''))
-        SourcePath: "$(Build.ArtifactStagingDirectory)/releasenote-$(resources.pipeline.self-pipe.runName).md"
-        azureSubscription: 'BC_Production_DevOps'
-        Destination: 'AzureBlob'
-        storage: 'brightcomdevops'
-        ContainerName: 'devops'
-        BlobPrefix: "Artifact/$(Build.Repository.Name)/ReleaseNotes/releasenote-$(resources.pipeline.self-pipe.runName).md"
+          - checkout: Template
+            clean: false
+            path: 's\bcbuildtemplate'
 
+          - task: PowerShell@2
+            displayName: "Copy Build Template"
+            inputs:
+              targetType: filePath
+              filePath: 'bcbuildtemplate\scripts\Copy-Template.ps1'
+              arguments: '-AgentToolsDirectory "$(Agent.ToolsDirectory)"'
+              failOnStderr: true
+
+          - task: PowerShell@2
+            displayName: "Reading Settings"
+            inputs:
+              targetType: filePath
+              filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
+              arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -version ${{ parameters.version }} -branchName "$(Build.SourceBranch)"'
+              failOnStderr: true
+
+          - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@4
+            displayName: "Generate Release Notes"
+            inputs:
+              outputfile: "$(Build.ArtifactStagingDirectory)/releasenote-$(resources.pipeline.self-pipe.runName).md"
+              templatefile: "$(Build.Repository.LocalPath)/${{ parameters.releasenoteTemplateFilePath }}"
+              checkStage: true
+              stopOnRedeploy: false
+              getParentsAndChildren: true
+              dumpPayloadToConsole: true
+              dumpPayloadToFile: false
+              replaceFile: True
+              checkForManuallyLinkedWI: True
+              stopOnError: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Artifacts"
+            inputs:
+              PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+              ArtifactName: "releasenote-$(resources.pipeline.self-pipe.runName).md"
+
+          - task: AzureFileCopy@4
+            displayName: "Copy Release Note to Azure Storage"
+            condition: and(succeeded(),ne(variables['azureStorageAccount'],''))
+            inputs:
+              SourcePath: "$(Build.ArtifactStagingDirectory)/releasenote-$(resources.pipeline.self-pipe.runName).md"
+              azureSubscription: "${{ parameters.azureSubscription }}"
+              Destination: AzureBlob
+              storage: "$(azureStorageAccount)"
+              ContainerName: "$(azureContainerName)"
+              BlobPrefix: "Artifact/$(Build.Repository.Name)/ReleaseNotes/releasenote-$(resources.pipeline.self-pipe.runName).md"

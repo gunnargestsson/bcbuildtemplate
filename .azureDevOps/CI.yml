@@ -19,13 +19,54 @@ parameters:
   displayName: 'Specifies the path to the build-settings.json file'
   type: string
   default: '.azureDevOps\build-settings.json'
+- name: publishTestApps
+  displayName: 'Specifies if test apps are to be published as artifacts and to Azure Blob'
+  type: boolean
+  default: False
+- name: cleanAllImages
+  displayName: 'Specifies if all images should be cleaned after the build'
+  type: boolean
+  default: False
+- name: SyncAppMode
+  displayName: Publish Sync-NAVApp Mode
+  type: string
+  default: Add
+  values:
+  - Add
+  - ForceSync
+- name: TestsDebugMode
+  displayName: Run Unit Tests in Debug Mode
+  type: boolean
+  default: False
+- name: ReRunFailedTests
+  displayName: ReRun Unit Tests that are failing
+  type: boolean
+  default: False
+- name: FlushContainerCache
+  displayName: Execute Flush-ContainerHelperCache after build
+  type: boolean
+  default: True
+- name: RemoveBuildContainer
+  displayName: Remove build container after build
+  type: boolean
+  default: True
+- name: PublishOnCompile
+  displayName: Publish app to container after compile
+  type: boolean
+  default: False
+- name: AzureBlobFolderForVersion
+  displayName: Create a folder structure in Azure Blob for each version
+  type: boolean
+  default: True
 
 stages:
 - stage: Build
   jobs:
   - job: Build
-    timeoutInMinutes: 360
+    timeoutInMinutes: 120
     cancelTimeoutInMinutes: 10
+    workspace:
+      clean: outputs | resources | all 
     variables:      
       build.clean: all
       platform: x64
@@ -52,6 +93,12 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Reading Settings'
+      env:
+        Password: $(Password)
+        SyncAppMode: ${{ parameters.SyncAppMode }}"
+        azstoragetenantid: $(AzStorageTenantId)
+        azstorageclientid: $(AzStorageClientId)
+        azstorageclientSecret: $(AzStorageClientSecret)          
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
@@ -60,6 +107,10 @@ stages:
     
     - task: PowerShell@2
       displayName: 'Install bccontainerhelper'
+      env:
+        azstoragetenantid: $(AzStorageTenantId)
+        azstorageclientid: $(AzStorageClientId)
+        azstorageclientSecret: $(AzStorageClientSecret)          
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Install-bccontainerhelper.ps1'
@@ -67,10 +118,14 @@ stages:
         
     - task: PowerShell@2
       displayName: 'Create Build Container'
+      condition: succeeded()
       env:
         Password: $(Password)
         LicenseFile: $(LicenseFile)
         InsiderSasToken: $(InsiderSasToken)
+        azstoragetenantid: $(AzStorageTenantId)
+        azstorageclientid: $(AzStorageClientId)
+        azstorageclientSecret: $(AzStorageClientSecret)          
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Create-Container.ps1'
@@ -79,12 +134,13 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Compile App'
+      condition: succeeded()
       env:
         Password: $(Password)
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
-        arguments: '-appFolders "$(appFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)"'
+        arguments: '-appFolders "$(appFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification'
         failOnStderr: true
     
     - task: PowerShell@2
@@ -95,7 +151,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)"'
+        arguments: '-appFolders "$(testFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification'
         failOnStderr: true
     
     - task: PowerShell@2
@@ -104,6 +160,9 @@ stages:
       env:
         codeSignPfxFile: $(CodeSignPfxFile)
         codeSignPfxPassword: $(CodeSignPfxPassword)
+        azstoragetenantid: $(AzStorageTenantId)
+        azstorageclientid: $(AzStorageClientId)
+        azstorageclientSecret: $(AzStorageClientSecret)          
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Sign-App.ps1'
@@ -112,34 +171,20 @@ stages:
     
     - task: PowerShell@2
       displayName: 'Publish App'
-      env:
-        LicenseFile: $(LicenseFile)
+      condition: and(succeeded(),ne('${{ parameters.PublishOnCompile}}','True'))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
-        arguments: '-appFolders "$(appFolders)" -skipVerification:([String]::IsNullOrEmpty($CodeSignPfxPassword)) -licenseFile "$(LicenseFile)"'
-        failOnStderr: true
-    
-    - task: PowerShell@2
-      displayName: 'Publish Test App using Test License File'
-      condition: and(succeeded(),ne(variables['testFolders'],''),ne(variables['TestLicenseFile'],''))
-      env:
-        LicenseFile: $(TestLicenseFile)
-      inputs:
-        targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -skipVerification -licenseFile "$(TestLicenseFile)"'
+        arguments: '-appFolders "$(appFolders)" -skipVerification:([String]::IsNullOrEmpty($CodeSignPfxPassword))'
         failOnStderr: true
 
     - task: PowerShell@2
-      displayName: 'Publish Test App using Build License File'
-      condition: and(succeeded(),ne(variables['testFolders'],''),eq(variables['TestLicenseFile'],''))
-      env:
-        LicenseFile: $(LicenseFile)
+      displayName: 'Publish Test App'
+      condition: and(succeeded(),ne(variables['testFolders'],''),ne('${{ parameters.PublishOnCompile}}','True'))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -skipVerification -licenseFile "$(LicenseFile)"'
+        arguments: '-appFolders "$(testFolders)" -skipVerification'
         failOnStderr: true
 
     - task: PowerShell@2
@@ -158,10 +203,12 @@ stages:
       env:
         Password: $(Password)
         TestParameters: $(TestParameters)
+        LicenseFile: $(LicenseFile)
+        TestLicenseFile: $(TestLicenseFile)
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Run-Tests.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appFolders "$(testFolders)"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appFolders "$(testFolders)" -reRunFailedTests:([String]::Equals("${{ parameters.ReRunFailedTests }}","True")) -debugMode:([String]::Equals("${{ parameters.TestsDebugMode }}","True"))'
         failOnStderr: true
       
     - task: PublishTestResults@2
@@ -187,22 +234,24 @@ stages:
       env:
         codeSignPfxFile: $(CodeSignPfxFile)
         codeSignPfxPassword: $(CodeSignPfxPassword)
+        azstoragetenantid: $(AzStorageTenantId)
+        azstorageclientid: $(AzStorageClientId)
+        azstorageclientSecret: $(AzStorageClientSecret)          
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Sign-App.ps1'
         arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)\RuntimePackages"'
         failOnStderr: true
         
-    - task: PowerShell@1
+    - task: PowerShell@2
       displayName: Remove Test App from Artifact Staging Directory
-      condition: and(succeeded(),ne(variables['testFolders'],''))
+      condition: and(succeeded(),ne(variables['testFolders'],''),eq('${{ parameters.publishTestApps }}','False'))
       inputs:
-        scriptType: inlineScript
-        inlineScript: >
-          foreach ($folder in ('$(testFolders)'.Split(','))) {
-            Remove-Item (Join-Path '$(Build.ArtifactStagingDirectory)' $folder) -Recurse -Force
-          }
-
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-Items.ps1'
+        arguments: '-appFolders "$(testFolders)" -artifactsFolder "$(Build.ArtifactStagingDirectory)"'
+        failOnStderr: true
+       
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
       inputs:
@@ -211,16 +260,25 @@ stages:
 
     - task: PowerShell@2
       displayName: Copy App to Release folder
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\CopyTo-LatestFolder.ps1'
-        arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)"  -releaseFolder "${{ parameters.version }}\${{ parameters.appVersion }}"'
-        failOnStderr: true              
+        arguments: '-appFolders "$(appFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -releaseFolder "${{ parameters.version }}\${{ parameters.appVersion }}"'
+        failOnStderr: true
 
-    - task: AzureFileCopy@4
-      displayName: 'Copy Release Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+    - task: PowerShell@2
+      displayName: Copy Test App to Release folder
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['testFolders'],''),eq('${{ parameters.publishTestApps }}','True'))
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\CopyTo-LatestFolder.ps1'
+        arguments: '-appFolders "$(testFolders)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -releaseFolder "${{ parameters.version }}\${{ parameters.appVersion }}"'
+        failOnStderr: true   
+
+    - task: AzureFileCopy@5
+      displayName: 'Copy Release Apps to Azure Blob with versions'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),eq('${{ parameters.AzureBlobFolderForVersion}}','True'))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
@@ -229,9 +287,20 @@ stages:
         ContainerName: '$(azureContainerName)'
         BlobPrefix: '$(Build.Repository.Name)\$(Build.SourceBranchName)\${{ parameters.appVersion }}\${{ parameters.version }}'
 
-    - task: AzureFileCopy@4
+    - task: AzureFileCopy@5
+      displayName: 'Copy Release Apps to Azure Blob latest'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),ne('${{ parameters.AzureBlobFolderForVersion}}','True'))
+      inputs:
+        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        Destination: AzureBlob
+        storage: '$(azureStorageAccount)'
+        ContainerName: '$(azureContainerName)'
+        BlobPrefix: '$(Build.Repository.Name)\$(Build.SourceBranchName)\latest'
+
+    - task: AzureFileCopy@5
       displayName: 'Copy Artifact Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
@@ -240,9 +309,9 @@ stages:
         ContainerName: '$(azureContainerName)'
         BlobPrefix: 'Artifact\$(Build.Repository.Name)'
 
-    - task: AzureFileCopy@4
+    - task: AzureFileCopy@5
       displayName: 'Copy Runtime Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.createRuntimePackages}}','True'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),eq('${{ parameters.createRuntimePackages}}','True'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\RuntimePackages\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
@@ -253,17 +322,18 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Remove Build Container'
-      condition: ne(variables['reuseContainer'],'True')
+      condition: and(ne(variables['reuseContainer'],'True'),eq('${{ parameters.RemoveBuildContainer }}','True'))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-Container.ps1'
 
     - task: PowerShell@2
       displayName: 'Remove Unused Container Image'
-      condition: and(ne(variables['Agent.Name'],'Hosted Agent'),ne(variables['Agent.Name'],'Azure Pipelines*'))
+      condition: and(ne(variables['Agent.Name'],'Hosted Agent'),ne(variables['Agent.Name'],'Azure Pipelines*'),eq('${{ parameters.FlushContainerCache }}','True'))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
+        arguments: '-cleanAllImages "${{ parameters.cleanAllImages }}"'
 
     - task: PowerShell@2
       displayName: 'Validate App'
@@ -297,5 +367,5 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Deploy-App.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)" -SyncAppMode ${{ parameters.SyncAppMode }}'
         failOnStderr: true

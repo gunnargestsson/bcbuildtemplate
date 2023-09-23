@@ -21,11 +21,15 @@
     $PowerShellUsername = $ENV:PowerShellUsername,
 
     [Parameter(Mandatory = $false)]
-    $PowerShellPassword = $ENV:PowerShellPassword
+    $PowerShellPassword = $ENV:PowerShellPassword,
+
+    [Parameter(Mandatory = $false)]
+    [string] $SyncAppMode = "Add"
     
 )
 
-Write-Host "Deploying apps from ${artifactFolder} to branch ${branchName} ..."
+Write-Host "Deploying apps from ${artifactsFolder} to branch ${branchName} ..."
+Write-Host "NAV App Sync mode is set to $SyncAppMode"
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 if ($clientId -is [string]) {
     if ($clientSecret -is [String]) { $clientSecret = ConvertTo-SecureString -String $clientSecret -AsPlainText -Force }
@@ -33,7 +37,7 @@ if ($clientId -is [string]) {
 }
 if ($PowerShellUsername -is [string]) {
     if ($PowerShellPassword -is [String]) { $PowerShellPassword = ConvertTo-SecureString -String $PowerShellPassword -AsPlainText -Force }
-    if ($PowerShellPassword -isnot [SecureString]) { throw "ClientSecret needs to be a SecureString or a String" }
+    if ($PowerShellPassword -isnot [SecureString]) { throw "PowerShellPassword needs to be a SecureString or a String" }
     $vmCredential = New-Object System.Management.Automation.PSCredential($PowerShellUsername, $PowerShellPassword);
 }
 $appFolders = $settings.appFolders
@@ -42,6 +46,12 @@ $deployments += $settings.deployments | Where-Object { $_.branch -eq $branchName
 $deployments += $settings.deployments | Where-Object { $_.branch -eq ($branchName.split('/') | Select-Object -Last 1)}
 foreach ($deployment in $deployments) {
     $deploymentType = $deployment.DeploymentType
+    if (($deployment.reason).Count -gt 0) {
+        if ($ENV:BUILD_REASON -notin $deployment.reason) {
+            Write-Host "Skip deployment $($deploymentType), Reason: $($ENV:BUILD_REASON) <> $($deployment.reason) "
+            continue
+        }
+    }
 
     $artifactsFolder = (Get-Item $artifactsFolder).FullName
     Write-Host "Folder: $artifactsFolder"
@@ -59,8 +69,12 @@ foreach ($deployment in $deployments) {
             $environment = $deployment.DeployToName;
             foreach ($tenantId in $deployment.DeployToTenants) {
                 Write-Host "Online Tenant deployment to https://businesscentral.dynamics.com/${tenantId}/${environment}/"
-                $authContext = New-BcAuthContext -clientID $clientId -clientSecret $clientSecret -tenantID $tenantId -scopes "https://api.businesscentral.dynamics.com/.default" 
-                Publish-PerTenantExtensionApps -bcAuthContext $authContext -environment $environment -appFiles $appFile -Verbose
+                $authContext = New-BcAuthContext -clientID $clientId -clientSecret $clientSecret -tenantID $tenantId -scopes "https://api.businesscentral.dynamics.com/.default"
+                if ($SyncAppMode -eq "ForceSync") {
+                    Publish-PerTenantExtensionApps -bcAuthContext $authContext -environment $environment -appFiles $appFile -Verbose -schemaSyncMode Force
+                } else {
+                    Publish-PerTenantExtensionApps -bcAuthContext $authContext -environment $environment -appFiles $appFile -Verbose -schemaSyncMode Add
+                }
             }
         }
         elseif ($deploymentType -eq "container" -and ($deployment.DeployToTenants).Count -eq 0) {
@@ -90,7 +104,7 @@ foreach ($deployment in $deployments) {
                         if ($NewApp) {
                             if (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $Newapp.Name | Where-Object -Property Version -LT $Newapp.Version | Where-Object -Property IsInstalled -EQ $true) {
                                 Write-Host "upgrading app $($app.Name) v$($app.Version) to v$($NewApp.Version) in tenant $($Tenant)"
-                                Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force
+                                Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force -Mode $SyncAppMode
                                 Start-NAVAppDataUpgrade -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force
                             }
                             else {
@@ -99,7 +113,7 @@ foreach ($deployment in $deployments) {
                         }
                         elseif (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -EQ $app.Version | Where-Object -Property IsInstalled -EQ $false) {
                             Write-Host "installing app $($app.Name) v$($app.Version) in tenant $($Tenant)"
-                            Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
+                            Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force -Mode $SyncAppMode
                             Install-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
                         }                   
                     }
@@ -210,7 +224,7 @@ foreach ($deployment in $deployments) {
                     $sessionArgument = @{ }
                 }
     
-                Invoke-Command @sessionArgument -ScriptBlock { Param($appFile, $DeployToInstance, $installNewApps)
+                Invoke-Command @sessionArgument -ScriptBlock { Param($appFile, $DeployToInstance, $installNewApps, $SyncAppMode)
                     $ErrorActionPreference = "Stop"
     
                     if ([String]::IsNullOrEmpty($DeployToInstance)) {
@@ -238,7 +252,7 @@ foreach ($deployment in $deployments) {
                             if ($NewApp) {
                                 if (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $Newapp.Name | Where-Object -Property Version -LT $Newapp.Version | Where-Object -Property IsInstalled -EQ $true) {
                                     Write-Host "upgrading app $($app.Name) v$($app.Version) to v$($NewApp.Version) in tenant $($Tenant)"
-                                    Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force
+                                    Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force -Mode $SyncAppMode
                                     Start-NAVAppDataUpgrade -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force
                                 }
                                 else {
@@ -247,7 +261,7 @@ foreach ($deployment in $deployments) {
                             }
                             elseif ($installNewApps -and (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -EQ $app.Version | Where-Object -Property IsInstalled -EQ $false)) {
                                 Write-Host "installing app $($app.Name) v$($app.Version) in tenant $($Tenant)"
-                                Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
+                                Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force -Mode $SyncAppMode
                                 Install-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
                             }                   
                         }
@@ -271,7 +285,7 @@ foreach ($deployment in $deployments) {
                             }
                         }
                     }
-                } -ArgumentList $tempAppFile, $deployment.DeployToInstance, $installNewApps
+                } -ArgumentList $tempAppFile, $deployment.DeployToInstance, $installNewApps, $SyncAppMode
             }
             catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
                 throw "Could not connect to $VM. Maybe port 5985 (WinRM) is not open for your IP address $myip"
@@ -317,16 +331,16 @@ foreach ($deployment in $deployments) {
                         else {
                             $vmSession = New-DeploymentRemoteSession -HostName $VM
                         }
-                        $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
-                        $sessionArgument = @{ "Session" = $vmSession }
                     }
+                    $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
+                    $sessionArgument = @{ "Session" = $vmSession }
                 }
                 else {
                     $tempAppFile = $appFile
                     $sessionArgument = @{ }
                 }
     
-                Invoke-Command @sessionArgument -ScriptBlock { Param($Tenants, $appFile, $DeployToInstance, $installNewApps)
+                Invoke-Command @sessionArgument -ScriptBlock { Param($Tenants, $appFile, $DeployToInstance, $installNewApps, $SyncAppMode)
                     $ErrorActionPreference = "Stop"
     
                     if ([String]::IsNullOrEmpty($DeployToInstance)) {
@@ -363,7 +377,9 @@ foreach ($deployment in $deployments) {
                             if ($NewApp) {
                                 if (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $Newapp.Name | Where-Object -Property Version -LT $Newapp.Version | Where-Object -Property IsInstalled -EQ $true) {
                                     Write-Host "upgrading app $($app.Name) v$($app.Version) to v$($NewApp.Version) in tenant $($Tenant)"
-                                    Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force
+
+                                    Write-Host "Sync-NAVApp -ServerInstance $($ServerInstance) -Tenant $($Tenant) -Name $($NewApp.Name) -Version $($NewApp.Version) -Mode $($SyncAppMode) -Force"
+                                    Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Mode $SyncAppMode -Force
                                     Start-NAVAppDataUpgrade -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force
                                 }
                                 else {
@@ -372,7 +388,7 @@ foreach ($deployment in $deployments) {
                             }
                             elseif ($installNewApps -and (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -EQ $app.Version | Where-Object -Property IsInstalled -EQ $false)) {
                                 Write-Host "installing app $($app.Name) v$($app.Version) in tenant $($Tenant)"
-                                Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
+                                Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force -Mode $SyncAppMode
                                 Install-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
                             }                   
                         }
@@ -394,7 +410,7 @@ foreach ($deployment in $deployments) {
                             }
                         }         
                     }
-                } -ArgumentList $Tenants, $tempAppFile, $deployment.DeployToInstance, $installNewApps
+                } -ArgumentList $Tenants, $tempAppFile, $deployment.DeployToInstance, $installNewApps, $SyncAppMode
             }
             catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
                 throw "Could not connect to $VM. Maybe port 5985 (WinRM) is not open for your IP address $myip"

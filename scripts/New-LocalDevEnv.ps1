@@ -1,8 +1,8 @@
 Param(
-    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyname=$true)]
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyname = $true)]
     [string] $configurationFilePath,
 
-    [Parameter(Mandatory = $false, ValueFromPipelineByPropertyname=$true)]
+    [Parameter(Mandatory = $false, ValueFromPipelineByPropertyname = $true)]
     [string] $scriptToStart = (Join-path $PSScriptRoot $MyInvocation.MyCommand.Name)
 
 )
@@ -22,7 +22,7 @@ $IsInAdminMode = $myWindowsPrincipal.IsInRole($adminRole)
 if (!$IsInAdminMode) {
     $ArgumentList = "-noprofile -file ${scriptToStart}"
     Write-Host "Starting '${scriptToStart}' in Admin Mode..."
-    Start-Process powershell -Verb runas -WorkingDirectory $scriptPath -ArgumentList @($ArgumentList,$configurationFilePath,$scriptToStart) -WindowStyle Normal -Wait 
+    Start-Process powershell -Verb runas -WorkingDirectory $scriptPath -ArgumentList @($ArgumentList, $configurationFilePath, $scriptToStart) -WindowStyle Normal -Wait 
 }
 else {
     Invoke-Expression -Command "Function Install-BCContainerHelper { $((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Install-BCContainerHelper.ps1").Content.Substring(1)) }"
@@ -47,8 +47,15 @@ else {
     $containername = $settings.name.ToLower()
     $auth = 'UserPassword'
     $artifact = $settings.versions[0].artifact
-    $segments = "$artifact/////".Split('/')
-    $artifactUrl = Get-BCArtifactUrl -storageAccount $segments[0] -type $segments[1] -version $segments[2] -country $segments[3] -select $segments[4] | Select-Object -First 1   
+
+    if ($artifact -like "https://*") {
+        $artifactUrl = $artifact
+    }
+    else {
+        $segments = "$artifact/////".Split('/')
+        $artifactUrl = Get-BCArtifactUrl -storageAccount $segments[0] -type $segments[1] -version $segments[2] -country $segments[3] -select $segments[4] | Select-Object -First 1   
+    }
+
     $username = $userProfile.Username
     $password = ConvertTo-SecureString -String $userProfile.Password
     $credential = New-Object System.Management.Automation.PSCredential ($username, $password)
@@ -69,8 +76,10 @@ else {
 
 
     if ($settings.dotnetAddIns) {
+        $NewConfigFilePath = Join-Path $env:TEMP "build-settings.json"
+        Copy-Item -Path $configurationFilePath -Destination $NewConfigFilePath -Force
         $parameters += @{ 
-            "myscripts" = @( "$configurationFilePath"
+            "myscripts" = @( "$NewConfigFilePath"
                 @{ "SetupAddins.ps1" = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/gunnargestsson/bcbuildtemplate/master/scripts/Copy-AddIns.ps1").Content })
         }    
     }
@@ -90,9 +99,10 @@ else {
             try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }
             if (!([String]::IsNullOrEmpty($value))) { 
                 if ($serverConfiguration -eq '') {
-                    $serverConfiguration =  "$($parameter.Name)=$($value)"
-                } else {
-                    $serverConfiguration +=  ",$($parameter.Name)=$($value)"
+                    $serverConfiguration = "$($parameter.Name)=$($value)"
+                }
+                else {
+                    $serverConfiguration += ",$($parameter.Name)=$($value)"
                 }
             } 
         }
@@ -111,7 +121,65 @@ else {
 
     $settings.dependencies | ForEach-Object {
         Write-Host "Publishing $_"
-        Publish-BCContainerApp -containerName $containerName -appFile $_ -skipVerification -sync -install
+        
+        $guid = New-Guid        
+        if ($_.EndsWith(".zip", "OrdinalIgnoreCase") -or $_.Contains(".zip?")) {        
+            $appFolder = Join-Path $env:TEMP $guid.Guid
+            $appFile = Join-Path $env:TEMP "$($guid.Guid).zip"
+            Write-Host "Downloading app file $($_) to $($appFile)"        
+            Download-File -sourceUrl $_ -destinationFile $appFile
+            New-Item -ItemType Directory -Path $appFolder -Force | Out-Null
+            Write-Host "Extracting .zip file "
+            Expand-Archive -Path $appFile -DestinationPath $appFolder
+            Remove-Item -Path $appFile -Force
+            $appFile = Get-ChildItem -Path $appFolder -Recurse -Include *.app -File | Select-Object -First 1
+        }  else {
+            Write-Host "Downloading app file $($_) to $($appFile)"        
+            $appFile = Join-Path $env:TEMP "$($guid.Guid).app"   
+            Download-File -sourceUrl $_ -destinationFile $appFile
+        }        
+    
+        Write-Host "Container deployment to ${containerName}"
+        Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -scope Global
+        $containerPath = Join-Path "C:\Run\My" (Split-Path -Path $appFile -Leaf)
+        Copy-FileToBcContainer -containerName $containerName -localPath $appFile -containerPath $containerPath 
+        
+        $appName = Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
+            param($appFile)
+            return (Get-NAVAppInfo -Path $appFile).Name
+        } -argumentList $containerPath
+    
+        Invoke-ScriptInBcContainer -containerName $containerName -scriptblock {
+            Param($appName)
+            $ServerInstance = (Get-NAVServerInstance | Where-Object -Property Default -EQ True).ServerInstance
+            Write-Host "Updating app '${appName}' on server instance '${ServerInstance}'..."
+    
+            foreach ($Tenant in (Get-NAVTenant -ServerInstance $ServerInstance).Id) {                                      
+                $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties -Name $appName
+                foreach ($app in $apps | Sort-Object -Property Version) {
+                    Write-Host "Investigating app $($app.Name) v$($app.version) installed=$($app.isInstalled)"
+                    $NewApp = $apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.version                            
+                    if ($NewApp) {
+                        if (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $Newapp.Name | Where-Object -Property Version -LT $Newapp.Version | Where-Object -Property IsInstalled -EQ $true) {
+                            Write-Host "upgrading app $($app.Name) v$($app.Version) to v$($NewApp.Version) in tenant $($Tenant)"
+                            Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force
+                            Start-NAVAppDataUpgrade -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force
+                        }
+                        else {
+                            Write-Host "Newer App is available"
+                        }
+                    }
+                    elseif (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -EQ $app.Version | Where-Object -Property IsInstalled -EQ $false) {
+                        Write-Host "installing app $($app.Name) v$($app.Version) in tenant $($Tenant)"
+                        Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
+                        Install-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force
+                    }                   
+                }
+            }
+        } -argumentList $appName
+
+        Remove-Item -Path $appFile -Force -ErrorAction SilentlyContinue
+        if ($appFolder) { Remove-Item -Path $appFolder -Force -Recurse -ErrorAction SilentlyContinue }
     }
 
     if ($settings.includeTestRunnerOnly) {

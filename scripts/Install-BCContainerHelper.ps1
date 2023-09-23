@@ -5,7 +5,6 @@
 
 Write-Host "Version: $bccontainerhelperVersion"
 
-
 $module = Get-InstalledModule -Name bccontainerhelper -ErrorAction SilentlyContinue
 if ($module) {
     $versionStr = $module.Version.ToString()

@@ -1,0 +1,44 @@
+parameters:
+- name: SyncAppMode
+  displayName: Publish Sync-NAVApp Mode
+  type: string
+  default: Add
+  values:
+  - Add
+  - ForceSync
+
+trigger: none
+pr: none
+
+schedules:
+  - cron: 10 20 * * 4
+    displayName: Deploy Weekly Thursday 2010
+    branches:
+      include: [master]
+    always: false
+
+pool: Default
+
+resources:
+  pipelines:
+  - pipeline: self-pipe
+    source: <CI Pipeline Name>
+    branch: master
+  repositories:
+    - repository: Template
+      type: github
+      endpoint: gunnargestsson # Service Connection
+      name: gunnargestsson/bcbuildtemplate
+      ref: master
+
+variables:
+- group: BuildVariables
+
+extends:
+  template: /.azureDevOps/CD.yml@Template
+  parameters:
+    version: "current"
+    appVersion: "17.2"
+    azureSubscription: ""
+    createRuntimePackages: false
+    SyncAppMode: ${{ parameters.SyncAppMode }}

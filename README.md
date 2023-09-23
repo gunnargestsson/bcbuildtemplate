@@ -8,17 +8,40 @@
     - BuildVariables
         - CodeSignPfxFile (optional for signing the apps)
         - CodeSignPfxPassword (optional for signing the apps)
-        - LicenseFile
+        - LicenseFile (optional - will use Cronus license if not specified)
         - TestLicenseFile (optional if unit tests require development license and build is using customer license)
-        - Password
+        - Password (optional - will create random password if not specified)
         - ClientId (optional for online tenant deployment)
         - ClientSecret (optional for online tenant deployment)
         - PowerShellUsername (optional for powershell deployment)
         - PowerShellPassword (optional for powershell deployment)
+        - Access a private storage account for license, certificates and app dependencies
+          - AzStorageTenantId, Azure tenantid where the storage container is located
+          - AzStorageClientId, App Registration Client Id
+          - AzStorageClientSecret, App Registration Client Secret
     - InsiderBuilds
         - InsiderSasToken
 3.	Create DevOps pipeline
 
+# Publish Sync-NAVApp Mode Parameter
+To enable the option to choose if the deployment step in the CI pipeline should ForceSync or not. You need to add the below parameters to your yaml files. You will find an example in file **Current-template-syncmode.yml** in the template folder.
+## Pipeline parameter
+Add the following to the top of your yaml file where you would like to enable the option.
+```
+parameters:
+- name: SyncAppMode
+  displayName: Publish Sync-NAVApp Mode
+  type: string
+  default: Add
+  values:
+  - Add
+  - ForceSync
+```
+Add the below parameter to the CI.yml extension at the bottom of the yaml file.
+```
+SyncAppMode: ${{ parameters.SyncAppMode }}
+```
+This will give you the option to specify whether your manually triggered deploy will be forced or not.
 # Service Connection
 Create a service connection to GitHub and update the endpoint
 -  https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml

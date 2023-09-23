@@ -27,6 +27,8 @@
     [bool] $reuseContainer = ($ENV:REUSECONTAINER -eq "True")
 )
 
+. (Join-Path $PSScriptRoot "HelperFunctions.ps1")
+
 if (-not ($artifact)) {
     if ($ENV:ARTIFACTURL) {
         Write-Host "Using Artifact Url variable"
@@ -64,10 +66,6 @@ if (-not ($credential)) {
     $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
 }
 
-if (-not ($licenseFile)) {
-    $licenseFile = try { $ENV:LICENSEFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:LICENSEFILE -AsPlainText -Force }
-}
-
 Write-Host "Create $containerName from $($artifactUrl.split('?')[0])"
 
 $parameters = @{
@@ -75,8 +73,21 @@ $parameters = @{
     "Accept_Outdated" = $true
 }
 
+
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 
+$userProfile = $settings.userProfiles | Where-Object -Property profile -EQ "$($ENV:AGENT_NAME)"
+if ($userProfile) { 
+    if ($userProfile.containerParameters) {
+        Foreach ($parameter in ($userProfile.containerParameters.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
+            try { $value = (Invoke-Expression $parameter.Value) } catch { $value = $parameter.Value }
+            if (!([String]::IsNullOrEmpty($value))) { 
+                try { $parameters += @{ $parameter.Name = $value } } catch { $parameters."$($parameter.Name)" = $value }
+            }
+        }
+    }
+}  
+       
 if ($settings.containerParameters) {
     Write-Host "Updating container properties"
     Foreach ($parameter in ($settings.containerParameters.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
@@ -95,6 +106,15 @@ if ($licenseFile) {
     $parameters += @{
         "licenseFile" = $unsecureLicenseFile
     }
+} elseif ($ENV:LICENSEFILE -ne "`$(LicenseFile)" -and $ENV:LICENSEFILE -ne "") {
+    $parameters += @{
+        "licenseFile" = $ENV:LICENSEFILE
+    }
+}
+
+# If azure storage App Registration information is provided and Url contains blob.core.windows.net, download licensefile using Oauth2 authentication
+if ($parameters.licenseFile -ne "" -and $ENV:DOWNLOADFROMPRIVATEAZURESTORAGE -and $parameters.licenseFile.Contains("blob.core.windows.net")) {
+    $parameters.licenseFile = Get-BlobFromPrivateAzureStorageOauth2 -blobUri $parameters.licenseFile
 }
 
 if ($buildenv -eq "Local") {
@@ -134,15 +154,14 @@ if ($settings.serverConfiguration) {
     Write-Host "Updating server configuration properties"
     Foreach ($parameter in ($settings.serverConfiguration.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
         $value = $parameter.Value
-        Write-Host "Adding server configuration property: $($parameter.Name) = ${value}"
         if ($serverConfiguration -eq '') {
-            $serverConfiguration =  "$($parameter.Name)=$($value)"
-        } else {
-            $serverConfiguration +=  ",$($parameter.Name)=$($value)"
-        }            
+            $serverConfiguration = "$($parameter.Name)=$($value)"
+        }
+        else {
+            $serverConfiguration += ",$($parameter.Name)=$($value)"
+        }
     }
     if ($serverConfiguration -ne '') {
-        Write-Host "Adding configured server configuration: ${serverConfiguration}"
         $additionalParameters += @("--env CustomNavSettings=${serverConfiguration}")
     }
 }
