@@ -55,7 +55,10 @@ if ($changesOnly) {
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
     } else {
         Write-Host "Looking for changed files from $target"
-        #try { git fetch origin $target } catch { Write-Host "Git error ignored"}
+        #git config user.name "my_name"
+        #git config user.password "my_password"
+        Start-Process -FilePath git.exe -ArgumentList "fetch origin $target" -Wait -NoNewWindow -ErrorAction SilentlyContinue
+        #git fetch origin $target 
         $files=$(git diff --name-only HEAD "origin/$target" --)
     }
     $count=($files -split ' ').Length
