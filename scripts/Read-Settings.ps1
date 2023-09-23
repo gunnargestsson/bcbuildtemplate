@@ -49,7 +49,7 @@ if ("$version" -eq "") {
 }
 
 if ($changesOnly) {
-    $target = ENV:TargetBranch
+    $target = $ENV:TargetBranch
     if ([String]::IsNullOrEmpty($target)) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
