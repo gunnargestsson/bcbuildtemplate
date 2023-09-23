@@ -55,6 +55,7 @@ if ($changesOnly) {
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
     } else {
         Write-Host "Looking for changed files from $target"
+        git fetch origin $target | Out-Null
         $files=$(git diff --name-only HEAD "origin/$target" --)
     }
     $count=($files -split ' ').Length
