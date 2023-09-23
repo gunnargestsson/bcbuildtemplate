@@ -135,7 +135,7 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Compile App'
-      condition: and(succeeded(),ne(variables['appFolders'],'')
+      condition: and(succeeded(),ne(variables['appFolders'],''))
       env:
         Password: $(Password)
       inputs:
@@ -157,7 +157,7 @@ stages:
     
     - task: PowerShell@2
       displayName: 'Sign App'
-      condition: and(succeeded(),ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''),ne(variables['appFolders'],'')
+      condition: and(succeeded(),ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''),ne(variables['appFolders'],''))
       env:
         codeSignPfxFile: $(CodeSignPfxFile)
         codeSignPfxPassword: $(CodeSignPfxPassword)
@@ -172,7 +172,7 @@ stages:
     
     - task: PowerShell@2
       displayName: 'Publish App'
-      condition: and(succeeded(),ne('${{ parameters.PublishOnCompile}}','True'),ne(variables['appFolders'],'')
+      condition: and(succeeded(),ne('${{ parameters.PublishOnCompile}}','True'),ne(variables['appFolders'],''))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
@@ -255,7 +255,7 @@ stages:
        
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
-      condition: and(succeeded(),ne(variables['appFolders'],'')
+      condition: and(succeeded(),ne(variables['appFolders'],''))
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: '${{ parameters.appVersion }}'
@@ -324,14 +324,14 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Remove Build Container'
-      condition: and(ne(variables['reuseContainer'],'True'),eq('${{ parameters.RemoveBuildContainer }}','True'),ne(variables['appFolders'],'')
+      condition: and(ne(variables['reuseContainer'],'True'),eq('${{ parameters.RemoveBuildContainer }}','True'),ne(variables['appFolders'],''))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-Container.ps1'
 
     - task: PowerShell@2
       displayName: 'Remove Unused Container Image'
-      condition: and(ne(variables['Agent.Name'],'Hosted Agent'),ne(variables['Agent.Name'],'Azure Pipelines*'),eq('${{ parameters.FlushContainerCache }}','True'),ne(variables['appFolders'],'')
+      condition: and(ne(variables['Agent.Name'],'Hosted Agent'),ne(variables['Agent.Name'],'Azure Pipelines*'),eq('${{ parameters.FlushContainerCache }}','True'),ne(variables['appFolders'],''))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Remove-OldDockerImages.ps1'
@@ -339,7 +339,7 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Validate App'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['appFolders'],'')
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['appFolders'],''))
       env:
         LicenseFile: $(LicenseFile)
         InsiderSasToken: $(InsiderSasToken)
@@ -351,7 +351,7 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Upgrade Microsoft Apps'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['appFolders'],'')
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['appFolders'],''))
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Upgrade-MicrosoftApps.ps1'
@@ -360,7 +360,7 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Deploy to Environment'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['appFolders'],'')
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['appFolders'],''))
       env:
         ClientId: $(ClientId)
         ClientSecret: $(ClientSecret)
