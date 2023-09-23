@@ -58,7 +58,8 @@ if ($changesOnly) {
     } else {
         Write-Host "Looking for changed files using 'git diff HEAD..$target --name-only'"
         git fetch origin $target
-        git diff HEAD..$target --name-only
+        git fetch origin $branchName
+        git diff $branchName..$target --name-only
         $files=$(git diff HEAD..$target --name-only)
     }
     $count=($files -split ' ').Length
