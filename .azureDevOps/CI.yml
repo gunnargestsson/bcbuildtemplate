@@ -177,6 +177,8 @@ stages:
     - task: PowerShell@2
       displayName: 'Publish App'
       condition: and(succeeded(),ne('${{ parameters.PublishOnCompile}}','True'),ne(variables['appFolders'],''))
+      env:
+        Password: $(Password)      
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'

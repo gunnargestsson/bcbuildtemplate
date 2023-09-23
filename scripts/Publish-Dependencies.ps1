@@ -17,6 +17,11 @@ Param(
 
 . (Join-Path $PSScriptRoot "HelperFunctions.ps1")
 
+if (-not ($credential)) {
+    $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
+    $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
+}
+
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $settings.dependencies | ForEach-Object {
     Write-Host "Publishing $_"
@@ -54,7 +59,7 @@ $settings.dependencies | ForEach-Object {
     }
 
     Write-Host "Container deployment to ${containerName}"
-    Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -useDevEndpoint
+    Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -useDevEndpoint -credential $credential
     $containerPath = Join-Path "C:\Run\My" (Split-Path -Path $appFile -Leaf)
     Copy-FileToBcContainer -containerName $containerName -localPath $appFile -containerPath $containerPath 
     
