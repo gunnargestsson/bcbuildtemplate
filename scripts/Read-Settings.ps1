@@ -52,11 +52,13 @@ if ("$version" -eq "") {
 }
 
 if ($changesOnly) {
-    Write-Host "Looking for changed files from '$branchName' to '$target'"
+    
     if ([String]::IsNullOrEmpty($target)) {
+        Write-Host "Looking for changed files in commit no. '$sourceVersion'"
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
     } else {
-        $files=$(git diff --no-commit-id --name-only -r "$branchName" "$target")
+        Write-Host "Looking for changed files from '$($branchName.split('/') | Select-Object -Last 1)' to '$target'"
+        $files=$(git diff --no-commit-id --name-only -r "$($branchName.split('/') | Select-Object -Last 1)" "$target")
     }
     $count=($files -split ' ').Length
     Write-Host "Total changed $count files"
