@@ -18,9 +18,6 @@ Param(
     [Parameter(Mandatory = $true)]
     [string] $branchName,
 
-    [Parameter(Mandatory = $false)]
-    [string] $target,
-
     [Parameter(Mandatory = $true)]
     [string] $sourceVersion,
 
@@ -52,13 +49,13 @@ if ("$version" -eq "") {
 }
 
 if ($changesOnly) {
-    
+    $target = ENV:TargetBranch
     if ([String]::IsNullOrEmpty($target)) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
     } else {
         Write-Host "Looking for changed files from '$($branchName.split('/') | Select-Object -Last 1)' to '$target'"
-        $files=$(git diff --no-commit-id --name-only HEAD "$target")
+        $files=$(git diff --no-commit-id --name-only HEAD..${target})
     }
     $count=($files -split ' ').Length
     Write-Host "Total changed $count files"

@@ -100,13 +100,14 @@ stages:
       env:
         Password: $(Password)
         SyncAppMode: ${{ parameters.SyncAppMode }}"
+        TargetBranch: "$(System.PullRequest.TargetBranch)"
         azstoragetenantid: $(AzStorageTenantId)
         azstorageclientid: $(AzStorageClientId)
         azstorageclientSecret: $(AzStorageClientSecret)          
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }} -branchName "$(Build.SourceBranch)" -target "$(System.PullRequest.TargetBranch)" -sourceVersion "$(Build.SourceVersion)" -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)"))'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -version ${{ parameters.version }} -branchName "$(Build.SourceBranch)" -sourceVersion "$(Build.SourceVersion)" -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)"))'
         failOnStderr: true
     
     - task: PowerShell@2
