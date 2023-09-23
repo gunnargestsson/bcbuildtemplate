@@ -100,7 +100,7 @@ stages:
       env:
         Password: $(Password)
         SyncAppMode: ${{ parameters.SyncAppMode }}"
-        TargetBranch: "$(System.PullRequest.TargetBranch)"
+        TargetBranch: $(System.PullRequest.TargetBranch)
         azstoragetenantid: $(AzStorageTenantId)
         azstorageclientid: $(AzStorageClientId)
         azstorageclientSecret: $(AzStorageClientSecret)          
