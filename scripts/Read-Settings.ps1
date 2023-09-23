@@ -50,6 +50,8 @@ if ("$version" -eq "") {
 
 if ($changesOnly) {
     $target = $ENV:TargetBranch
+    git config --global user.email "bcbuildtemplate@github.com"
+    git config --global user.name "BC Build Template"
     if ([String]::IsNullOrEmpty($target)) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
