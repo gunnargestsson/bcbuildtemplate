@@ -18,8 +18,12 @@ Param(
     [Parameter(Mandatory = $true)]
     [string] $branchName,
 
+    [Parameter(Mandatory = $true)]
+    [string] $sourceVersion,
+
     [Parameter(Mandatory = $false)]
     [bool] $changesOnly = $false
+
 )
 
 if ($ENV:PASSWORD -eq "`$(Password)" -or $ENV:PASSWORD -eq "") { 
@@ -46,7 +50,7 @@ if ("$version" -eq "") {
 
 if ($changesOnly) {
     Write-Host "Looking for changed files"
-    $files=$(git diff-tree --no-commit-id --name-only -r $(Build.SourceVersion))
+    $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
     $temp=$files -split ' '
     $count=$temp.Length
     Write-Host "Total changed $count files"
