@@ -55,7 +55,7 @@ if ($changesOnly) {
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
     } else {
         Write-Host "Looking for changed files from '$($branchName.split('/') | Select-Object -Last 1)' to '$target'"
-        $files=$(git diff --no-commit-id --name-only HEAD ${target})
+        $files=$(git diff --no-commit-id --name-only HEAD "origin/${target}")
     }
     $count=($files -split ' ').Length
     Write-Host "Total changed $count files"
