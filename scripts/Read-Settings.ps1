@@ -49,8 +49,14 @@ if ("$version" -eq "") {
 }
 
 if ($changesOnly) {
-    Write-Host "Looking for changed files"
-    $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
+    $target = $ENV:TargetBranch
+    if ([String]::IsNullOrEmpty($target)) {
+        Write-Host "Looking for changed files in commit no. '$sourceVersion'"
+        $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
+    } else {
+        Write-Host "Looking for changed files from $target"
+        $files=$(git diff --name-only HEAD "origin/$target" --)
+    }
     $count=($files -split ' ').Length
     Write-Host "Total changed $count files"
     $changedFolders = @()

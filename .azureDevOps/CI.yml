@@ -80,6 +80,9 @@ stages:
 
     steps:
     - checkout: self
+      persistCredentials: true
+      fetchDepth: 0
+      fetchTags: true
       clean: true
       path: 's'
 
@@ -100,6 +103,7 @@ stages:
       env:
         Password: $(Password)
         SyncAppMode: ${{ parameters.SyncAppMode }}"
+        TargetBranch: $(System.PullRequest.TargetBranch)
         azstoragetenantid: $(AzStorageTenantId)
         azstorageclientid: $(AzStorageClientId)
         azstorageclientSecret: $(AzStorageClientSecret)          
