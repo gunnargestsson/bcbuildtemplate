@@ -81,6 +81,15 @@ if ($changesOnly) {
             }
         }
     }
+    foreach ($appToBuild in $appsToBuild) {
+        foreach ($testApp in @($settings.testFolders -split ',')) {
+            if ($appToBuild.IndexOf($testApp) -eq 0) {
+                if ($testApp -notin $testAppsToBuild) {
+                    $testAppsToBuild += $testApp
+                }
+            }
+        }
+    }
     $settings.appFolders = $appsToBuild -join ','
     $settings.testFolders = $testAppsToBuild -join ','
     Write-Host "Apps to build: $($settings.appFolders)"
