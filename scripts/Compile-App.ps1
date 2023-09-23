@@ -58,8 +58,12 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
         Copy-Item -Path $appFile -Destination $buildSymbolsFolder -Force
         Copy-Item -Path (Join-Path $buildProjectFolder "$_\app.json") -Destination (Join-Path $buildArtifactFolder "$_\app.json")
         if ($publishApp) {
+            if (-not ($credential)) {
+                $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
+                $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
+            }
             Write-Host "Publishing $_"
-            Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification:$skipVerification -sync -install
+            Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification:$skipVerification -scope Tenant -sync -install -upgrade -useDevEndpoint -credential $credential
         } 
     }
 }

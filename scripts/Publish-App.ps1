@@ -18,9 +18,14 @@
     [switch] $skipVerification
 )
 
+if (-not ($credential)) {
+    $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
+    $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
+}
+
 Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
     Write-Host "Publishing $_"
     Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) -Filter "*.app" | ForEach-Object {
-        Publish-BCContainerApp -containerName $containerName -appFile $_.FullName -skipVerification:$skipVerification -sync -install
+        Publish-BCContainerApp -containerName $containerName -appFile $_.FullName -skipVerification:$skipVerification -scope Tenant -sync -install -upgrade -useDevEndpoint -credential $credential
     }
 }
