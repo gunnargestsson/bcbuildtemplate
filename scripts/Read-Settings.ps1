@@ -18,6 +18,9 @@ Param(
     [Parameter(Mandatory = $true)]
     [string] $branchName,
 
+    [Parameter(Mandatory = $false)]
+    [string] $target,
+
     [Parameter(Mandatory = $true)]
     [string] $sourceVersion,
 
@@ -49,7 +52,7 @@ if ("$version" -eq "") {
 }
 
 if ($changesOnly) {
-    Write-Host "Looking for changed files"
+    Write-Host "Looking for changed files from '$branchName' to '$target'"
     $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
     $count=($files -split ' ').Length
     Write-Host "Total changed $count files"
