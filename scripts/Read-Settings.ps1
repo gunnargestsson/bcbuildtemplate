@@ -16,7 +16,10 @@ Param(
     [string] $appVersion = "",
 
     [Parameter(Mandatory = $true)]
-    [string] $branchName
+    [string] $branchName,
+
+    [Parameter(Mandatory = $false)]
+    [bool] $changesOnly = $false
 )
 
 if ($ENV:PASSWORD -eq "`$(Password)" -or $ENV:PASSWORD -eq "") { 
@@ -39,6 +42,15 @@ $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-Strin
 if ("$version" -eq "") {
     $version = $settings.versions[0].version
     Write-Host "Version not defined, using $version"
+}
+
+if ($changesOnly) {
+    Write-Host "Looking for changed files"
+    $files=$(git diff-tree --no-commit-id --name-only -r $(Build.SourceVersion))
+    $temp=$files -split ' '
+    $count=$temp.Length
+    Write-Host "Total changed $count files"
+    $temp
 }
 
 $imageName = "build"
