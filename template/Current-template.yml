@@ -15,9 +15,6 @@ parameters:
 trigger:
 - '*'
 
-pr: 
-- '*'
-
 pool: Default
 
 resources:
@@ -42,4 +39,7 @@ extends:
     TestsDebugMode: ${{ parameters.TestsDebugMode }}
     ReRunFailedTests: ${{ parameters.ReRunFailedTests }}
     RemoveBuildContainer: ${{ parameters.RemoveBuildContainer }}
+    PublishOnCompile: true
+    AzureBlobFolderForVersion: false
+
 

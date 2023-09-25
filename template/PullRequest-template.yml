@@ -1,0 +1,28 @@
+﻿trigger: none
+
+pr:
+- '*'
+
+pool: Default
+
+resources:
+  repositories:
+    - repository: Template
+      type: github
+      endpoint: github.com_gunnargestsson
+      name: gunnargestsson/bcbuildtemplate
+      ref: master
+
+variables:
+  - group: BuildVariables
+
+extends:
+  template: /.azureDevOps/CI.yml@Template
+  parameters:
+    version: "current"
+    appVersion: "17.3"
+    azureSubscription: ""
+    createRuntimePackages: false
+    PublishOnCompile: true
+    AzureBlobFolderForVersion: false
+    changeBuild: true
