@@ -1,6 +1,7 @@
 {
     "name": "BLOB",
     "imageName": "my",
+    "libFolders": "lib",
     "appFolders": "app",
     "testFolders": "test",
     "dependencies": [],

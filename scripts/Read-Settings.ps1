@@ -129,6 +129,12 @@ Write-Host "Set bccontainerhelperVersion = $bccontainerhelperVersion"
 Write-Host "##vso[task.setvariable variable=bccontainerhelperVersion]$bccontainerhelperVersion"
 
 $appFolders = $settings.appFolders
+$libFolders = $settings.libFolders
+if ($libFolders) {
+    if ($appFolders) {
+        $appFolders += ",$libFolders"
+    }
+}
 Write-Host "Set appFolders = $appFolders"
 Write-Host "##vso[task.setvariable variable=appFolders]$appFolders"
 
