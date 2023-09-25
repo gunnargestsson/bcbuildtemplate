@@ -41,6 +41,7 @@ if ($appVersion) {
     Write-Host "Using Version $appVersion"   
     if ($changesOnly) {
         $version = [System.Version]::Parse($appVersion)
+        Write-Host "Updating $($version.ToString())"        
         $appVersion = "$($version.Major).$($version.Minor + 1).$($version.Build).$($version.Revision)"
     }
     Write-Host "Updating build number to $appVersion"
