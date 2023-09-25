@@ -62,7 +62,7 @@ parameters:
   displayName: Build only changed apps
   type: boolean
   default: False
-- name: ticketNumberRequired
+- name: BranchNamePattern
   displayName: Ticket number required
   type: string
   default: ""
@@ -107,7 +107,7 @@ stages:
       env:
         Password: $(Password)
         SyncAppMode: ${{ parameters.SyncAppMode }}"
-        TicketNumberRequired: ${{ parameters.ticketNumberRequired }}
+        BranchNamePattern: ${{ parameters.BranchNamePattern }}
         TargetBranch: $(System.PullRequest.TargetBranch)
         sourceVersion: $(Build.SourceVersion)
         azstoragetenantid: $(AzStorageTenantId)

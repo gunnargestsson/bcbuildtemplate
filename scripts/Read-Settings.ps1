@@ -25,7 +25,7 @@ Param(
     [bool] $changesOnly = $false,
 
     [Parameter(Mandatory = $false)]
-    [string] $TicketNumberRequired = $ENV:TicketNumberRequired
+    [string] $BranchNamePattern = $ENV:BranchNamePattern
 
 )
 
@@ -58,10 +58,10 @@ if ("$version" -eq "") {
 }
 
 if ($changesOnly) {
-    if ((![String]::IsNullOrEmpty($TicketNumberRequired))) {
-        Write-Host "TicketNumberRequired = $TicketNumberRequired"
-        if (!$branchName.Contains($TicketNumberRequired)) {            
-            throw "Branch Name '$branchName' should include Ticket Number '$TicketNumberRequired'"
+    if ((![String]::IsNullOrEmpty($BranchNamePattern))) {
+        Write-Host "BranchNamePattern = $BranchNamePattern"
+        if (!$branchName -match $BranchNamePattern) {
+            throw "Branch Name '$branchName' should match Ticket Number Pattern '$BranchNamePattern'"
         } else {
             Write-Host "Ticket Number Verified for branch '$branchName'"
         }
