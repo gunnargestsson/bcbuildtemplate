@@ -22,7 +22,7 @@ Param(
     [string] $appFolders,
 
     [Parameter(Mandatory=$false)]
-    [string] $appVersion = "",
+    [string] $appVersion = $ENV:APPVERSION,
     
     [switch] $updateSymbols,
     [switch] $updateDependencies,

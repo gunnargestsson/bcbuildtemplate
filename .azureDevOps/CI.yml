@@ -149,7 +149,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
-        arguments: '-appFolders "$(appFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)"))'
+        arguments: '-appFolders "$(appFolders)" -appVersion "$(Build.BuildNumber)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)"))'
         failOnStderr: true
     
     - task: PowerShell@2
@@ -160,7 +160,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)"))'
+        arguments: '-appFolders "$(testFolders)" -appVersion "$(Build.BuildNumber)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)"))'
         failOnStderr: true
     
     - task: PowerShell@2
@@ -236,7 +236,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Get-AppRuntimePackage.ps1'
-        arguments: '-appFolders "$(appFolders)" -appVersion "${{ parameters.appVersion }}.$(appBuild).$(appRevision)"'
+        arguments: '-appFolders "$(appFolders)" -appVersion "$(Build.BuildNumber)"'
         failOnStderr: true
 
     - task: PowerShell@2

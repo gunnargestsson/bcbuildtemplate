@@ -13,7 +13,7 @@ Param(
     [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH,
 
     [Parameter(Mandatory = $false)]
-    [string] $appVersion = "",
+    [string] $appVersion = "1.0.0.0",
 
     [Parameter(Mandatory = $true)]
     [string] $branchName,
