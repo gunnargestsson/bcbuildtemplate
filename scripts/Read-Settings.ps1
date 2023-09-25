@@ -40,8 +40,8 @@ Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode"
 if ($appVersion) {
     Write-Host "Using Version $appVersion"   
     if ($changesOnly) {
-        $versionParts = [int]$appVersion.Split('.')
-        $versionParts[1] = $versionParts[1] + 1        
+        $versionParts = $appVersion.Split('.')
+        $versionParts[1] = ([int]$versionParts[1] + 1).ToString()
         $appVersion = $versionParts -join '.'
     }
     Write-Host "Updating build number to $appVersion"
