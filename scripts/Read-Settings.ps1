@@ -13,13 +13,13 @@ Param(
     [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH,
 
     [Parameter(Mandatory = $false)]
-    [string] $appVersion = "",
+    [string] $appVersion = "1.0.0.0",
 
     [Parameter(Mandatory = $true)]
     [string] $branchName,
 
-    [Parameter(Mandatory = $true)]
-    [string] $sourceVersion,
+    [Parameter(Mandatory = $false)]
+    [string] $sourceVersion = $ENV:sourceVersion,
 
     [Parameter(Mandatory = $false)]
     [bool] $changesOnly = $false
@@ -38,6 +38,12 @@ Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode"
 
 
 if ($appVersion) {
+    Write-Host "Using Version $appVersion"   
+    if ($changesOnly) {
+        $versionParts = $appVersion.Split('.')
+        $versionParts[1] = ([int]$versionParts[1] + 1).ToString()
+        $appVersion = $versionParts -join '.'
+    }
     Write-Host "Updating build number to $appVersion"
     write-host "##vso[build.updatebuildnumber]$appVersion"
 }
@@ -61,9 +67,11 @@ if ($changesOnly) {
     Write-Host "Total changed $count files"
     $changedFolders = @()
     foreach ($file in $files -split ' ') {
-        $folder = $file.Substring(0, $file.IndexOf('/'))
-        if ($folder -notin $changedFolders) {
-            $changedFolders += $folder
+        if ($file.Contains('/')) {
+            $folder = $file.Substring(0, $file.IndexOf('/'))
+            if ($folder -notin $changedFolders) {
+                $changedFolders += $folder
+            }
         }
     }
     $appsToBuild = @()
@@ -123,6 +131,12 @@ Write-Host "Set bccontainerhelperVersion = $bccontainerhelperVersion"
 Write-Host "##vso[task.setvariable variable=bccontainerhelperVersion]$bccontainerhelperVersion"
 
 $appFolders = $settings.appFolders
+$libFolders = $settings.libFolders
+if ($libFolders) {
+    if ($appFolders) {
+        $appFolders += ",$libFolders"
+    }
+}
 Write-Host "Set appFolders = $appFolders"
 Write-Host "##vso[task.setvariable variable=appFolders]$appFolders"
 
