@@ -22,7 +22,10 @@ Param(
     [string] $sourceVersion = $ENV:sourceVersion,
 
     [Parameter(Mandatory = $false)]
-    [bool] $changesOnly = $false
+    [bool] $changesOnly = $false,
+
+    [Parameter(Mandatory = $false)]
+    [string] $TicketNumberRequired = $ENV:TicketNumberRequired
 
 )
 
@@ -55,6 +58,15 @@ if ("$version" -eq "") {
 }
 
 if ($changesOnly) {
+    if ((![String]::IsNullOrEmpty($TicketNumberRequired))) {
+        Write-Host "TicketNumberRequired = $TicketNumberRequired"
+        if (!$branchName.Contains($TicketNumberRequired)) {            
+            Write-Host "##vso[task.error]TicketNumberRequired = $TicketNumberRequired"
+        } else {
+            Write-Host "Ticket Number Verified for branch $branchName"
+        }
+        
+    }
     $target = $ENV:TargetBranch
     if ([String]::IsNullOrEmpty($target)) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
