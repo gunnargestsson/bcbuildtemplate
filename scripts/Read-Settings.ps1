@@ -18,8 +18,8 @@ Param(
     [Parameter(Mandatory = $true)]
     [string] $branchName,
 
-    [Parameter(Mandatory = $true)]
-    [string] $sourceVersion,
+    [Parameter(Mandatory = $false)]
+    [string] $sourceVersion = $ENV:sourceVersion,
 
     [Parameter(Mandatory = $false)]
     [bool] $changesOnly = $false
@@ -67,7 +67,7 @@ if ($changesOnly) {
     Write-Host "Total changed $count files"
     $changedFolders = @()
     foreach ($file in $files -split ' ') {
-        if ($file.IndexOf('/')) {
+        if ($file.Contains('/')) {
             $folder = $file.Substring(0, $file.IndexOf('/'))
             if ($folder -notin $changedFolders) {
                 $changedFolders += $folder
