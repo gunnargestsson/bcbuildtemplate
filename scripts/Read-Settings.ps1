@@ -37,11 +37,10 @@ Write-Host "Set SyncAppMode = $ENV:SyncAppMode"
 Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode" 
 
 
-if ($appVersion) {
-    $version = [System.Version]::Parse($appVersion)
+if ($appVersion) {    
     if ($changesOnly) {
-        $version.Minor += 1
-        $appVersion = "$version"
+        $version = [System.Version]::Parse($appVersion)
+        $appVersion = "($version.Major).($version.Minor + 1).($version.Build).($version.Revision)"
     }
     Write-Host "Updating build number to $appVersion"
     write-host "##vso[build.updatebuildnumber]$appVersion"
