@@ -61,9 +61,9 @@ if ($changesOnly) {
     if ((![String]::IsNullOrEmpty($TicketNumberRequired))) {
         Write-Host "TicketNumberRequired = $TicketNumberRequired"
         if (!$branchName.Contains($TicketNumberRequired)) {            
-            throw "Branch Name should include Ticket Number $TicketNumberRequired"
+            throw "Branch Name '$branchName' should include Ticket Number '$TicketNumberRequired'"
         } else {
-            Write-Host "Ticket Number Verified for branch $branchName"
+            Write-Host "Ticket Number Verified for branch '$branchName'"
         }
         
     }
