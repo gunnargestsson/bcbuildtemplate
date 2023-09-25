@@ -107,7 +107,7 @@ stages:
       env:
         Password: $(Password)
         SyncAppMode: ${{ parameters.SyncAppMode }}"
-        TicketNumberRequired: ${{ parameters.ticketNumberRequired }}"
+        TicketNumberRequired: ${{ parameters.ticketNumberRequired }}
         TargetBranch: $(System.PullRequest.TargetBranch)
         sourceVersion: $(Build.SourceVersion)
         azstoragetenantid: $(AzStorageTenantId)
