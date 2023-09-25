@@ -62,6 +62,10 @@ parameters:
   displayName: Build only changed apps
   type: boolean
   default: False
+- name: BranchNamePattern
+  displayName: Ticket number required
+  type: string
+  default: ""
 
 stages:
 - stage: Build
@@ -103,6 +107,7 @@ stages:
       env:
         Password: $(Password)
         SyncAppMode: ${{ parameters.SyncAppMode }}"
+        BranchNamePattern: ${{ parameters.BranchNamePattern }}
         TargetBranch: $(System.PullRequest.TargetBranch)
         sourceVersion: $(Build.SourceVersion)
         azstoragetenantid: $(AzStorageTenantId)

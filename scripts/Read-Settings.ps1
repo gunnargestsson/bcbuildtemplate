@@ -22,7 +22,10 @@ Param(
     [string] $sourceVersion = $ENV:sourceVersion,
 
     [Parameter(Mandatory = $false)]
-    [bool] $changesOnly = $false
+    [bool] $changesOnly = $false,
+
+    [Parameter(Mandatory = $false)]
+    [string] $BranchNamePattern = $ENV:BranchNamePattern
 
 )
 
@@ -55,6 +58,15 @@ if ("$version" -eq "") {
 }
 
 if ($changesOnly) {
+    if ((![String]::IsNullOrEmpty($BranchNamePattern))) {
+        Write-Host "BranchNamePattern = $BranchNamePattern"
+        if (!$branchName -match $BranchNamePattern) {
+            throw "Branch Name '$branchName' should match Branch Name Pattern '$BranchNamePattern'"
+        } else {
+            Write-Host "Branch Name verified for '$branchName'"
+        }
+        
+    }
     $target = $ENV:TargetBranch
     if ([String]::IsNullOrEmpty($target)) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
