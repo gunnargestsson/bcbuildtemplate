@@ -61,7 +61,7 @@ if ($changesOnly) {
     if ((![String]::IsNullOrEmpty($TicketNumberRequired))) {
         Write-Host "TicketNumberRequired = $TicketNumberRequired"
         if (!$branchName.Contains($TicketNumberRequired)) {            
-            Write-Host "##vso[task.error]TicketNumberRequired = $TicketNumberRequired"
+            throw "Branch Name should include Ticket Number $TicketNumberRequired"
         } else {
             Write-Host "Ticket Number Verified for branch $branchName"
         }
