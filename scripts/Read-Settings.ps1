@@ -67,9 +67,11 @@ if ($changesOnly) {
     Write-Host "Total changed $count files"
     $changedFolders = @()
     foreach ($file in $files -split ' ') {
-        $folder = $file.Substring(0, $file.IndexOf('/'))
-        if ($folder -notin $changedFolders) {
-            $changedFolders += $folder
+        if ($file.IndexOf('/')) {
+            $folder = $file.Substring(0, $file.IndexOf('/'))
+            if ($folder -notin $changedFolders) {
+                $changedFolders += $folder
+            }
         }
     }
     $appsToBuild = @()
