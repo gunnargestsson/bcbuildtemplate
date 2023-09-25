@@ -42,7 +42,20 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
     
     $appProjectFolder = Join-Path $buildProjectFolder $_
 
-    if (!$changesOnly) {
+    if ($changesOnly) {
+        if ($appVersion) {
+            $version = [System.Version]::Parse($appVersion)
+            Write-Host "Using Version $version"
+            $appJsonFile = Join-Path $appProjectFolder "app.json"
+            $appJson = Get-Content $appJsonFile | ConvertFrom-Json
+            Write-Host "Building version $($appJson.version) of $($appJson.name)"
+            if (!($appJson.version.StartsWith("$($version.Major).$($version.Minor - 1)."))) {
+                throw "Major and Minor version of app doesn't match with pipeline"
+            }
+            $appJson.version = "$version"
+            $appJson | ConvertTo-Json -Depth 99 | Set-Content $appJsonFile
+        }
+    } else {
         if ($appVersion) {
             $version = [System.Version]::Parse($appVersion)
             Write-Host "Using Version $version"
