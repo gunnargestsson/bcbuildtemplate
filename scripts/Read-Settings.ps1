@@ -28,7 +28,13 @@ Param(
     [string] $BranchNamePattern = $ENV:BranchNamePattern,
 
     [Parameter(Mandatory = $false)]
-    [string] $ChangeBuild = $ENV:ChangeBuild
+    [string] $ChangeBuild = $ENV:ChangeBuild,
+
+    [Parameter(Mandatory = $false)]
+    [string] $target = $ENV:TargetBranch,
+
+    [Parameter(Mandatory = $false)]
+    [string] $source = $ENV:SourceBranch
 
 )
 
@@ -42,6 +48,15 @@ if ($ENV:PASSWORD -eq "`$(Password)" -or $ENV:PASSWORD -eq "") {
 Write-Host "Set SyncAppMode = $ENV:SyncAppMode"
 Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode" 
 
+if ($branchName.Contains('/')) {
+    $branchName = $branchName.Substring($branchName.LastIndexOf('/') + 1)
+}
+if ($target.Contains('/')) {
+    $target = $target.Substring($target.LastIndexOf('/') + 1)
+}
+if ($source.Contains('/')) {
+    $source = $source.Substring($source.LastIndexOf('/') + 1)
+}
 
 if ($appVersion) {
     Write-Host "Using Version $appVersion"   
@@ -61,23 +76,18 @@ if ("$version" -eq "") {
 }
 
 if ($changesOnly) {
-    if ((![String]::IsNullOrEmpty($BranchNamePattern))) {
+    if ((![String]::IsNullOrEmpty($BranchNamePattern)) -and (![String]::IsNullOrEmpty($source))) {
         Write-Host "BranchNamePattern = $BranchNamePattern"
-        if (!$branchName -match $BranchNamePattern) {
-            throw "Branch Name '$branchName' should match Branch Name Pattern '$BranchNamePattern'"
+        if (!($source -match $BranchNamePattern)) {
+            throw "Branch Name '$source' should match Branch Name Pattern '$BranchNamePattern'"
         } else {
-            Write-Host "Branch Name verified for '$branchName'"
+            Write-Host "Branch Name verified for '$source'"
         }
-        
     }
-    $target = $ENV:TargetBranch
     if ([String]::IsNullOrEmpty($target)) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
-    } else {
-        if ($target.Contains('/')) {
-            $target = $target.Substring($target.LastIndexOf('/') + 1)
-        }
+    } else {        
         Write-Host "Looking for changed files from $target"
         $files=$(git diff --name-only HEAD "origin/$target" --)
     }
@@ -166,7 +176,10 @@ $property = $settings.PSObject.Properties.Match('azureBlob')
 if ($property.Value) {
     $branches = $settings.azureBlob.PSObject.Properties.Match('BranchNames')
     if ($branches.Value) {
-        if ($branches.Value -icontains $branchName -or $branches.Value -icontains ($branchName.split('/') | Select-Object -Last 1)) {
+        if (($branches.Value).Contains('/')) {
+            $branches.Value = ($branches.Value).Substring($branchName.LastIndexOf('/') + 1)
+        }
+        if ($branches.Value -icontains $branchName) {
             Write-Host "Set azureStorageAccount = $($settings.azureBlob.azureStorageAccount)"
             Write-Host "##vso[task.setvariable variable=azureStorageAccount]$($settings.azureBlob.azureStorageAccount)"
             Write-Host "Set azureContainerName = $($settings.azureBlob.azureContainerName)"

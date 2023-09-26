@@ -110,6 +110,7 @@ stages:
         BranchNamePattern: ${{ parameters.BranchNamePattern }}
         ChangeBuild: ${{ parameters.changeBuild }}
         TargetBranch: $(System.PullRequest.TargetBranch)
+        SourceBranch: $(System.PullRequest.SourceBranch)
         sourceVersion: $(Build.SourceVersion)
         azstoragetenantid: $(AzStorageTenantId)
         azstorageclientid: $(AzStorageClientId)
