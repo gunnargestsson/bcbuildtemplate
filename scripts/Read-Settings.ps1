@@ -42,6 +42,9 @@ if ($ENV:PASSWORD -eq "`$(Password)" -or $ENV:PASSWORD -eq "") {
 Write-Host "Set SyncAppMode = $ENV:SyncAppMode"
 Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode" 
 
+if ($branchName.Contains('/')) {
+    $branchName = $branchName.Substring($branchName.LastIndexOf('/') + 1)
+}
 
 if ($appVersion) {
     Write-Host "Using Version $appVersion"   
@@ -166,7 +169,10 @@ $property = $settings.PSObject.Properties.Match('azureBlob')
 if ($property.Value) {
     $branches = $settings.azureBlob.PSObject.Properties.Match('BranchNames')
     if ($branches.Value) {
-        if ($branches.Value -icontains $branchName -or $branches.Value -icontains ($branchName.split('/') | Select-Object -Last 1)) {
+        if (($branches.Value).Contains('/')) {
+            $branches.Value = ($branches.Value).Substring($branchName.LastIndexOf('/') + 1)
+        }
+        if ($branches.Value -icontains $branchName) {
             Write-Host "Set azureStorageAccount = $($settings.azureBlob.azureStorageAccount)"
             Write-Host "##vso[task.setvariable variable=azureStorageAccount]$($settings.azureBlob.azureStorageAccount)"
             Write-Host "Set azureContainerName = $($settings.azureBlob.azureContainerName)"
