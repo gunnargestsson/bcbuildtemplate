@@ -63,7 +63,7 @@ if ("$version" -eq "") {
 if ($changesOnly) {
     if ((![String]::IsNullOrEmpty($BranchNamePattern))) {
         Write-Host "BranchNamePattern = $BranchNamePattern"
-        if (!$branchName -match $BranchNamePattern) {
+        if (!($branchName -match $BranchNamePattern)) {
             throw "Branch Name '$branchName' should match Branch Name Pattern '$BranchNamePattern'"
         } else {
             Write-Host "Branch Name verified for '$branchName'"
