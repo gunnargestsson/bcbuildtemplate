@@ -153,6 +153,7 @@ stages:
       condition: and(succeeded(),ne(variables['appFolders'],''))
       env:
         Password: $(Password)
+        ChangeBuild: ${{ parameters.changeBuild }}
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
@@ -164,6 +165,7 @@ stages:
       condition: and(succeeded(),ne(variables['testFolders'],''))
       env:
         Password: $(Password)
+        ChangeBuild: ${{ parameters.changeBuild }}
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
