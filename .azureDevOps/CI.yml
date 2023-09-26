@@ -108,6 +108,7 @@ stages:
         Password: $(Password)
         SyncAppMode: ${{ parameters.SyncAppMode }}"
         BranchNamePattern: ${{ parameters.BranchNamePattern }}
+        ChangeBuild: ${{ parameters.changeBuild }}
         TargetBranch: $(System.PullRequest.TargetBranch)
         sourceVersion: $(Build.SourceVersion)
         azstoragetenantid: $(AzStorageTenantId)
