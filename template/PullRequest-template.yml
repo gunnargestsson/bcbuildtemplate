@@ -1,4 +1,13 @@
-﻿trigger: none
+﻿parameters:
+- name: SyncAppMode
+  displayName: Publish Sync-NAVApp Mode
+  type: string
+  default: Add
+  values:
+  - Add
+  - ForceSync
+
+trigger: none
 
 pr:
 - '*'
@@ -26,3 +35,4 @@ extends:
     PublishOnCompile: true
     AzureBlobFolderForVersion: false
     changeBuild: true
+    SyncAppMode: ${{ parameters.SyncAppMode }}    

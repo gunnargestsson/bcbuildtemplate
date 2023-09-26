@@ -155,7 +155,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
-        arguments: '-appFolders "$(appFolders)" -appVersion "$(Build.BuildNumber)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)"))'
+        arguments: '-appFolders "$(appFolders)" -appVersion "$(Build.BuildNumber)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)")) -SyncAppMode ${{ parameters.SyncAppMode }}'
         failOnStderr: true
     
     - task: PowerShell@2
@@ -166,7 +166,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -appVersion "$(Build.BuildNumber)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)"))'
+        arguments: '-appFolders "$(testFolders)" -appVersion "$(Build.BuildNumber)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)")) -SyncAppMode ${{ parameters.SyncAppMode }}'
         failOnStderr: true
     
     - task: PowerShell@2
@@ -192,7 +192,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
-        arguments: '-appFolders "$(appFolders)" -skipVerification:([String]::IsNullOrEmpty($CodeSignPfxPassword))'
+        arguments: '-appFolders "$(appFolders)" -skipVerification:([String]::IsNullOrEmpty($CodeSignPfxPassword)) -SyncAppMode ${{ parameters.SyncAppMode }}'
         failOnStderr: true
 
     - task: PowerShell@2
@@ -201,7 +201,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Publish-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -skipVerification'
+        arguments: '-appFolders "$(testFolders)" -skipVerification -SyncAppMode ${{ parameters.SyncAppMode }}'
         failOnStderr: true
 
     - task: PowerShell@2
