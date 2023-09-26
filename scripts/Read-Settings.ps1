@@ -75,6 +75,9 @@ if ($changesOnly) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
     } else {
+        if ($target.Contains('/')) {
+            $target = $target.Substring($target.LastIndexOf('/') + 1)
+        }
         Write-Host "Looking for changed files from $target"
         $files=$(git diff --name-only HEAD "origin/$target" --)
     }
