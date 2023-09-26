@@ -28,7 +28,7 @@ Param(
     [string] $BranchNamePattern = $ENV:BranchNamePattern,
 
     [Parameter(Mandatory = $false)]
-    [bool] $ChangeBuild = $ENV:ChangeBuild
+    [string] $ChangeBuild = $ENV:ChangeBuild
 
 )
 
@@ -45,7 +45,7 @@ Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode"
 
 if ($appVersion) {
     Write-Host "Using Version $appVersion"   
-    if ($ChangeBuild) {
+    if ($ChangeBuild -ieq "true") {
         $versionParts = $appVersion.Split('.')
         $versionParts[1] = ([int]$versionParts[1] + 1).ToString()
         $appVersion = $versionParts -join '.'
