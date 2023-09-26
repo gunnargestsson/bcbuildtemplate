@@ -83,7 +83,6 @@ if ($changesOnly) {
         } else {
             Write-Host "Branch Name verified for '$source'"
         }
-        
     }
     if ([String]::IsNullOrEmpty($target)) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
