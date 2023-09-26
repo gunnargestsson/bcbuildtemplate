@@ -15,7 +15,10 @@
     [Parameter(Mandatory = $true)]
     [string] $appFolders,
 
-    [switch] $skipVerification
+    [switch] $skipVerification,
+
+    [Parameter(Mandatory = $false)]
+    [string] $SyncAppMode = "Add"
 )
 
 if (-not ($credential)) {
@@ -26,6 +29,10 @@ if (-not ($credential)) {
 Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
     Write-Host "Publishing $_"
     Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) -Filter "*.app" | ForEach-Object {
-        Publish-BCContainerApp -containerName $containerName -appFile $_.FullName -skipVerification:$skipVerification -scope Tenant -sync -install -upgrade -useDevEndpoint -credential $credential
+        if ($SyncAppMode -eq "ForceSync") {
+            Publish-BCContainerApp -containerName $containerName -appFile $_.FullName -skipVerification:$skipVerification -scope Tenant -sync -install -upgrade -useDevEndpoint -credential $credential -syncMode ForceSync
+        } else {
+            Publish-BCContainerApp -containerName $containerName -appFile $_.FullName -skipVerification:$skipVerification -scope Tenant -sync -install -upgrade -useDevEndpoint -credential $credential
+        }
     }
 }
