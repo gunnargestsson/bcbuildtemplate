@@ -106,7 +106,7 @@ stages:
       displayName: 'Reading Settings'
       env:
         Password: $(Password)
-        SyncAppMode: ${{ parameters.SyncAppMode }}"
+        SyncAppMode: ${{ parameters.SyncAppMode }}
         BranchNamePattern: ${{ parameters.BranchNamePattern }}
         ChangeBuild: ${{ parameters.changeBuild }}
         TargetBranch: $(System.PullRequest.TargetBranch)

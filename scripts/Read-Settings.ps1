@@ -52,9 +52,6 @@ if ($ENV:PASSWORD -eq "`$(Password)" -or $ENV:PASSWORD -eq "") {
     Write-Host "##vso[task.setvariable variable=Password]$Password" 
 }
 
-Write-Host "Set SyncAppMode = $ENV:SyncAppMode"
-Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode" 
-
 if ($branchName.Contains('/')) {
     $branchName = $branchName.Substring($branchName.LastIndexOf('/') + 1)
 }
@@ -157,6 +154,9 @@ $property = $settings.PSObject.Properties.Match('imageName')
 if ($property.Value) {
     $imageName = $property.Value
 }
+
+Write-Host "Set SyncAppMode = $ENV:SyncAppMode"
+Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode" 
 
 $property = $settings.PSObject.Properties.Match('bccontainerhelperVersion')
 if ($property.Value) {
