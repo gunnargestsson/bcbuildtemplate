@@ -257,6 +257,7 @@ else {
 Write-Host "Container Name Prefx: ${containerNamePrefix}"
 
 $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[1]
+$buildReason = $ENV:BUILD_REASON
 
 if ([string]::IsNullOrEmpty($buildName)) {
     $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[0]
