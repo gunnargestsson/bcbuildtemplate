@@ -249,6 +249,7 @@ Write-Host "Build Reason: $($ENV:BUILD_REASON)"
 Write-Host "Container Name Prefx: ${containerNamePrefix}"
 
 $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[1]
+$buildReason = $ENV:BUILD_REASON
 
 if ([string]::IsNullOrEmpty($buildName)) {
     $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[0]
@@ -257,7 +258,11 @@ if ([string]::IsNullOrEmpty($buildName)) {
 $buildName = $buildName -replace '[^a-zA-Z0-9]', ''
 
 if ($buildName.Length -gt 10) {
-    $buildName = $buildName.Substring(0, 10)
+    $buildName = $buildName.Substring(0, 8)
+}
+
+if ($buildReason -eq "PullRequest") {
+    $buildName = "PR${buildName}"
 }
 
 Write-Host "Build Name: ${buildName}"
