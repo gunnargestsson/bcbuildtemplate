@@ -38,6 +38,13 @@ Param(
 
 )
 
+$buildReason = $ENV:BUILD_REASON
+
+Write-Host "Agent Name:" $($ENV:AGENT_NAME)
+Write-Host "Repository: $($ENV:BUILD_REPOSITORY_NAME)"
+Write-Host "Build Reason: $($ENV:BUILD_REASON)"
+Write-Host "Branch Name: $branchName"
+
 if ($ENV:PASSWORD -eq "`$(Password)" -or $ENV:PASSWORD -eq "") { 
     add-type -AssemblyName System.Web
     $Password = [System.Web.Security.Membership]::GeneratePassword(10, 2)
@@ -45,17 +52,8 @@ if ($ENV:PASSWORD -eq "`$(Password)" -or $ENV:PASSWORD -eq "") {
     Write-Host "##vso[task.setvariable variable=Password]$Password" 
 }
 
-Write-Host "Set SyncAppMode = $ENV:SyncAppMode"
-Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode" 
-
 if ($branchName.Contains('/')) {
     $branchName = $branchName.Substring($branchName.LastIndexOf('/') + 1)
-}
-if ($target.Contains('/')) {
-    $target = $target.Substring($target.LastIndexOf('/') + 1)
-}
-if ($source.Contains('/')) {
-    $source = $source.Substring($source.LastIndexOf('/') + 1)
 }
 
 if ($appVersion) {
@@ -75,7 +73,8 @@ if ("$version" -eq "") {
     Write-Host "Version not defined, using $version"
 }
 
-if ($changesOnly) {
+if ($ChangeBuild -ieq "true" -and $buildReason -eq "PullRequest") {
+    Write-Host "Source Branch: $source"
     if ((![String]::IsNullOrEmpty($BranchNamePattern)) -and (![String]::IsNullOrEmpty($source))) {
         Write-Host "BranchNamePattern = $BranchNamePattern"
         if (!($source -match $BranchNamePattern)) {
@@ -84,6 +83,14 @@ if ($changesOnly) {
             Write-Host "Branch Name verified for '$source'"
         }
     }
+}
+
+if ($changesOnly) {
+    Write-Host "Target Branch: $target"
+    if ($target.Contains('/')) {
+        $target = $target.Substring($target.LastIndexOf('/') + 1)
+    }
+    
     if ([String]::IsNullOrEmpty($target)) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
@@ -147,6 +154,9 @@ $property = $settings.PSObject.Properties.Match('imageName')
 if ($property.Value) {
     $imageName = $property.Value
 }
+
+Write-Host "Set SyncAppMode = $ENV:SyncAppMode"
+Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode" 
 
 $property = $settings.PSObject.Properties.Match('bccontainerhelperVersion')
 if ($property.Value) {
@@ -243,9 +253,7 @@ else {
     Write-Host "##vso[task.setvariable variable=imageName]$imageName"
 }
 
-Write-Host "Agent Name:" $($ENV:AGENT_NAME)
-Write-Host "Repository: $($ENV:BUILD_REPOSITORY_NAME)"
-Write-Host "Build Reason: $($ENV:BUILD_REASON)"
+
 Write-Host "Container Name Prefx: ${containerNamePrefix}"
 
 $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[1]
