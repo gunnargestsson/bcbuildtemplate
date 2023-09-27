@@ -54,9 +54,6 @@ if ($branchName.Contains('/')) {
 if ($target.Contains('/')) {
     $target = $target.Substring($target.LastIndexOf('/') + 1)
 }
-if ($source.Contains('/')) {
-    $source = $source.Substring($source.LastIndexOf('/') + 1)
-}
 
 if ($appVersion) {
     Write-Host "Using Version $appVersion"   
