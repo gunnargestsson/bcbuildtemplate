@@ -38,6 +38,13 @@ Param(
 
 )
 
+Write-Host "Agent Name:" $($ENV:AGENT_NAME)
+Write-Host "Repository: $($ENV:BUILD_REPOSITORY_NAME)"
+Write-Host "Build Reason: $($ENV:BUILD_REASON)"
+Write-Host "Source Branch: $source"
+Write-Host "Branch Name: $branchName"
+Write-Host "Target Branch: $target"
+
 if ($ENV:PASSWORD -eq "`$(Password)" -or $ENV:PASSWORD -eq "") { 
     add-type -AssemblyName System.Web
     $Password = [System.Web.Security.Membership]::GeneratePassword(10, 2)
@@ -243,9 +250,7 @@ else {
     Write-Host "##vso[task.setvariable variable=imageName]$imageName"
 }
 
-Write-Host "Agent Name:" $($ENV:AGENT_NAME)
-Write-Host "Repository: $($ENV:BUILD_REPOSITORY_NAME)"
-Write-Host "Build Reason: $($ENV:BUILD_REASON)"
+
 Write-Host "Container Name Prefx: ${containerNamePrefix}"
 
 $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[1]
