@@ -38,12 +38,12 @@ Param(
 
 )
 
+$buildReason = $ENV:BUILD_REASON
+
 Write-Host "Agent Name:" $($ENV:AGENT_NAME)
 Write-Host "Repository: $($ENV:BUILD_REPOSITORY_NAME)"
 Write-Host "Build Reason: $($ENV:BUILD_REASON)"
-Write-Host "Source Branch: $source"
 Write-Host "Branch Name: $branchName"
-Write-Host "Target Branch: $target"
 
 if ($ENV:PASSWORD -eq "`$(Password)" -or $ENV:PASSWORD -eq "") { 
     add-type -AssemblyName System.Web
@@ -57,9 +57,6 @@ Write-Host "##vso[task.setvariable variable=SyncAppMode]$ENV:SyncAppMode"
 
 if ($branchName.Contains('/')) {
     $branchName = $branchName.Substring($branchName.LastIndexOf('/') + 1)
-}
-if ($target.Contains('/')) {
-    $target = $target.Substring($target.LastIndexOf('/') + 1)
 }
 
 if ($appVersion) {
@@ -79,7 +76,8 @@ if ("$version" -eq "") {
     Write-Host "Version not defined, using $version"
 }
 
-if ($ChangeBuild -ieq "true") {
+if ($ChangeBuild -ieq "true" -and $buildReason -eq "PullRequest") {
+    Write-Host "Source Branch: $source"
     if ((![String]::IsNullOrEmpty($BranchNamePattern)) -and (![String]::IsNullOrEmpty($source))) {
         Write-Host "BranchNamePattern = $BranchNamePattern"
         if (!($source -match $BranchNamePattern)) {
@@ -91,6 +89,11 @@ if ($ChangeBuild -ieq "true") {
 }
 
 if ($changesOnly) {
+    Write-Host "Target Branch: $target"
+    if ($target.Contains('/')) {
+        $target = $target.Substring($target.LastIndexOf('/') + 1)
+    }
+    
     if ([String]::IsNullOrEmpty($target)) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
@@ -254,7 +257,6 @@ else {
 Write-Host "Container Name Prefx: ${containerNamePrefix}"
 
 $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[1]
-$buildReason = $ENV:BUILD_REASON
 
 if ([string]::IsNullOrEmpty($buildName)) {
     $buildName = ($ENV:BUILD_REPOSITORY_NAME).Split('/')[0]
