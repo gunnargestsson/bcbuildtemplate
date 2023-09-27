@@ -72,7 +72,7 @@ if ("$version" -eq "") {
     Write-Host "Version not defined, using $version"
 }
 
-if ($changesOnly) {
+if ($ChangeBuild -ieq "true") {
     if ((![String]::IsNullOrEmpty($BranchNamePattern)) -and (![String]::IsNullOrEmpty($source))) {
         Write-Host "BranchNamePattern = $BranchNamePattern"
         if (!($source -match $BranchNamePattern)) {
@@ -81,6 +81,9 @@ if ($changesOnly) {
             Write-Host "Branch Name verified for '$source'"
         }
     }
+}
+
+if ($changesOnly) {
     if ([String]::IsNullOrEmpty($target)) {
         Write-Host "Looking for changed files in commit no. '$sourceVersion'"
         $files=$(git diff-tree --no-commit-id --name-only -r $sourceVersion)
