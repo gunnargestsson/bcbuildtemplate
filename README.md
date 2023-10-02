@@ -48,7 +48,7 @@ Create a service connection to GitHub and update the endpoint
 
 # Azure Blob
 To upload artifacts to Azure Blob container
--  Create service connection to your Azure Blob subscription using Azure Resource Manager and recomended options.
+-  Create service connection to your Azure Blob subscription using Azure Resource Manager and Service Principal.
 -  Creates a service principal in Azure Active Directory based on DevOps organization, project and Azure Subscription Id.
 -  Add Role Assignment "Storage Blob Data Contributor" to Azure Storage Account 
 -  Add Service connection Name as azureSubscription in Current.yml file.
