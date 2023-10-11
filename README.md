@@ -25,7 +25,7 @@
      - InsiderSasToken
 3. Create DevOps pipeline
 
-# Build Settings
+# Build Settings (build-settings-template.json)
 
 ## deployments
 
@@ -39,7 +39,7 @@ There are 3 types of deployment types:
 
 Examples:
 
-#### host
+### host
 
 ```
 {
@@ -59,13 +59,12 @@ Examples:
 }
 ```
 
-#### onlineTenant
+### onlineTenant
 
 ```
 {
-    "DeploymentType": "onlineTenant",  
     "branch": "refs/heads/main",
-    "reason": [],
+    "DeploymentType": "onlineTenant",  
     "DeployToName": "Sandbox",
     "DeployToTenants": [
         "24bc1e4f-1a1b-40f8-8987-cd9988f90b4d"
@@ -73,7 +72,7 @@ Examples:
 }
 ```
 
-#### container
+### container
 
 ```
 {
@@ -82,32 +81,24 @@ Examples:
     "DeployToName": "myContainer",
     "DeployToTenants": [
         "<blank for all tenants>"
-    ],
-    "InstallNewApps": false
+    ]
 }
 ```
 
 ### branch
+When a pipeline run is triggered the run is marked with a source branch, this setting pecifies what source branch this deployment applies to, in the examples above the deployments will trigger if the run was triggered via the *refs/heads/main* branch.
 
-Specifies what branch this deployment applies to, in the example above the main branch will be used to deploy to a host.
+### DeploymentType
+| DeploymentType | Description                                 |
+| -------------- | --------------------------------------------|
+| onlineTenant   | Deploy to a SaaS enviroment                 |
+| container      | Deploy to a Docker container.               |
+| host           | Deploy to a Virtual Machine or Server host. |
 
-#### DeploymentType
+### DeployToTenants
+TenantId/s or tenant name/s in which you want to publish the Per Tenant Extension Apps.
 
-##### onlineTenant
-
-Deploy to an online tenant (SaaS).
-
-##### container
-
-Deploy to a Docker container.
-
-##### host
-
-Deploy to a Virtual Machine or Server host.
-
-#### DeployToTenants
-
-TenantId/s of tenant/s in which you want to publish the Per Tenant Extension Apps.
+Depending on Deployment Type this setting is used differently.
 
 | DeploymentType | Description                                                                                                                                                                           |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -145,10 +136,8 @@ Examples:
     "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 ],
 ```
-
-#### DeployToName
-
-Used differently depending on **DeploymentType.**
+### DeployToName
+Depending on Deployment Type this setting is used differently.
 
 | DeploymentType | Description                                                                                          |
 | -------------- | ---------------------------------------------------------------------------------------------------- |
@@ -156,29 +145,21 @@ Used differently depending on **DeploymentType.**
 | container      | Name of the conatiner in which you want to publish the Per Tenant Extension Apps                     |
 | host           | Name of the Host (VM, server etc.) in which you want to publish the Per Tenant Extension Apps        |
 
-#### DeployToInstance
-
+### DeployToInstance
 Only applies to Deployment Type **host**. Specifies in which ServerInstance you want to publish the Per Tenant Extension Apps. If left empty the pipeline will try to use the default serverinstance on the host.
 
-#### Reason
-
+### Reason
 You can filter your deployment by specifying reasons as a JSON Array litteral. The events that are reported by DevOps can be found here [[Predefined variables - Azure Pipelines | Microsoft Learn](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#build-variables-devops-services)](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#build-variables-devops-services).
 
 If left empty or if you omit reasons the pipeline will deploy no mather what reason triggered the run.
 
-#### InstallNewApps
-
+### InstallNewApps
 Only applies to Deployment Type **host.**
-
 Default value is false.
-
 If specified and the app is not already installed in the tenant or Server Instance, the pipline will try to install the app after succsefully publishing the app.
-
 # Publish Sync-NAVApp Mode Parameter
-
 To enable the option to choose if the deployment step in the CI pipeline should ForceSync or not. You need to add the below parameters to your yaml files. You will find an example in file **Current-template-syncmode.yml** in the template folder.
-
-## Pipeline parameter
+## Parameters
 
 Add the following to the top of your yaml file where you would like to enable the option.
 
@@ -192,17 +173,12 @@ parameters:
   - Add
   - ForceSync
 ```
-
 Add the below parameter to the CI.yml extension at the bottom of the yaml file.
-
 ```
 SyncAppMode: ${{ parameters.SyncAppMode }}
 ```
-
 This will give you the option to specify whether your manually triggered deploy will be forced or not.
-
 # Service Connection
-
 Create a service connection to GitHub and update the endpoint
 
 - https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml
