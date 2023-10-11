@@ -75,8 +75,10 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
             }
             Write-Host "Publishing $_"
             if ($SyncAppMode -eq "ForceSync") {
+                Write-Host "ForceSync mode"
                 Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification:$skipVerification -scope Tenant -sync -install -upgrade -useDevEndpoint -credential $credential -syncMode ForceSync
             } else {
+                Write-Host "Add mode"
                 Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification:$skipVerification -scope Tenant -sync -install -upgrade -useDevEndpoint -credential $credential
             }
         } 
