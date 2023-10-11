@@ -53,7 +53,7 @@ else {
     }
     else {
         $segments = "$artifact/////".Split('/')
-        $artifactUrl = Get-BCArtifactUrl -storageAccount $segments[0] -type $segments[1] -version $segments[2] -country $segments[3] -select $segments[4] | Select-Object -First 1   
+        $artifactUrl = Get-BCArtifactUrl -storageAccount $segments[0] -type $segments[1] -version $segments[2] -country $segments[3] -select $segments[4] -accept_insiderEula | Select-Object -First 1   
     }
 
     $username = $userProfile.Username
