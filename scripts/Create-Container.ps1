@@ -55,7 +55,7 @@ if ($artifact -like 'https://*') {
 else {
     Write-Host "Finding Url for $artifact"
     $segments = "$artifact/////".Split('/')
-    $artifactUrl = Get-BCArtifactUrl -storageAccount $segments[0] -type $segments[1] -version $segments[2] -country $segments[3] -select $segments[4] -sasToken $env:InsiderSasToken | Select-Object -First 1
+    $artifactUrl = Get-BCArtifactUrl -storageAccount $segments[0] -type $segments[1] -version $segments[2] -country $segments[3] -select $segments[4] -accept_insiderEula | Select-Object -First 1
     if (-not ($artifactUrl)) {
         throw "Unable to locate artifactUrl from $artifact"
     }
@@ -71,8 +71,8 @@ Write-Host "Create $containerName from $($artifactUrl.split('?')[0])"
 $parameters = @{
     "Accept_Eula"     = $true
     "Accept_Outdated" = $true
+    "Accept_insiderEula" = $true
 }
-
 
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 
