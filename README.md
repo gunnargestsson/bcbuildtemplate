@@ -23,6 +23,8 @@
        - AzStorageClientSecret, App Registration Client Secret
    - InsiderBuilds
      - InsiderSasToken
+   - Application Insights
+     - InstrumentationKey     
 3. Create DevOps pipeline
 
 # Build Settings (build-settings-template.json)
