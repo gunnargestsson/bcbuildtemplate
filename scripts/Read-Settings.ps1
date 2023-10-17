@@ -34,7 +34,13 @@ Param(
     [string] $target = $ENV:TargetBranch,
 
     [Parameter(Mandatory = $false)]
-    [string] $source = $ENV:SourceBranch
+    [string] $source = $ENV:SourceBranch,
+
+    [Parameter(Mandatory = $false)]
+    [string] $InstrumentationKey = $ENV:InstrumentationKey,
+
+    [Parameter(Mandatory = $false)]
+    [string] $EventName = "Build Pipeline"
 
 )
 
@@ -311,3 +317,26 @@ if ($AzStorageTenantIdIsSet -and $AzStorageClientIdIsSet -and $AzStorageClientSe
     Write-Host "Set downloadFromPrivateAzureStorage = $true"
     Write-Host "##vso[task.setvariable variable=downloadFromPrivateAzureStorage]$true"
 }
+
+if ($InstrumentationKey) {
+    Write-Host "Sending Telemetry"
+    $CustomProperties = @{
+        "Agent Name" = $ENV:AGENT_NAME
+        "Repository" = $ENV:BUILD_REPOSITORY_NAME
+        "Build Reason" = $ENV:BUILD_REASON
+        "Branch Name" = $branchName
+        "Sync App Mode" = $ENV:SyncAppMode
+        "Changes Only" = $changesOnly
+        "Change Build" = $ChangeBuild
+        "Build Number" = $appVersion
+        "Source Branch" = $source
+        "Apps to build" = $settings.appFolders
+        "Test apps to build" = $settings.testFolders
+        "Azure Storage Account" = $settings.azureBlob.azureStorageAccount
+        "Azure Container Name" = $settings.azureBlob.azureContainerName
+        "Container Name" = $containerName
+    }    
+    & "${PSScriptRoot}\Send-AppInsightsEventTelemetry.ps1" -InstrumentationKey $InstrumentationKey -EventName $EventName -CustomProperties $CustomProperties
+}
+
+
