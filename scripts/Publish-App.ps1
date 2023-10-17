@@ -30,8 +30,10 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
     Write-Host "Publishing $_"
     Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) -Filter "*.app" | ForEach-Object {
         if ($SyncAppMode -eq "ForceSync") {
+            Write-Host "ForceSync Mode"
             Publish-BCContainerApp -containerName $containerName -appFile $_.FullName -skipVerification:$skipVerification -scope Tenant -sync -install -upgrade -useDevEndpoint -credential $credential -syncMode ForceSync
         } else {
+            Write-Host "Add Mode"
             Publish-BCContainerApp -containerName $containerName -appFile $_.FullName -skipVerification:$skipVerification -scope Tenant -sync -install -upgrade -useDevEndpoint -credential $credential
         }
     }

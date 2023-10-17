@@ -71,7 +71,7 @@
     ],
     "deployments": [
         {
-            "branch": "<disabled>",
+            "branch": "refs/heads/main",
             "reason": [
                 "Schedule",
                 "Manual"
@@ -85,12 +85,20 @@
             "InstallNewApps": false
         },
         {
-            "branch": "<disabled>",
+            "branch": "refs/heads/main",
             "reason": [],
             "DeploymentType": "onlineTenant",
-            "DeployToName": "Sandbox",
+            "DeployToName": "<environment>",
             "DeployToTenants": [
-                "24bc1e4f-1a1b-40f8-8987-cd9988f90b4d"
+                "4764bb31-9da7-4224-b726-a0631b8d7acb"
+            ]
+        },
+        {
+            "branch": "refs/heads/main",
+            "DeploymentType": "container",  
+            "DeployToName": "myContainer",
+            "DeployToTenants": [
+                "<blank for all tenants>"
             ]
         }
     ],
