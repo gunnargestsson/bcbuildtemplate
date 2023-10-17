@@ -329,7 +329,9 @@ if ($InstrumentationKey) {
         "Changes Only" = $changesOnly
         "Change Build" = $ChangeBuild
         "Build Number" = $appVersion
+        "Commit ID" = $sourceVersion
         "Source Branch" = $source
+        "Target Branch" = $target
         "Apps to build" = $settings.appFolders
         "Test apps to build" = $settings.testFolders
         "Azure Storage Account" = $settings.azureBlob.azureStorageAccount
