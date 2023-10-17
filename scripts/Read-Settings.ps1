@@ -324,7 +324,7 @@ if ($AzStorageTenantIdIsSet -and $AzStorageClientIdIsSet -and $AzStorageClientSe
     Write-Host "##vso[task.setvariable variable=downloadFromPrivateAzureStorage]$true"
 }
 
-if ($InstrumentationKey) {
+if ($InstrumentationKey -match "^[a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12}$") {
     Write-Host "Sending event telemetry ($EventName) to Application Insights: $InstrumentationKey"
     $CustomProperties = @{
         "Agent Name" = $ENV:AGENT_NAME
