@@ -336,7 +336,7 @@ if ($InstrumentationKey) {
         "Azure Container Name" = $settings.azureBlob.azureContainerName
         "Container Name" = $containerName
     }    
-    & "${PSScriptRoot}\Send-AppInsightsEventTelemetry.ps1" -InstrumentationKey $InstrumentationKey -EventName $EventName -CustomProperties $CustomProperties
+    & "${PSScriptRoot}\Send-AppInsightEventTelemetry.ps1" -InstrumentationKey $InstrumentationKey -EventName $EventName -CustomProperties $CustomProperties
 }
 
 
