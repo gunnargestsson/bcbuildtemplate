@@ -71,5 +71,8 @@ Process
     };
 
     # send the request
-    Invoke-RestMethod -Uri $AppInsightsIngestionEndpoint -Method Post -Headers $headers -Body $bodyAsCompressedJson;
+    $NoOfItemsAccepted = (Invoke-RestMethod -Uri $AppInsightsIngestionEndpoint -Method Post -Headers $headers -Body $bodyAsCompressedJson).itemsAccepted;
+    if ($NoOfItemsAccepted -ge 1) {
+        Write-Host "Successfully sent to telemetry"
+    }
 }

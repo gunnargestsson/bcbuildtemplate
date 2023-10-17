@@ -40,7 +40,7 @@ Param(
     [string] $InstrumentationKey = $ENV:InstrumentationKey,
 
     [Parameter(Mandatory = $false)]
-    [string] $EventName = "Build Pipeline"
+    [string] $EventName = "Build"
 
 )
 
