@@ -319,7 +319,7 @@ if ($AzStorageTenantIdIsSet -and $AzStorageClientIdIsSet -and $AzStorageClientSe
 }
 
 if ($InstrumentationKey) {
-    Write-Host "Sending Telemetry"
+    Write-Host "Sending event telemetry ($EventName) to Application Insights: $InstrumentationKey"
     $CustomProperties = @{
         "Agent Name" = $ENV:AGENT_NAME
         "Repository" = $ENV:BUILD_REPOSITORY_NAME
@@ -336,7 +336,7 @@ if ($InstrumentationKey) {
         "Azure Container Name" = $settings.azureBlob.azureContainerName
         "Container Name" = $containerName
     }    
-    & "${PSScriptRoot}\Send-AppInsightEventTelemetry.ps1" -InstrumentationKey $InstrumentationKey -EventName $EventName -CustomProperties $CustomProperties
+    & "${PSScriptRoot}\Send-AppInsightEventTelemetry.ps1" -InstrumentationKey $InstrumentationKey -EventName $EventName -CustomProperties @CustomProperties
 }
 
 
