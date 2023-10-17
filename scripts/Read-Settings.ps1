@@ -22,6 +22,9 @@ Param(
     [string] $sourceVersion = $ENV:sourceVersion,
 
     [Parameter(Mandatory = $false)]
+    [string] $BuildUri = $ENV:BuildUri,
+
+    [Parameter(Mandatory = $false)]
     [bool] $changesOnly = $false,
 
     [Parameter(Mandatory = $false)]
@@ -89,6 +92,9 @@ if ($ChangeBuild -ieq "true" -and $buildReason -eq "PullRequest") {
             Write-Host "Branch Name verified for '$source'"
         }
     }
+} else {
+    $source = ""
+    $target = ""
 }
 
 if ($changesOnly) {
@@ -337,6 +343,7 @@ if ($InstrumentationKey) {
         "Azure Storage Account" = $settings.azureBlob.azureStorageAccount
         "Azure Container Name" = $settings.azureBlob.azureContainerName
         "Container Name" = $containerName
+        "Build Uri" = $BuildUri
     }    
     & "${PSScriptRoot}\Send-AppInsightEventTelemetry.ps1" -InstrumentationKey $InstrumentationKey -EventName $EventName -CustomProperties $CustomProperties
 }

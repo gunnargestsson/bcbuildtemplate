@@ -116,6 +116,7 @@ stages:
         azstorageclientid: $(AzStorageClientId)
         azstorageclientSecret: $(AzStorageClientSecret)
         InstrumentationKey: $(InstrumentationKey)
+        BuildUri: $(Build.BuildUri)
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Read-Settings.ps1'

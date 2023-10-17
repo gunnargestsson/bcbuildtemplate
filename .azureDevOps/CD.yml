@@ -67,6 +67,7 @@ stages:
             displayName: "Reading Settings"
             env:
               InstrumentationKey: $(InstrumentationKey)
+              BuildUri: $(Build.BuildUri)
             inputs:
               targetType: filePath
               filePath: 'bcbuildtemplate\scripts\Read-Settings.ps1'
