@@ -26,7 +26,7 @@ Process
     # app insights has a single endpoint where all incoming telemetry is processed.
     # documented here: https://github.com/microsoft/ApplicationInsights-Home/blob/master/EndpointSpecs/ENDPOINT-PROTOCOL.md
     
-    $AppInsightsIngestionEndpoint = $MyInvocation.MyCommand.Module.PrivateData.Constants.AppInsightsIngestionEndpoint;
+    $AppInsightsIngestionEndpoint = 'https://dc.services.visualstudio.com/v2/track'
     
     # prepare custom properties
     # convert the hashtable to a custom object, if properties were supplied.
