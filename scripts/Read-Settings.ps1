@@ -299,7 +299,7 @@ $containerName = "${containerNamePrefix}${buildName}${buildNumber}"
 $hasher = new-object System.Security.Cryptography.MD5CryptoServiceProvider
 $toHash = [System.Text.Encoding]::UTF8.GetBytes($containerName)
 $hashByteArray = $hasher.ComputeHash($toHash)
-containerName = ""
+$containerName = ""
 foreach($byte in $hashByteArray)
 {
     $containerName += "{0:X2}" -f $byte
