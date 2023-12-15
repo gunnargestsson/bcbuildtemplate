@@ -277,12 +277,8 @@ if ([string]::IsNullOrEmpty($buildName)) {
 
 $buildName = $buildName -replace '[^a-zA-Z0-9]', ''
 
-if ($buildName.Length -gt 10) {
-    $buildName = $buildName.Substring(0, 8)
-}
-
 if ($buildReason -eq "PullRequest") {
-    $buildName = "PR${buildName}"
+    $buildName += "-PR"
 }
 
 Write-Host "Build Name: ${buildName}"
