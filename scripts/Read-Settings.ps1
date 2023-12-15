@@ -308,7 +308,6 @@ foreach($byte in $hashByteArray)
 if ($containerName.Length -gt 15) {
     $containerName = $containerName.Substring(0, 15)
 }
-$containerName = "${containerName}${buildNumber}"
 
 Write-Host "Set containerName = $containerName"
 Write-Host "##vso[task.setvariable variable=containerName]$containerName"
