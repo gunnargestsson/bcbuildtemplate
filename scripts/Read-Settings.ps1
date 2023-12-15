@@ -294,9 +294,19 @@ if ($buildNumber.Length -gt 8) {
 
 Write-Host "Build Number: ${buildNumber}"
 
-$containerName = "${containerNamePrefix}${buildName}".ToUpper()
-if ($containerName.Length -gt (15 - $buildNumber.Length)) {
-    $containerName = $containerName.Substring(0, (15 - $buildNumber.Length))
+$containerName = "${containerNamePrefix}${buildName}${buildNumber}"
+
+$hasher = new-object System.Security.Cryptography.MD5CryptoServiceProvider
+$toHash = [System.Text.Encoding]::UTF8.GetBytes($containerName)
+$hashByteArray = $hasher.ComputeHash($toHash)
+containerName = ""
+foreach($byte in $hashByteArray)
+{
+    $containerName += "{0:X2}" -f $byte
+}
+
+if ($containerName.Length -gt 15) {
+    $containerName = $containerName.Substring(0, 15)
 }
 $containerName = "${containerName}${buildNumber}"
 
