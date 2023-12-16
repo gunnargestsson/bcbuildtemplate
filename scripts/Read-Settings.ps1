@@ -295,13 +295,12 @@ $containerName = "${containerNamePrefix}${buildName}${buildNumber}"
 $hasher = new-object System.Security.Cryptography.MD5CryptoServiceProvider
 $toHash = [System.Text.Encoding]::UTF8.GetBytes($containerName)
 $hashByteArray = $hasher.ComputeHash($toHash)
-$containerName = ""
+$containerName = "C"
 foreach($byte in $hashByteArray)
 {
     $containerName += "{0:X2}" -f $byte
 }
 
-$containerName = $containerName -replace "[^a-zA-Z]"
 if ($containerName.Length -gt 15) {
     $containerName.Substring(0,15)
 }
