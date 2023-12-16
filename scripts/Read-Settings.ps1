@@ -301,6 +301,8 @@ foreach($byte in $hashByteArray)
     $containerName += "{0:X2}" -f $byte
 }
 
+$containerName = $containerName.Substring(0,15)
+
 Write-Host "Set containerName = $containerName"
 Write-Host "##vso[task.setvariable variable=containerName]$containerName"
 
