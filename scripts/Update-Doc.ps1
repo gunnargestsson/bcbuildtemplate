@@ -18,9 +18,9 @@ $alDoc = $settings.PSObject.Properties.Match('alDoc')
 if ($alDoc.Value) {
     if ($alDoc.branch -match $branchName -or $branchName -match $aldoc.branch) {
         Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
-            Write-Host "Publishing $_"
+            Write-Host "Update alDoc for  $(Join-Path $buildArtifactFolder $_) based on ${buildProjectFolder} to $($alDoc.alDocRoot)"
             Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) -Filter "*.app" | ForEach-Object {
-                Write-Host "Writing Document References for $($_.Name) based on ${buildProjectFolder} to $($alDoc.alDocRoot)"
+                Write-Host "Writing Document References for $($_.Name)"
                 Start-Process -FilePath $alDoc.alDocPath -ArgumentList "build -o $($alDoc.alDocRoot) -c ${buildProjectFolder} -s $($_.FullName)"
                 Start-Process -FilePath $aldoc.docFxPath -ArgumentList "build '$(Join-Path $alDoc.alDocRoot docfx.json)' -n $($alDoc.alDocHostName) -p $($alDoc.alDocPort)"
             }
