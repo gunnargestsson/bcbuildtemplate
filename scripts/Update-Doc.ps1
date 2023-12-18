@@ -18,7 +18,7 @@ Param(
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $alDoc = $settings.PSObject.Properties.Match('alDoc')
 if ($alDoc.Value) {
-    $alDoc
+    $alDoc = $alDoc.Value
     if ($alDoc.branch -match $branchName -or $branchName -match $aldoc.branch) {
         Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
             Write-Host "Update alDoc for  $(Join-Path $artifactsFolder $_) based on ${buildProjectFolder} to $($alDoc.alDocRoot)"
