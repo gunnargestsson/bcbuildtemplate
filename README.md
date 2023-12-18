@@ -220,7 +220,7 @@ Build Agent must have Docker and Azure compatibility
     "alDoc": {
         "branch": "develop",
         "docFxPath": "F:\\aldoc\\bin\\docfx.exe",
-        "alPath": "F:\\aldoc\\bin\\extension\\bin\\aldoc.exe",
+        "alDocPath": "F:\\aldoc\\bin\\extension\\bin\\aldoc.exe",
         "alDocRoot": "F:\\aldoc", 
         "alDocHostName": "kappi.is",
         "alDocPort": 8080
