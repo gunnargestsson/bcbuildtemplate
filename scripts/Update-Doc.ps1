@@ -5,6 +5,9 @@ Param(
     [Parameter(Mandatory = $true)]
     [string] $artifactsFolder,
 
+    [Parameter(Mandatory=$true)]
+    [string] $appFolders,
+
     [Parameter(Mandatory = $true)]
     [string] $branchName,
 
@@ -13,7 +16,6 @@ Param(
 )
 
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
-$appFolders = $settings.appFolders
 $alDoc = $settings.PSObject.Properties.Match('alDoc')
 if ($alDoc.Value) {
     if ($alDoc.branch -match $branchName -or $branchName -match $aldoc.branch) {

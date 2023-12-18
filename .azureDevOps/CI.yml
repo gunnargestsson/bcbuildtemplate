@@ -162,6 +162,15 @@ stages:
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
         arguments: '-appFolders "$(appFolders)" -appVersion "$(Build.BuildNumber)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)")) -SyncAppMode "${{ parameters.SyncAppMode }}"'
         failOnStderr: true
+        
+    - task: PowerShell@2
+      displayName: 'Update alDoc references'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['appFolders'],''))
+      inputs:
+        targetType: filePath
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Update-Doc.ps1'
+        arguments: '-appFolders "$(appFolders)" -configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)"'
+        failOnStderr: true
     
     - task: PowerShell@2
       displayName: 'Compile Test App'
@@ -396,11 +405,3 @@ stages:
         arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)" -SyncAppMode "${{ parameters.SyncAppMode }}"'
         failOnStderr: true
 
-    - task: PowerShell@2
-      displayName: 'Update alDoc references'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['appFolders'],''))
-      inputs:
-        targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Update-Doc.ps1'
-        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)"'
-        failOnStderr: true
