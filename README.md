@@ -213,14 +213,15 @@ Build Agent must have Docker and Azure compatibility
 # alDoc
 
 - https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/help/help-aldoc-generate-help
-- Copy the aldoc.exe and docfx.exe files to a folder on the build server
+- Copy the docfx.exe files from $env:USERPROFILE\.dotnet\tools to a folder on the build server
+- Extract the ALLanguage.vsix from a new container bchelper extensions folder to a folder on the build server
 - Initialize the aldoc folder using aldoc.exe init
 - Populate the alDoc section in the build-settings.json 
     "alDoc": {
         "branch": "develop",
         "docFxPath": "F:\\aldoc\\bin\\docfx.exe",
-        "alDocPath": "F:\\aldoc\\bin\\aldoc.exe",
-        "alDocRoot": "F:\\aldoc",
+        "alPath": "F:\\aldoc\\bin\\extension\\bin\\aldoc.exe",
+        "alDocRoot": "F:\\aldoc", 
         "alDocHostName": "kappi.is",
         "alDocPort": 8080
     },
