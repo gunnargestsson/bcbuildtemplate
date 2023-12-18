@@ -18,14 +18,14 @@ Param(
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $alDoc = $settings.PSObject.Properties.Match('alDoc')
 if ($alDoc.Value) {
-    $alDoc = $alDoc.Value
+    $alDoc = $settings.$alDoc
     if ($alDoc.branch -match $branchName -or $branchName -match $aldoc.branch) {
         Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
             Write-Host "Update alDoc for  $(Join-Path $artifactsFolder $_) based on ${buildProjectFolder} to $($alDoc.alDocRoot)"
             Get-ChildItem -Path (Join-Path $artifactsFolder $_) -Filter "*.app" | ForEach-Object {
                 Write-Host "Writing Document References for $($_.Name)"
-                Start-Process -FilePath $alDoc.alDocPath -ArgumentList "build -o $($alDoc.alDocRoot) -c ${buildProjectFolder} -s $($_.FullName)"
-                Start-Process -FilePath $aldoc.docFxPath -ArgumentList "build '$(Join-Path $alDoc.alDocRoot docfx.json)' -n $($alDoc.alDocHostName) -p $($alDoc.alDocPort)"
+                Start-Process -FilePath $alDoc.alDocPath -ArgumentList "build -o '$($alDoc.alDocRoot)' -c '${buildProjectFolder}' -s $($_.FullName)"
+                Start-Process -FilePath $aldoc.docFxPath -ArgumentList "build '$(Join-Path $alDoc.alDocRoot docfx.json)' -n '$($alDoc.alDocHostName)' -p $($alDoc.alDocPort)"
             }
         }
     }
