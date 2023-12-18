@@ -16,7 +16,7 @@ $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-Strin
 $appFolders = $settings.appFolders
 $alDoc = $settings.PSObject.Properties.Match('alDoc')
 if ($alDoc.Value) {
-    if ($alDoc | Where-Object { $_.branch -eq $branchName } -or $aldoc | Where-Object { $_.branch -eq ($branchName.split('/') | Select-Object -Last 1)}) {
+    if ($alDoc.branch -match $branchName -or $branchName -match $aldoc.branch) {
         Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
             Write-Host "Publishing $_"
             Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) -Filter "*.app" | ForEach-Object {

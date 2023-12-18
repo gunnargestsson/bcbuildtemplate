@@ -401,6 +401,6 @@ stages:
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),eq('${{ parameters.version }}','current'),ne(variables['appFolders'],''))
       inputs:
         targetType: filePath
-        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Deploy-App.ps1'
+        filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Update-Doc.ps1'
         arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -artifactsFolder "$(Build.ArtifactStagingDirectory)" -branchName "$(Build.SourceBranch)"'
         failOnStderr: true
