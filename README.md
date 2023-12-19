@@ -216,7 +216,8 @@ Build Agent must have Docker and Azure compatibility
 - Copy the files from $env:USERPROFILE\.dotnet\tools to a folder on the build server
 - Extract the ALLanguage.vsix from a new container bchelper extensions folder to a folder on the build server
 - Initialize the aldoc folder using aldoc.exe init
-- Populate the alDoc section in the build-settings.json 
+- Populate the alDoc section in the build-settings.json
+- Manually add the new references to toc.yml file on the root of alDoc
     "alDoc": {
         "branch": "develop",
         "docFxPath": "F:\\aldoc\\bin\\docfx.exe",
