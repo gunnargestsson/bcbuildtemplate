@@ -26,7 +26,8 @@ if ($alDoc.Value) {
             Get-ChildItem -Path (Join-Path $artifactsFolder $_) -Filter "*.app" | ForEach-Object {
                 Write-Host "Writing Document References for $($_.Name)"               
                 Start-Process -FilePath $alDoc.alDocPath -ArgumentList "build","--output `"$($alDoc.alDocRoot)`"","--packagecache `"${buildProjectFolder}`"","--source `"$($_.FullName)`"" -Wait
-                Start-Process -FilePath $aldoc.docFxPath -ArgumentList "build","`"$(Join-Path $alDoc.alDocRoot docfx.json)`"","--hostname $($alDoc.alDocHostName)","--port $($alDoc.alDocPort)" -Wait            }
+                Start-Process -FilePath $aldoc.docFxPath -ArgumentList "build","`"$(Join-Path $alDoc.alDocRoot docfx.json)`"","--hostname $($alDoc.alDocHostName)","--port $($alDoc.alDocPort)" -Wait
+            }
         }
     }
 }
