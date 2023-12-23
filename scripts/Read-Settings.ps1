@@ -302,7 +302,7 @@ foreach($byte in $hashByteArray)
 }
 
 if ($containerName.Length -gt 15) {
-    $containerName.Substring(0,15).ToLower()
+    $containerName = $containerName.Substring(0,15).ToLower()
 } else {
     $containerName = $containerName.ToLower()
 }
