@@ -278,7 +278,7 @@ if ([string]::IsNullOrEmpty($buildName)) {
 $buildName = $buildName -replace '[^a-zA-Z0-9]', ''
 
 if ($buildReason -eq "PullRequest") {
-    $buildName += "-PR"
+    $buildName = "PR-" + $buildName
 }
 
 Write-Host "Build Name: ${buildName}"
@@ -290,17 +290,7 @@ if ($buildNumber.Length -gt 8) {
 
 Write-Host "Build Number: ${buildNumber}"
 
-$containerName = "${containerNamePrefix}${buildName}${buildNumber}"
-
-$hasher = new-object System.Security.Cryptography.MD5CryptoServiceProvider
-$toHash = [System.Text.Encoding]::UTF8.GetBytes($containerName)
-$hashByteArray = $hasher.ComputeHash($toHash)
-$containerName = "C"
-foreach($byte in $hashByteArray)
-{
-    $containerName += "{0:X2}" -f $byte
-}
-
+$containerName = "c" + (New-Guid) -replace '[^a-zA-Z0-9]', ''
 if ($containerName.Length -gt 15) {
     $containerName = $containerName.Substring(0,15).ToLower()
 } else {
