@@ -247,7 +247,7 @@ foreach ($deployment in $deployments) {
                     foreach ($Tenant in (Get-NAVTenant -ServerInstance $ServerInstance).Id) {                                      
                         $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property AppId -EQ $CurrentApp.AppId
                         foreach ($app in $apps | Sort-Object -Property Version) {
-                            Write-Host "Investigating app $($app.Name) v$($app.version) installed=$($app.isInstalled)"
+                            Write-Host "Investigating app $($app.Name) v$($app.version) installed=$($app.isInstalled) on tenant $($Tenant)"
                             $NewApp = $apps | Where-Object -Property AppId -EQ $app.AppId | Where-Object -Property Version -GT $app.version                            
                             if ($NewApp) {
                                 if (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property AppId -EQ $Newapp.AppId | Where-Object -Property Version -LT $Newapp.Version | Where-Object -Property IsInstalled -EQ $true) {
