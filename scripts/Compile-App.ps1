@@ -1,4 +1,7 @@
 Param(
+    [Parameter(Mandatory = $true)]
+    [string] $configurationFilePath,    
+
     [ValidateSet('AzureDevOps','Local','AzureVM')]
     [Parameter(Mandatory=$false)]
     [string] $buildenv = "AzureDevOps",
@@ -28,6 +31,7 @@ Param(
     [switch] $updateDependencies,
     [switch] $publishApp,
     [switch] $skipVerification,
+    [switch] $TestBuild,
 
     [Parameter(Mandatory = $false)]
     [bool] $changesOnly = $false,
@@ -37,12 +41,15 @@ Param(
 
     [Parameter(Mandatory = $false)]
     [string] $ChangeBuild = $ENV:ChangeBuild
+
 )
 
 if (-not ($credential)) {
     $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
     $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
 }
+
+$settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json )
 
 Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
     
@@ -64,7 +71,30 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
     }
     
     Write-Host "Compiling $_"
-    $appFile = Compile-AppInBCContainer -containerName $containerName -credential $credential -appProjectFolder $appProjectFolder -appSymbolsFolder $buildSymbolsFolder -appOutputFolder (Join-Path $buildArtifactFolder $_) -UpdateSymbols:$updateSymbols -UpdateDependencies:$updateDependencies -AzureDevOps:($buildenv -eq "AzureDevOps")
+    $parameters = @{
+        "containerName" = $containerName
+        "credential" = $credential
+        "appProjectFolder" = $appProjectFolder
+        "appSymbolsFolder" = $buildSymbolsFolder
+        "appOutputFolder" = (Join-Path $buildArtifactFolder $_)
+        "UpdateSymbols" = $updateSymbols
+        "UpdateDependencies" = $updateDependencies
+        "AzureDevOps" = ($buildenv -eq "AzureDevOps")
+    }
+    if (!$TestBuild) {
+        Write-Host "Reading Compile Configuration $($settings.compileConfiguration)"
+        if ($settings.compileConfiguration) {
+            Write-Host "Updating compile configuration properties"
+            Foreach ($parameter in ($settings.compileConfiguration.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
+                $value = $parameter.Value
+                $parameters += @{
+                    $parameter.Name = $value
+                }
+            }
+        }
+    }
+    $parameters
+    $appFile = Compile-AppInBCContainer @parameters
     if ($appFile -and (Test-Path $appFile)) {
         Copy-Item -Path $appFile -Destination $buildSymbolsFolder -Force
         Copy-Item -Path (Join-Path $buildProjectFolder "$_\app.json") -Destination (Join-Path $buildArtifactFolder "$_\app.json")

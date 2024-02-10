@@ -22,6 +22,16 @@
     "serverConfiguration": {
         "EnableUserConsistencyValidationOnTasks": "false"
     },
+    "compileConfiguration": {
+        "EnableCodeCop": true,
+        "EnablePerTenantExtensionCop": true,
+        "EnableUICop": true,
+        "buildBy" : "Navision.Guru",
+        "preProcessorSymbols": [
+            "CLEAN24",
+            "CLEAN25"
+        ]
+    },    
     "azureBlob": {
         "azureStorageAccount": "",
         "azureContainerName": "",

@@ -160,7 +160,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
-        arguments: '-appFolders "$(appFolders)" -appVersion "$(Build.BuildNumber)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)")) -SyncAppMode "${{ parameters.SyncAppMode }}"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -appFolders "$(appFolders)" -appVersion "$(Build.BuildNumber)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)")) -SyncAppMode "${{ parameters.SyncAppMode }}"'
         failOnStderr: true
         
     - task: PowerShell@2
@@ -181,7 +181,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Compile-App.ps1'
-        arguments: '-appFolders "$(testFolders)" -appVersion "$(Build.BuildNumber)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)")) -SyncAppMode "${{ parameters.SyncAppMode }}"'
+        arguments: '-configurationFilePath "$(Build.Repository.LocalPath)\${{ parameters.configurationFilePath }}" -testBuild -appFolders "$(testFolders)" -appVersion "$(Build.BuildNumber)" -publishApp:([String]::Equals("${{ parameters.PublishOnCompile }}","True")) -skipVerification -changesOnly ("${{ parameters.changeBuild }}" -ieq "true" -and ("IndividualCI","BatchedCI","PullRequest","ResourceTrigger" -contains "$(Build.Reason)")) -SyncAppMode "${{ parameters.SyncAppMode }}"'
         failOnStderr: true
     
     - task: PowerShell@2
