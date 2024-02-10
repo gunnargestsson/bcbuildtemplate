@@ -245,12 +245,12 @@ foreach ($deployment in $deployments) {
                     Publish-NAVApp -ServerInstance $ServerInstance -Path $appFile -Scope Global -SkipVerification
                 
                     foreach ($Tenant in (Get-NAVTenant -ServerInstance $ServerInstance).Id) {                                      
-                        $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $CurrentApp.Name
+                        $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property AppId -EQ $CurrentApp.AppId
                         foreach ($app in $apps | Sort-Object -Property Version) {
-                            Write-Host "Investigating app $($app.Name) v$($app.version) installed=$($app.isInstalled)"
-                            $NewApp = $apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.version                            
+                            Write-Host "Investigating app $($app.Name) v$($app.version) installed=$($app.isInstalled) on tenant $($Tenant)"
+                            $NewApp = $apps | Where-Object -Property AppId -EQ $app.AppId | Where-Object -Property Version -GT $app.version                            
                             if ($NewApp) {
-                                if (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $Newapp.Name | Where-Object -Property Version -LT $Newapp.Version | Where-Object -Property IsInstalled -EQ $true) {
+                                if (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property AppId -EQ $Newapp.AppId | Where-Object -Property Version -LT $Newapp.Version | Where-Object -Property IsInstalled -EQ $true) {
                                     Write-Host "upgrading app $($app.Name) v$($app.Version) to v$($NewApp.Version) in tenant $($Tenant)"
                                     Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force -Mode $SyncAppMode
                                     Start-NAVAppDataUpgrade -ServerInstance $ServerInstance -Tenant $Tenant -Name $NewApp.Name -Version $NewApp.Version -Force
@@ -270,11 +270,11 @@ foreach ($deployment in $deployments) {
                     
                         $allTenantsApps = @()
                         foreach ($Tenant in (Get-NAVTenant -ServerInstance $ServerInstance).Id) {
-                            $allTenantsApps += Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties -Name $CurrentApp.Name | Where-Object -Property IsInstalled -EQ $true
+                            $allTenantsApps += Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties -Id $CurrentApp.AppId | Where-Object -Property IsInstalled -EQ $true
                         }
-                        $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Name $CurrentApp.Name | Where-Object -Property Scope -EQ Global
+                        $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Id $CurrentApp.AppId | Where-Object -Property Scope -EQ Global
                         foreach ($app in $apps | Sort-Object -Property Version) {
-                            $NoOfApps = @($apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.Version).Count
+                            $NoOfApps = @($apps | Where-Object -Property AppId -EQ $app.AppId | Where-Object -Property Version -GT $app.Version).Count
                             $NoOfInstalledApps = @($allTenantsApps | Where-Object -Property Version -EQ $app.Version).Count
                             if ($NoOfApps -gt 0 -and $NoOfInstalledApps -eq 0) {
                                 Write-Host "Unpublishing old app $($app.Name) $($app.Version)"
@@ -360,7 +360,7 @@ foreach ($deployment in $deployments) {
 
                     foreach ($Tenant in $Tenants) {
                         Write-Host "Publishing $($CurrentApp.Name) (${appFile}) to ${Tenant}"
-                        Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $CurrentApp.Name | Where-Object -Property IsInstalled -EQ $false | ForEach-Object {
+                        Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property AppId -EQ $CurrentApp.AppId | Where-Object -Property IsInstalled -EQ $false | ForEach-Object {
                             Write-Host "Removing unused app v$($_.Version)"
                             try {
                                 Unpublish-NAVApp -ServerInstance $ServerInstance -Name $_.Name -Publisher $_.Publisher -Version $_.Version -Tenant $Tenant
@@ -372,12 +372,12 @@ foreach ($deployment in $deployments) {
                         Write-Host "Publishing v$($CurrentApp.Version)"    
                         Publish-NAVApp -ServerInstance $ServerInstance -Path $appFile -Tenant $Tenant -Scope Tenant -SkipVerification
             
-                        $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $CurrentApp.Name
+                        $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property AppId -EQ $CurrentApp.AppId
                         foreach ($app in $apps | Sort-Object -Property Version) {
                             Write-Host "Investigating app $($app.Name) v$($app.version) installed=$($app.isInstalled)"
-                            $NewApp = $apps | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -GT $app.version                            
+                            $NewApp = $apps | Where-Object -Property AppId -EQ $app.AppId | Where-Object -Property Version -GT $app.version                            
                             if ($NewApp) {
-                                if (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $Newapp.Name | Where-Object -Property Version -LT $Newapp.Version | Where-Object -Property IsInstalled -EQ $true) {
+                                if (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property AppId -EQ $Newapp.AppId | Where-Object -Property Version -LT $Newapp.Version | Where-Object -Property IsInstalled -EQ $true) {
                                     Write-Host "upgrading app $($app.Name) v$($app.Version) to v$($NewApp.Version) in tenant $($Tenant)"
 
                                     Write-Host "Sync-NAVApp -ServerInstance $($ServerInstance) -Tenant $($Tenant) -Name $($NewApp.Name) -Version $($NewApp.Version) -Mode $($SyncAppMode) -Force"
@@ -388,7 +388,7 @@ foreach ($deployment in $deployments) {
                                     Write-Host "Newer App is available"
                                 }
                             }
-                            elseif ($installNewApps -and (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $app.Name | Where-Object -Property Version -EQ $app.Version | Where-Object -Property IsInstalled -EQ $false)) {
+                            elseif ($installNewApps -and (Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property AppId -EQ $app.AppId | Where-Object -Property Version -EQ $app.Version | Where-Object -Property IsInstalled -EQ $false)) {
                                 Write-Host "installing app $($app.Name) v$($app.Version) in tenant $($Tenant)"
                                 Sync-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force -Mode $SyncAppMode
                                 try {Install-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force}
@@ -396,7 +396,7 @@ foreach ($deployment in $deployments) {
                                 finally {Install-NAVApp -ServerInstance $ServerInstance -Tenant $Tenant -Name $app.Name -Version $app.Version -Force}
                             }                   
                         }
-                        $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property Name -EQ $CurrentApp.Name
+                        $apps = Get-NAVAppInfo -ServerInstance $ServerInstance -Tenant $Tenant -TenantSpecificProperties | Where-Object -Property AppId -EQ $CurrentApp.AppId
                         foreach ($app in $apps | Sort-Object -Property Version) {
                             Write-Host "Checking installation status for app $($app.Name) $($app.Version)"
                             $NoOfNewerApps = @($apps | Where-Object -Property Version -GT $app.Version).Count
