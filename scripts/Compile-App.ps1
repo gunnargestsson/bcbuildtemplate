@@ -31,6 +31,7 @@ Param(
     [switch] $updateDependencies,
     [switch] $publishApp,
     [switch] $skipVerification,
+    [switch] $TestBuild,
 
     [Parameter(Mandatory = $false)]
     [bool] $changesOnly = $false,
@@ -39,10 +40,7 @@ Param(
     [string] $SyncAppMode = "Add",
 
     [Parameter(Mandatory = $false)]
-    [string] $ChangeBuild = $ENV:ChangeBuild,
-
-    [Parameter(Mandatory = $false)]
-    [string] $TestBuild = $false
+    [string] $ChangeBuild = $ENV:ChangeBuild
 
 )
 
