@@ -82,7 +82,6 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
         "AzureDevOps" = ($buildenv -eq "AzureDevOps")
     }
     if (!$TestBuild) {
-        Write-Host "Reading Compile Configuration $($settings.compileConfiguration)"
         if ($settings.compileConfiguration) {
             Write-Host "Updating compile configuration properties"
             Foreach ($parameter in ($settings.compileConfiguration.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
@@ -93,7 +92,6 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
             }
         }
     }
-    $parameters
     $appFile = Compile-AppInBCContainer @parameters
     if ($appFile -and (Test-Path $appFile)) {
         Copy-Item -Path $appFile -Destination $buildSymbolsFolder -Force
