@@ -1,4 +1,7 @@
 Param(
+    [Parameter(Mandatory = $true)]
+    [string] $configurationFilePath,    
+
     [ValidateSet('AzureDevOps','Local','AzureVM')]
     [Parameter(Mandatory=$false)]
     [string] $buildenv = "AzureDevOps",
@@ -36,13 +39,19 @@ Param(
     [string] $SyncAppMode = "Add",
 
     [Parameter(Mandatory = $false)]
-    [string] $ChangeBuild = $ENV:ChangeBuild
+    [string] $ChangeBuild = $ENV:ChangeBuild,
+
+    [Parameter(Mandatory = $false)]
+    [string] $TestBuild = $false
+
 )
 
 if (-not ($credential)) {
     $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
     $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
 }
+
+$settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 
 Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
     
@@ -65,9 +74,6 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
     
     Write-Host "Compiling $_"
     $parameters = @{
-        "Accept_Eula"     = $true
-        "Accept_Outdated" = $true
-        "Accept_insiderEula" = $true
         "containerName" = $containerName
         "credential" = $credential
         "appProjectFolder" = $appProjectFolder
@@ -76,6 +82,24 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
         "UpdateSymbols" = $updateSymbols
         "UpdateDependencies" = $updateDependencies
         "AzureDevOps" = ($buildenv -eq "AzureDevOps")
+    }
+    if (!$TestBuild) {
+        if ($settings.compileConfiguration) {
+            $compileConfiguration = ''
+            Write-Host "Updating compile configuration properties"
+            Foreach ($parameter in ($settings.compileConfiguration.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
+                $value = $parameter.Value
+                if ($compileConfiguration -eq '') {
+                    $compileConfiguration = "$($parameter.Name)=$($value)"
+                }
+                else {
+                    $compileConfiguration += ",$($parameter.Name)=$($value)"
+                }
+            }
+            if ($compileConfiguration -ne '') {
+                $parameters += $compileConfiguration
+            }
+        }
     }
     $parameters
     $appFile = Compile-AppInBCContainer @parameters
