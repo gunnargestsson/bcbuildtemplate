@@ -64,7 +64,21 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
     }
     
     Write-Host "Compiling $_"
-    $appFile = Compile-AppInBCContainer -containerName $containerName -credential $credential -appProjectFolder $appProjectFolder -appSymbolsFolder $buildSymbolsFolder -appOutputFolder (Join-Path $buildArtifactFolder $_) -UpdateSymbols:$updateSymbols -UpdateDependencies:$updateDependencies -AzureDevOps:($buildenv -eq "AzureDevOps")
+    $parameters = @{
+        "Accept_Eula"     = $true
+        "Accept_Outdated" = $true
+        "Accept_insiderEula" = $true
+        "containerName" = $containerName
+        "credential" = $credential
+        "appProjectFolder" = $appProjectFolder
+        "appSymbolsFolder" = $buildSymbolsFolder
+        "appOutputFolder" = (Join-Path $buildArtifactFolder $_)
+        "UpdateSymbols" = $updateSymbols
+        "UpdateDependencies" = $updateDependencies
+        "AzureDevOps" = ($buildenv -eq "AzureDevOps")
+    }
+    $parameters
+    $appFile = Compile-AppInBCContainer @parameters
     if ($appFile -and (Test-Path $appFile)) {
         Copy-Item -Path $appFile -Destination $buildSymbolsFolder -Force
         Copy-Item -Path (Join-Path $buildProjectFolder "$_\app.json") -Destination (Join-Path $buildArtifactFolder "$_\app.json")
