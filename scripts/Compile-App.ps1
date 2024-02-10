@@ -49,7 +49,7 @@ if (-not ($credential)) {
     $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
 }
 
-$settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
+$settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json )
 
 Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
     
@@ -84,19 +84,12 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
     if (!$TestBuild) {
         Write-Host "Reading Compile Configuration $($settings.compileConfiguration)"
         if ($settings.compileConfiguration) {
-            $compileConfiguration = ''
             Write-Host "Updating compile configuration properties"
             Foreach ($parameter in ($settings.compileConfiguration.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
                 $value = $parameter.Value
-                if ($compileConfiguration -eq '') {
-                    $compileConfiguration = "$($parameter.Name)=$($value)"
+                $parameters += @{
+                    $parameter.Name = $value
                 }
-                else {
-                    $compileConfiguration += ",$($parameter.Name)=$($value)"
-                }
-            }
-            if ($compileConfiguration -ne '') {
-                $parameters += $compileConfiguration
             }
         }
     }
