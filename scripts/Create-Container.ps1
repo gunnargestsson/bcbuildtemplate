@@ -192,9 +192,6 @@ if ($imageName) {
     $parameters += @{ "imageName" = $imageName }
 }
 
-$parameters
-$additionalParameters
-
 if (!$restoreDb) {
     New-BCContainer @Parameters `
         -doNotCheckHealth `
