@@ -21,7 +21,7 @@ if ($alDoc.Value) {
     $alDoc = $settings.alDoc
     $buildProjectFolder = Join-Path $buildProjectFolder '.alPackages'
     if ($alDoc.branch -match $branchName -or $branchName -match $aldoc.branch) {
-        $appFolders.Split(',') | ForEach-Object {
+        $appFolders.TrimEnd(',').Split(',') | ForEach-Object {
             Write-Host "Update alDoc for $(Join-Path $artifactsFolder $_) based on ${buildProjectFolder} to $($alDoc.alDocRoot)"
             Get-ChildItem -Path (Join-Path $artifactsFolder $_) -Filter "*.app" | ForEach-Object {
                 Write-Host "Writing Document References for $($_.Name)"               
