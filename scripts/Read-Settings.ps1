@@ -113,7 +113,7 @@ if ($changesOnly) {
     $count=($files -split ' ').Length
     Write-Host "Total changed $count files"
     $changedFolders = @()
-    foreach ($file in $files -split ' ') {
+    foreach ($file in $files -split '\n') {
         if ($file.Contains('/')) {
             $folder = $file.Substring(0, $file.IndexOf('/'))
             if ($folder -notin $changedFolders) {
