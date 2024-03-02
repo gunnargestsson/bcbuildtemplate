@@ -91,7 +91,7 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
             }
         }
     }
-    $parameters
+    
     $appFile = Compile-AppInBCContainer @parameters
     if ($appFile -and (Test-Path $appFile)) {
         Copy-Item -Path $appFile -Destination $buildSymbolsFolder -Force

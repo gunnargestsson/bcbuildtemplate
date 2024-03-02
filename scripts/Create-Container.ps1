@@ -71,6 +71,9 @@ if (-not ($credential)) {
 
 Write-Host "Create $containerName from $($artifactUrl.split('?')[0])"
 $country = $artifactUrl.split('/')[5]
+if ($country -eq '') {
+    $country = "w1"
+}
 
 $parameters = @{
     "Accept_Eula"     = $true
