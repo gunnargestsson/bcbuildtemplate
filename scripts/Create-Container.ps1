@@ -70,6 +70,7 @@ if (-not ($credential)) {
 }
 
 Write-Host "Create $containerName from $($artifactUrl.split('?')[0])"
+$country = $artifactUrl.split('/')[5]
 
 $parameters = @{
     "Accept_Eula"     = $true
@@ -143,6 +144,7 @@ elseif ($buildenv -eq "AzureDevOps") {
     }
     if (!([String]::IsNullOrEmpty($assembliesCache))) {
         if (Test-Path $assembliesCache -PathType Container) {
+            $assembliesCache = Join-Path $assembliesCache $country
             $additionalParameters += @("--volume ""${assembliesCache}:C:\bcassemblies""")
             Write-Host "Assemblies Cache folder found: $assembliesCache"
         } else {
