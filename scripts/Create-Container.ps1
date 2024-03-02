@@ -30,8 +30,6 @@
     [bool] $reuseContainer = ($ENV:REUSECONTAINER -eq "True")
 )
 
-Write-Host "Assembly Cache: ${assembliesCache}"
-
 . (Join-Path $PSScriptRoot "HelperFunctions.ps1")
 
 if (-not ($artifact)) {
@@ -211,9 +209,6 @@ if ($restoreDb) {
 if ($imageName) {
     $parameters += @{ "imageName" = $imageName }
 }
-
-$parameters
-$additionalParameters
 
 if (!$restoreDb) {
     New-BCContainer @Parameters `
