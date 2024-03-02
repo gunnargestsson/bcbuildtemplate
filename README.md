@@ -17,6 +17,7 @@
      - ClientSecret (optional for online tenant deployment)
      - PowerShellUsername (optional for powershell deployment)
      - PowerShellPassword (optional for powershell deployment)
+     - BCAssembliesCache (optional for server compile cache.  Folder specified will not be cleaned up)
      - Access a private storage account for license, certificates and app dependencies
        - AzStorageTenantId, Azure tenantid where the storage container is located
        - AzStorageClientId, App Registration Client Id
