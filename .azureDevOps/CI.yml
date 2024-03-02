@@ -144,7 +144,8 @@ stages:
         InsiderSasToken: $(InsiderSasToken)
         azstoragetenantid: $(AzStorageTenantId)
         azstorageclientid: $(AzStorageClientId)
-        azstorageclientSecret: $(AzStorageClientSecret)          
+        azstorageclientSecret: $(AzStorageClientSecret)
+        BCAssembliesCache: $(BCAssembliesCache)       
       inputs:
         targetType: filePath
         filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Create-Container.ps1'

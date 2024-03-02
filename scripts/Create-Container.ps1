@@ -24,6 +24,9 @@
     [Parameter(Mandatory = $false)]
     [securestring] $licenseFile = $null,
 
+    [Parameter(Mandatory = $false)]
+    [string] $assembliesCache = $ENV:BCASSEMBLIESCACHE,
+
     [bool] $reuseContainer = ($ENV:REUSECONTAINER -eq "True")
 )
 
@@ -137,7 +140,16 @@ elseif ($buildenv -eq "AzureDevOps") {
             "myscripts" = @( "$NewConfigFilePath",
                 @{ "SetupAddIns.ps1" = (Get-Content -Path "${PSScriptRoot}\Copy-AddIns.ps1" -Encoding UTF8 | Out-String) })
         }
-    }    
+    }
+    if ($assembliesCache) {
+        if (Test-Path $assembliesCache -PathType Container) {
+            $additionalParameters += @("--volume ""${assembliesCache}:C:\bcassemblies""")
+            Write-Host "Assemblies Cache folder found: $assembliesCache"
+        }
+        else {
+            Write-Host "Assemblies Cache folder not found: $assembliesCache"
+        }
+    }
 }
 else {
     $workspaceFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
@@ -149,8 +161,14 @@ else {
 
 }
 
+$serverConfiguration = ''
+if ($assembliesCache) {
+    if (Test-Path $assembliesCache -PathType Container) {
+        $serverConfiguration = "ServerFileCacheDirectory=C:\bcassemblies"
+    }
+}
+
 if ($settings.serverConfiguration) {
-    $serverConfiguration = ''
     Write-Host "Updating server configuration properties"
     Foreach ($parameter in ($settings.serverConfiguration.PSObject.Properties | Where-Object -Property MemberType -eq NoteProperty)) {
         $value = $parameter.Value
