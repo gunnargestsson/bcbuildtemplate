@@ -70,6 +70,7 @@ if (-not ($credential)) {
 }
 
 Write-Host "Create $containerName from $($artifactUrl.split('?')[0])"
+$version = $artifactUrl.split('/')[4]
 $country = $artifactUrl.split('/')[5]
 if ($country -eq '') {
     $country = "w1"
@@ -148,6 +149,10 @@ elseif ($buildenv -eq "AzureDevOps") {
     if (!([String]::IsNullOrEmpty($assembliesCache))) {
         if (Test-Path $assembliesCache -PathType Container) {
             $assembliesCache = Join-Path $assembliesCache $country
+            if (!(Test-Path $assembliesCache)) {
+                New-Item -Path $assembliesCache -ItemType Directory
+            }
+            $assembliesCache = Join-Path $assembliesCache $version
             if (!(Test-Path $assembliesCache)) {
                 New-Item -Path $assembliesCache -ItemType Directory
             }
