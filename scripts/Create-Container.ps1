@@ -150,11 +150,11 @@ elseif ($buildenv -eq "AzureDevOps") {
         if (Test-Path $assembliesCache -PathType Container) {
             $assembliesCache = Join-Path $assembliesCache $country
             if (!(Test-Path $assembliesCache)) {
-                New-Item -Path $assembliesCache -ItemType Directory
+                New-Item -Path $assembliesCache -ItemType Directory | Out-Null
             }
             $assembliesCache = Join-Path $assembliesCache $version
             if (!(Test-Path $assembliesCache)) {
-                New-Item -Path $assembliesCache -ItemType Directory
+                New-Item -Path $assembliesCache -ItemType Directory | Out-Null
             }
             $additionalParameters += @("--volume ""${assembliesCache}:C:\bcassemblies""")
             Write-Host "Assemblies Cache folder found: $assembliesCache"
