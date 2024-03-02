@@ -30,6 +30,8 @@
     [bool] $reuseContainer = ($ENV:REUSECONTAINER -eq "True")
 )
 
+Write-Host "Assembly Cache: ${assembliesCache}"
+
 . (Join-Path $PSScriptRoot "HelperFunctions.ps1")
 
 if (-not ($artifact)) {
