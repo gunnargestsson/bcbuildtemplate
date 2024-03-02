@@ -143,12 +143,11 @@ elseif ($buildenv -eq "AzureDevOps") {
                 @{ "SetupAddIns.ps1" = (Get-Content -Path "${PSScriptRoot}\Copy-AddIns.ps1" -Encoding UTF8 | Out-String) })
         }
     }
-    if ($assembliesCache) {
+    if (!([String]::IsNullOrEmpty($assembliesCache))) {
         if (Test-Path $assembliesCache -PathType Container) {
             $additionalParameters += @("--volume ""${assembliesCache}:C:\bcassemblies""")
             Write-Host "Assemblies Cache folder found: $assembliesCache"
-        }
-        else {
+        } else {
             Write-Host "Assemblies Cache folder not found: $assembliesCache"
         }
     }
@@ -164,7 +163,7 @@ else {
 }
 
 $serverConfiguration = ''
-if ($assembliesCache) {
+if (!([String]::IsNullOrEmpty($assembliesCache))) {
     if (Test-Path $assembliesCache -PathType Container) {
         $serverConfiguration = "ServerFileCacheDirectory=C:\bcassemblies"
     }
@@ -211,6 +210,8 @@ if ($restoreDb) {
 if ($imageName) {
     $parameters += @{ "imageName" = $imageName }
 }
+
+$parameters
 
 if (!$restoreDb) {
     New-BCContainer @Parameters `
