@@ -180,9 +180,10 @@ if ($settings.serverConfiguration) {
             $serverConfiguration += ",$($parameter.Name)=$($value)"
         }
     }
-    if ($serverConfiguration -ne '') {
-        $additionalParameters += @("--env CustomNavSettings=${serverConfiguration}")
-    }
+}
+
+if ($serverConfiguration -ne '') {
+    $additionalParameters += @("--env CustomNavSettings=${serverConfiguration}")
 }
 
 
@@ -212,6 +213,7 @@ if ($imageName) {
 }
 
 $parameters
+$additionalParameters
 
 if (!$restoreDb) {
     New-BCContainer @Parameters `
