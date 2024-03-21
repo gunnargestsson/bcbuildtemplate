@@ -18,7 +18,7 @@ parameters:
 - name: configurationFilePath
   displayName: 'Specifies the path to the build-settings.json file'
   type: string
-  default: '.azureDevOps\build-settings.json'
+  default: '.\build-settings.json'
 - name: publishTestApps
   displayName: 'Specifies if test apps are to be published as artifacts and to Azure Blob'
   type: boolean
