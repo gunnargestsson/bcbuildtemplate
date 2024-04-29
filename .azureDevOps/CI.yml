@@ -6,7 +6,7 @@ parameters:
 - name: appVersion
   displayName: 'Specify build app version'
   type: string
-  default: "18.0"
+  default: "1.0"
 - name: azureSubscription
   displayName: 'Specify azure subscription name'
   type: string

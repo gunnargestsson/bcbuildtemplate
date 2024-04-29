@@ -59,13 +59,17 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
         $version = [System.Version]::Parse($appVersion)
         Write-Host "Using Version $version"
         $appJsonFile = Join-Path $appProjectFolder "app.json"
-        $appJson = Get-Content $appJsonFile | ConvertFrom-Json
-        Write-Host "Building version $($appJson.version) of $($appJson.name)"
+        $appJson = Get-Content $appJsonFile | ConvertFrom-Json        
         if ($ChangeBuild -ieq "false") {
             if (!($appJson.version.StartsWith("$($version.Major).$($version.Minor)."))) {
                 throw "Major and Minor version of app doesn't match with pipeline"
             }
         }
+        if ($env:useContainerMajorVersion) {
+            $containerVersion = Get-BcContainerNavVersion -containerName $containerName
+            $version = [System.Version]::new($containerVersion.Split('.')[0], $version.Minor, $version.Build, $version.Revision)
+        }
+        Write-Host "Building version $($appJson.version) of $($appJson.name)"
         $appJson.version = "$version"
         $appJson | ConvertTo-Json -Depth 99 | Set-Content $appJsonFile
     }

@@ -229,6 +229,15 @@ if ($imageversion) {
     Write-Host "Set artifact = $($imageVersion.artifact)"
     Write-Host "##vso[task.setvariable variable=artifact]$($imageVersion.artifact)"
     
+    if ($imageVersion.PSObject.Properties.Match("useContainerMajorVersion").Value) {
+        $useContainerMajorVersion = $imageVersion.useContainerMajorVersion
+    }
+    else {
+        $useContainerMajorVersion = $false
+    }
+    Write-Host "Set useContainerMajorVersion = $useContainerMajorVersion"
+    Write-Host "##vso[task.setvariable variable=useContainerMajorVersion]$useContainerMajorVersion"
+    
     "reuseContainer" | ForEach-Object {
         $property = $imageVersion.PSObject.Properties.Match($_)
         if ($property.Value) {
