@@ -43,7 +43,7 @@ Param(
     [string] $ChangeBuild = $ENV:ChangeBuild,
 
     [Parameter(Mandatory = $false)]
-    [bool] $useContainerMajorVersion = $env:useContainerMajorVersion
+    [string] $useContainerMajorVersion = $env:useContainerMajorVersion
 
 )
 
@@ -69,7 +69,7 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
             }
         }
         Write-Host "Using container major version = $useContainerMajorVersion"
-        if ($useContainerMajorVersion -eq $true) {
+        if ($useContainerMajorVersion -ieq "true") {
             $containerVersion = Get-BcContainerNavVersion -containerOrImageName $containerName
             $version = [System.Version]::new($containerVersion.Split('.')[0], $version.Minor, $version.Build, $version.Revision)
         }        
