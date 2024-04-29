@@ -40,7 +40,10 @@ Param(
     [string] $SyncAppMode = "Add",
 
     [Parameter(Mandatory = $false)]
-    [string] $ChangeBuild = $ENV:ChangeBuild
+    [string] $ChangeBuild = $ENV:ChangeBuild,
+
+    [Parameter(Mandatory = $false)]
+    [bool] $useContainerMajorVersion = $env:useContainerMajorVersion
 
 )
 
@@ -65,14 +68,14 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
                 throw "Major and Minor version of app doesn't match with pipeline"
             }
         }
-        Write-Host "Using container major version = $env:useContainerMajorVersion"
-        if ($env:useContainerMajorVersion -eq "true") {
+        Write-Host "Using container major version = $useContainerMajorVersion"
+        if ($useContainerMajorVersion -eq $true) {
             $containerVersion = Get-BcContainerNavVersion -containerOrImageName $containerName
             $version = [System.Version]::new($containerVersion.Split('.')[0], $version.Minor, $version.Build, $version.Revision)
-        }
-        Write-Host "Building version $($appJson.version) of $($appJson.name)"
+        }        
         $appJson.version = "$version"
         $appJson | ConvertTo-Json -Depth 99 | Set-Content $appJsonFile
+        Write-Host "Building version $($appJson.version) of $($appJson.name)"
     }
     
     Write-Host "Compiling $_"
