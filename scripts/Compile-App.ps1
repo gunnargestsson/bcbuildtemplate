@@ -66,7 +66,7 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
             }
         }
         if ($env:useContainerMajorVersion) {
-            $containerVersion = Get-BcContainerNavVersion -containerName $containerName
+            $containerVersion = Get-BcContainerNavVersion -containerOrImageName $containerName
             $version = [System.Version]::new($containerVersion.Split('.')[0], $version.Minor, $version.Build, $version.Revision)
         }
         Write-Host "Building version $($appJson.version) of $($appJson.name)"
