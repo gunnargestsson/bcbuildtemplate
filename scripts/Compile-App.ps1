@@ -65,7 +65,7 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
                 throw "Major and Minor version of app doesn't match with pipeline"
             }
         }
-        if ($env:useContainerMajorVersion) {
+        if ($env:useContainerMajorVersion -eq "true") {
             $containerVersion = Get-BcContainerNavVersion -containerOrImageName $containerName
             $version = [System.Version]::new($containerVersion.Split('.')[0], $version.Minor, $version.Build, $version.Revision)
         }
