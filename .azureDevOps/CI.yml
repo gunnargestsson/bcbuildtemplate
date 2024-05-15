@@ -66,6 +66,10 @@ parameters:
   displayName: Ticket number required
   type: string
   default: ""
+- name: DisableBCContainerHelperUpdate
+  displayName: Disable BCContainerHelper update
+  type: boolean
+  default: False
 
 stages:
 - stage: Build
@@ -125,7 +129,7 @@ stages:
     
     - task: PowerShell@2
       displayName: 'Install bccontainerhelper'
-      condition: and(succeeded(),ne(variables['appFolders'],''))
+      condition: and(succeeded(),ne(variables['appFolders'],''),ne('${{ parameters.DisableBCContainerHelperUpdate}}','True'))
       env:
         azstoragetenantid: $(AzStorageTenantId)
         azstorageclientid: $(AzStorageClientId)
