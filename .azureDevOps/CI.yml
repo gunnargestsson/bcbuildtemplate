@@ -69,7 +69,7 @@ parameters:
 - name: DisableBCContainerHelperUpdate
   displayName: Disable BCContainerHelper update
   type: boolean
-  default: False
+  default: True
 
 stages:
 - stage: Build
