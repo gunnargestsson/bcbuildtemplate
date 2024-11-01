@@ -70,6 +70,10 @@ parameters:
   displayName: Disable BCContainerHelper update
   type: boolean
   default: True
+- name: AzureFileCopyVersion6
+  displayName: Use AzureFileCopy Version 6
+  type: boolean
+  default: False
 
 stages:
 - stage: Build
@@ -318,7 +322,7 @@ stages:
 
     - task: AzureFileCopy@5
       displayName: 'Copy Release Apps to Azure Blob with versions'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),eq('${{ parameters.AzureBlobFolderForVersion}}','True'))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),eq('${{ parameters.AzureBlobFolderForVersion}}','True'),ne('${{ parameters.AzureFileCopyVersion6}}','True'))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
@@ -329,7 +333,7 @@ stages:
 
     - task: AzureFileCopy@5
       displayName: 'Copy Release Apps to Azure Blob latest'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),ne('${{ parameters.AzureBlobFolderForVersion}}','True'))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),ne('${{ parameters.AzureBlobFolderForVersion}}','True'),ne('${{ parameters.AzureFileCopyVersion6}}','True'))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
@@ -340,7 +344,7 @@ stages:
 
     - task: AzureFileCopy@5
       displayName: 'Copy Artifact Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),ne('${{ parameters.AzureFileCopyVersion6}}','True'))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
@@ -351,7 +355,7 @@ stages:
 
     - task: AzureFileCopy@5
       displayName: 'Copy Runtime Apps to Azure Blob'
-      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),eq('${{ parameters.createRuntimePackages}}','True'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''))
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),eq('${{ parameters.createRuntimePackages}}','True'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),ne('${{ parameters.AzureFileCopyVersion6}}','True'))
       inputs:
         SourcePath: '$(Build.ArtifactStagingDirectory)\RuntimePackages\*\*.app'
         azureSubscription: '${{ parameters.azureSubscription }}'
@@ -359,6 +363,50 @@ stages:
         storage: '$(azureStorageAccount)'
         ContainerName: '$(azureContainerName)'
         BlobPrefix: 'Runtime\$(Build.Repository.Name)'
+
+    - task: AzureFileCopy@6
+      displayName: 'Copy Release Apps to Azure Blob with versions'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),eq('${{ parameters.AzureBlobFolderForVersion}}','True'),eq('${{ parameters.AzureFileCopyVersion6}}','True'))
+      inputs:
+        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        Destination: AzureBlob
+        storage: '$(azureStorageAccount)'
+        ContainerName: '$(azureContainerName)'
+        BlobPrefix: '$(Build.Repository.Name)\$(Build.SourceBranchName)\${{ parameters.appVersion }}\${{ parameters.version }}'
+
+    - task: AzureFileCopy@6
+      displayName: 'Copy Release Apps to Azure Blob latest'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),ne('${{ parameters.AzureBlobFolderForVersion}}','True'),eq('${{ parameters.AzureFileCopyVersion6}}','True'))
+      inputs:
+        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        Destination: AzureBlob
+        storage: '$(azureStorageAccount)'
+        ContainerName: '$(azureContainerName)'
+        BlobPrefix: '$(Build.Repository.Name)\$(Build.SourceBranchName)\latest'
+
+    - task: AzureFileCopy@6
+      displayName: 'Copy Artifact Apps to Azure Blob'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),eq('${{ parameters.AzureFileCopyVersion6}}','True'))
+      inputs:
+        SourcePath: '$(Build.ArtifactStagingDirectory)\*\*.app'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        Destination: AzureBlob
+        storage: '$(azureStorageAccount)'
+        ContainerName: '$(azureContainerName)'
+        BlobPrefix: 'Artifact\$(Build.Repository.Name)'
+
+    - task: AzureFileCopy@6
+      displayName: 'Copy Runtime Apps to Azure Blob'
+      condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),eq('${{ parameters.createRuntimePackages}}','True'),eq('${{ parameters.version }}','current'),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),eq('${{ parameters.AzureFileCopyVersion6}}','True'))
+      inputs:
+        SourcePath: '$(Build.ArtifactStagingDirectory)\RuntimePackages\*\*.app'
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        Destination: AzureBlob
+        storage: '$(azureStorageAccount)'
+        ContainerName: '$(azureContainerName)'
+        BlobPrefix: 'Runtime\$(Build.Repository.Name)'        
 
     - task: PowerShell@2
       displayName: 'Remove Build Container'
