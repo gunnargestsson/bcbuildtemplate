@@ -74,6 +74,10 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $bu
             $version = [System.Version]::new($containerVersion.Split('.')[0], $version.Minor, $version.Build, $version.Revision)
         }        
         $appJson.version = "$version"
+        if ((Get-BcContainerArtifactUrl -containerName $containerName).Split('/')[3] -eq "sandbox") {
+            Write-Host "Removing target from app.json"
+            $appJson.PSObject.Properties.Remove('target')
+        }
         $appJson | ConvertTo-Json -Depth 99 | Set-Content $appJsonFile
         Write-Host "Building version $($appJson.version) of $($appJson.name)"
     }
