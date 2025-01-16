@@ -29,7 +29,11 @@ parameters:
     default: Add
     values:
     - Add
-    - ForceSync    
+    - ForceSync
+  - name: DisableBCContainerHelperUpdate
+    displayName: Disable BCContainerHelper update
+    type: boolean
+    default: False
 
 stages:
   - stage: Deployment
@@ -76,6 +80,18 @@ stages:
 
           - download: self-pipe
             displayName: "Download build artifacts"
+
+          - task: PowerShell@2
+            displayName: 'Install bccontainerhelper'
+            condition: and(succeeded(),ne('${{ parameters.DisableBCContainerHelperUpdate}}','True'))
+            env:
+              azstoragetenantid: $(AzStorageTenantId)
+              azstorageclientid: $(AzStorageClientId)
+              azstorageclientSecret: $(AzStorageClientSecret)          
+            inputs:
+              targetType: filePath
+              filePath: '$(Agent.ToolsDirectory)\bcbuildtemplate\Install-bccontainerhelper.ps1'
+              failOnStderr: true
 
           - task: PowerShell@2
             displayName: "Deploy to Environment"
