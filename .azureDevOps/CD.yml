@@ -30,10 +30,6 @@ parameters:
     values:
     - Add
     - ForceSync
-  - name: DisableBCContainerHelperUpdate
-    displayName: Disable BCContainerHelper update
-    type: boolean
-    default: False
 
 stages:
   - stage: Deployment
@@ -83,7 +79,7 @@ stages:
 
           - task: PowerShell@2
             displayName: 'Install bccontainerhelper'
-            condition: and(succeeded(),ne('${{ parameters.DisableBCContainerHelperUpdate}}','True'))
+            condition: and(succeeded(),or(eq(variables['Agent.Name'],'Hosted Agent'),eq(variables['Agent.Name'],'Azure Pipelines*')))
             env:
               azstoragetenantid: $(AzStorageTenantId)
               azstorageclientid: $(AzStorageClientId)
