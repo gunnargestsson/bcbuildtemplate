@@ -24,7 +24,7 @@ if (-not ($credential)) {
 
 $settings = (Get-Content -Path $configurationFilePath -Encoding UTF8 | Out-String | ConvertFrom-Json)
 $settings.dependencies | ForEach-Object {
-    Write-Host "Publishing $_"
+    Write-Host "Publishing $_ to ${containerName}"
         
     $guid = New-Guid
     if ($_.EndsWith(".zip", "OrdinalIgnoreCase") -or $_.Contains(".zip?")) {        
@@ -39,28 +39,25 @@ $settings.dependencies | ForEach-Object {
         else {
             Download-File -sourceUrl $_ -destinationFile $appFile
         }
-               
         New-Item -ItemType Directory -Path $appFolder -Force | Out-Null
         Write-Host "Extracting .zip file "
         Expand-Archive -Path $appFile -DestinationPath $appFolder
         Remove-Item -Path $appFile -Force
-        $appFile = Get-ChildItem -Path $appFolder -Recurse -Include *.app -File | Select-Object -First 1
+        foreach ($appFile in Get-ChildItem -Path $appFolder -Recurse -Include *.app -File) {
+            Publish-BCContainerApp -containerName $containerName -appFile $appFile.FullName -skipVerification -scope Tenant -sync -install -upgrade -useDevEndpoint -credential $credential
+        }
+        if ($appFolder) { Remove-Item -Path $appFolder -Force -Recurse -ErrorAction SilentlyContinue }
     } else {
         Write-Host "Downloading app file $($_) to $($appFile)"        
         $appFile = Join-Path $env:TEMP "$($guid.Guid).app"   
-        
-        # If azure storage App Registration information is provided and Url contains blob.core.windows.net, download dependency app using Oauth2 authentication
-        if ($ENV:DOWNLOADFROMPRIVATEAZURESTORAGE -and $_.Contains("blob.core.windows.net")) {
+         # If azure storage App Registration information is provided and Url contains blob.core.windows.net, download dependency zip using Oauth2 authentication        
+         if ($ENV:DOWNLOADFROMPRIVATEAZURESTORAGE -and $_.Contains("blob.core.windows.net")) {
             $appFile = Get-BlobFromPrivateAzureStorageOauth2 -blobUri $_
         }
         else {
             Download-File -sourceUrl $_ -destinationFile $appFile
         }
+        Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -scope Tenant -sync -install -upgrade -useDevEndpoint -credential $credential
+        Remove-Item -Path $appFile -Force -ErrorAction SilentlyContinue
     }
-
-    Write-Host "Container deployment to ${containerName}"
-    Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -scope Tenant -sync -install -upgrade -useDevEndpoint -credential $credential
-
-    Remove-Item -Path $appFile -Force -ErrorAction SilentlyContinue
-    if ($appFolder) { Remove-Item -Path $appFolder -Force -Recurse -ErrorAction SilentlyContinue }
 }
