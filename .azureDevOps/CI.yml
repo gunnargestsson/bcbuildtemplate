@@ -335,7 +335,7 @@ stages:
       displayName: 'Copy Release Apps to Azure Blob latest'
       condition: and(succeeded(),ne(variables['Build.Reason'],'PullRequest'),ne('${{ parameters.azureSubscription }}',''),ne(variables['azureStorageAccount'],''),ne(variables['appFolders'],''),ne('${{ parameters.AzureBlobFolderForVersion}}','True'),ne('${{ parameters.AzureFileCopyVersion6}}','True'))
       inputs:
-        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.app'
+        SourcePath: '$(Build.ArtifactStagingDirectory)\${{ parameters.version }}\${{ parameters.appVersion }}\*\*.*'
         azureSubscription: '${{ parameters.azureSubscription }}'
         Destination: AzureBlob
         storage: '$(azureStorageAccount)'
