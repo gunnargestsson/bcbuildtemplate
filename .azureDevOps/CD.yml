@@ -30,6 +30,10 @@ parameters:
     values:
     - Add
     - ForceSync
+  - name: AzureFileCopyVersion6
+    displayName: Use AzureFileCopy Version 6
+    type: boolean
+    default: False
 
 stages:
   - stage: Deployment
@@ -151,9 +155,20 @@ stages:
               PathtoPublish: "$(Build.ArtifactStagingDirectory)"
               ArtifactName: "releasenote-$(resources.pipeline.self-pipe.runName).md"
 
-          - task: AzureFileCopy@4
+          - task: AzureFileCopy@5
             displayName: "Copy Release Note to Azure Storage"
-            condition: and(succeeded(),ne(variables['azureStorageAccount'],''))
+            condition: and(succeeded(),ne(variables['azureStorageAccount'],''),ne('${{ parameters.AzureFileCopyVersion6}}','True'))
+            inputs:
+              SourcePath: "$(Build.ArtifactStagingDirectory)/releasenote-$(resources.pipeline.self-pipe.runName).md"
+              azureSubscription: "${{ parameters.azureSubscription }}"
+              Destination: AzureBlob
+              storage: "$(azureStorageAccount)"
+              ContainerName: "$(azureContainerName)"
+              BlobPrefix: "Artifact/$(Build.Repository.Name)/ReleaseNotes/releasenote-$(resources.pipeline.self-pipe.runName).md"
+
+          - task: AzureFileCopy@6
+            displayName: "Copy Release Note to Azure Storage"
+            condition: and(succeeded(),ne(variables['azureStorageAccount'],''),eq('${{ parameters.AzureFileCopyVersion6}}','True'))
             inputs:
               SourcePath: "$(Build.ArtifactStagingDirectory)/releasenote-$(resources.pipeline.self-pipe.runName).md"
               azureSubscription: "${{ parameters.azureSubscription }}"
